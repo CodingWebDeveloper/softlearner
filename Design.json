@@ -1,0 +1,272 @@
+{
+    "designSystem": {
+      "name": "Online Learning Management System",
+      "category": "Educational Dashboard UI",
+      "designPhilosophy": "Clean, modern educational interface with focus on progress visualization and user engagement",
+      
+      "colorPalette": {
+        "primary": {
+          "background": "#1a1b23",
+          "surface": "#252730",
+          "surfaceElevated": "#2d2f3a"
+        },
+        "accent": {
+          "teal": "#4ecdc4",
+          "blue": "#4a90e2",
+          "purple": "#8b5cf6",
+          "green": "#10b981",
+          "orange": "#f97316"
+        },
+        "semantic": {
+          "success": "#10b981",
+          "warning": "#f59e0b",
+          "error": "#ef4444",
+          "info": "#3b82f6"
+        },
+        "text": {
+          "primary": "#ffffff",
+          "secondary": "#9ca3af",
+          "muted": "#6b7280"
+        }
+      },
+  
+      "typography": {
+        "fontFamily": "Modern sans-serif (Inter, SF Pro, or system)",
+        "hierarchy": {
+          "h1": {
+            "size": "2.5rem",
+            "weight": "700",
+            "lineHeight": "1.2",
+            "usage": "Main titles, hero headings"
+          },
+          "h2": {
+            "size": "2rem",
+            "weight": "600",
+            "lineHeight": "1.3",
+            "usage": "Section headers"
+          },
+          "h3": {
+            "size": "1.5rem",
+            "weight": "600",
+            "lineHeight": "1.4",
+            "usage": "Card titles, subsections"
+          },
+          "body": {
+            "size": "0.875rem",
+            "weight": "400",
+            "lineHeight": "1.5",
+            "usage": "Regular content"
+          },
+          "caption": {
+            "size": "0.75rem",
+            "weight": "400",
+            "lineHeight": "1.4",
+            "usage": "Labels, metadata"
+          }
+        }
+      },
+  
+      "spacing": {
+        "unit": "4px",
+        "scale": {
+          "xs": "4px",
+          "sm": "8px",
+          "md": "16px",
+          "lg": "24px",
+          "xl": "32px",
+          "2xl": "48px",
+          "3xl": "64px"
+        }
+      },
+  
+      "borderRadius": {
+        "sm": "4px",
+        "md": "8px",
+        "lg": "12px",
+        "xl": "16px",
+        "full": "9999px"
+      },
+  
+      "shadows": {
+        "sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+        "md": "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+        "lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+        "inner": "inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)"
+      },
+  
+      "layoutStructure": {
+        "pattern": "Sidebar + Main Content",
+        "sidebar": {
+          "width": "240px",
+          "position": "fixed-left",
+          "background": "surface",
+          "padding": "lg"
+        },
+        "mainContent": {
+          "marginLeft": "240px",
+          "padding": "xl",
+          "maxWidth": "none"
+        },
+        "gridSystem": {
+          "columns": 12,
+          "gap": "md",
+          "breakpoints": {
+            "sm": "640px",
+            "md": "768px",
+            "lg": "1024px",
+            "xl": "1280px"
+          }
+        }
+      },
+  
+      "components": {
+        "navigation": {
+          "type": "Vertical sidebar navigation",
+          "style": {
+            "background": "surface",
+            "items": {
+              "padding": "sm md",
+              "borderRadius": "md",
+              "hoverState": "surfaceElevated",
+              "activeState": "accent.teal with opacity",
+              "iconSize": "20px",
+              "textSize": "body"
+            }
+          }
+        },
+  
+        "cards": {
+          "variants": {
+            "elevated": {
+              "background": "surface",
+              "borderRadius": "lg",
+              "padding": "lg",
+              "shadow": "md",
+              "border": "none"
+            },
+            "flat": {
+              "background": "surfaceElevated",
+              "borderRadius": "md",
+              "padding": "md",
+              "shadow": "none",
+              "border": "1px solid rgba(255,255,255,0.1)"
+            }
+          }
+        },
+  
+        "progressIndicators": {
+          "progressBar": {
+            "height": "6px",
+            "borderRadius": "full",
+            "background": "rgba(255,255,255,0.1)",
+            "fillColor": "accent.teal",
+            "animation": "smooth transition"
+          },
+          "circularProgress": {
+            "strokeWidth": "3px",
+            "size": "40px",
+            "colors": ["accent.teal", "accent.blue", "accent.purple"]
+          }
+        },
+  
+        "dataVisualization": {
+          "charts": {
+            "lineChart": {
+              "strokeWidth": "2px",
+              "pointRadius": "4px",
+              "colors": ["accent.teal", "accent.blue"],
+              "gridLines": "rgba(255,255,255,0.1)"
+            }
+          }
+        },
+  
+        "buttons": {
+          "primary": {
+            "background": "accent.teal",
+            "color": "white",
+            "padding": "sm lg",
+            "borderRadius": "md",
+            "fontWeight": "500"
+          },
+          "secondary": {
+            "background": "transparent",
+            "color": "text.secondary",
+            "border": "1px solid rgba(255,255,255,0.2)",
+            "padding": "sm lg",
+            "borderRadius": "md"
+          }
+        },
+  
+        "calendar": {
+          "style": {
+            "compactGrid": true,
+            "daySize": "32px",
+            "borderRadius": "sm",
+            "todayHighlight": "accent.teal",
+            "eventIndicators": "small dots"
+          }
+        }
+      },
+  
+      "iconography": {
+        "style": "Outlined/Linear",
+        "strokeWidth": "1.5px",
+        "size": {
+          "sm": "16px",
+          "md": "20px",
+          "lg": "24px"
+        },
+        "usage": "Navigation icons, status indicators, action buttons"
+      },
+  
+      "interactionPatterns": {
+        "hover": {
+          "transition": "150ms ease",
+          "effect": "Subtle background change or opacity shift"
+        },
+        "focus": {
+          "outline": "2px solid accent.teal",
+          "outlineOffset": "2px"
+        },
+        "loading": {
+          "shimmer": "Skeleton loading with gradient animation",
+          "spinners": "Circular with accent colors"
+        }
+      },
+  
+      "responsivePatterns": {
+        "mobile": {
+          "navigation": "Bottom tab bar or collapsible sidebar",
+          "cards": "Full width with reduced padding",
+          "spacing": "Reduced by 50%"
+        },
+        "tablet": {
+          "navigation": "Condensed sidebar",
+          "gridColumns": "Adjusted to 2-3 columns"
+        }
+      },
+  
+      "accessibilityConsiderations": {
+        "contrast": "Ensure 4.5:1 minimum contrast ratio",
+        "focusIndicators": "Clear focus states for all interactive elements",
+        "screenReaderSupport": "Proper ARIA labels and semantic HTML",
+        "keyboardNavigation": "Full keyboard accessibility"
+      },
+  
+      "designPrinciples": {
+        "hierarchy": "Clear visual hierarchy through typography and spacing",
+        "consistency": "Consistent spacing, colors, and component behavior",
+        "feedback": "Clear visual feedback for user interactions",
+        "efficiency": "Streamlined workflows and minimal cognitive load",
+        "personalization": "Customizable dashboard and progress tracking"
+      },
+  
+      "implementationNotes": {
+        "frameworks": "Works well with React, Vue, or Angular",
+        "cssFramework": "Tailwind CSS compatible",
+        "animations": "Framer Motion or CSS transitions",
+        "charts": "Chart.js, D3.js, or Recharts",
+        "icons": "Lucide, Heroicons, or Phosphor icons"
+      }
+    }
+  }
