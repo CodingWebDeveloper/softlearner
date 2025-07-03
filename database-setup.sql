@@ -1,126 +1,199 @@
--- Database setup for Educational Dashboard
+-- Complete Database Setup for SoftLearner Educational Platform
 -- Run this in your Supabase SQL editor
 
--- Enable Row Level Security
-ALTER TABLE auth.users ENABLE ROW LEVEL SECURITY;
+-- DO NOT MODIFY auth.users directly (removed ALTER on auth.users)
 
--- Create courses table
-CREATE TABLE IF NOT EXISTS courses (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  thumbnail_url TEXT,
-  instructor_name TEXT NOT NULL,
-  total_resources INTEGER DEFAULT 0,
+-- Create extended User table (linked to auth.users)
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT,
+  avatar_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create resources table
-CREATE TABLE IF NOT EXISTS resources (
+-- Create Course table
+CREATE TABLE IF NOT EXISTS courses (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  type TEXT CHECK (type IN ('video', 'document', 'quiz', 'assignment')),
-  duration INTEGER, -- in minutes
-  order_index INTEGER NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create user_courses table (purchases/enrollments)
-CREATE TABLE IF NOT EXISTS user_courses (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  purchased_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user_id, course_id)
-);
-
--- Create user_progress table
-CREATE TABLE IF NOT EXISTS user_progress (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  resource_id UUID REFERENCES resources(id) ON DELETE CASCADE,
-  status TEXT CHECK (status IN ('not_started', 'in_progress', 'completed')) DEFAULT 'not_started',
-  completed_at TIMESTAMP WITH TIME ZONE,
-  last_accessed TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user_id, resource_id)
-);
-
--- Create profiles table (if not exists)
-CREATE TABLE IF NOT EXISTS profiles (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  full_name TEXT,
-  avatar_url TEXT,
+  name TEXT NOT NULL,
+  description TEXT,
+  video_url TEXT,
+  price DECIMAL(10,2) NOT NULL,
+  thumbnail_image_url TEXT,
+  creator_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable RLS on all tables
+-- Create Order table
+CREATE TABLE IF NOT EXISTS orders (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  status TEXT CHECK (status IN ('ACTIVE', 'PENDING', 'CANCELLED')) DEFAULT 'PENDING',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create Resource table
+CREATE TABLE IF NOT EXISTS resources (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  url TEXT NOT NULL,
+  name TEXT NOT NULL,
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create Review table
+CREATE TABLE IF NOT EXISTS reviews (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  content TEXT NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create Vote table
+CREATE TABLE IF NOT EXISTS votes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  review_id UUID REFERENCES reviews(id) ON DELETE CASCADE,
+  vote_type TEXT CHECK (vote_type IN ('Up', 'Down')) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, review_id)
+);
+
+-- Create Bookmark table
+CREATE TABLE IF NOT EXISTS bookmarks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, course_id)
+);
+
+-- Create Test table
+CREATE TABLE IF NOT EXISTS tests (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create Question table
+CREATE TABLE IF NOT EXISTS questions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  text TEXT NOT NULL,
+  type TEXT CHECK (type IN ('single', 'multiple')) NOT NULL,
+  points INTEGER DEFAULT 1,
+  test_id UUID REFERENCES tests(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create AnswerOption table
+CREATE TABLE IF NOT EXISTS answer_options (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  is_correct BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create UserTest table
+CREATE TABLE IF NOT EXISTS user_tests (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  test_id UUID REFERENCES tests(id) ON DELETE CASCADE,
+  score INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create UserAnswer table
+CREATE TABLE IF NOT EXISTS user_answers (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_test_id UUID REFERENCES user_tests(id) ON DELETE CASCADE,
+  question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
+  answer_option_id UUID REFERENCES answer_options(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security on all custom tables (NOT auth.users)
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_courses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE votes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookmarks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE answer_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_tests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_answers ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for courses (public read access)
-CREATE POLICY "Courses are viewable by everyone" ON courses
-  FOR SELECT USING (true);
-
--- RLS Policies for resources (public read access)
-CREATE POLICY "Resources are viewable by everyone" ON resources
-  FOR SELECT USING (true);
-
--- RLS Policies for user_courses
-CREATE POLICY "Users can view their own course enrollments" ON user_courses
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can enroll in courses" ON user_courses
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
--- RLS Policies for user_progress
-CREATE POLICY "Users can view their own progress" ON user_progress
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own progress" ON user_progress
-  FOR ALL USING (auth.uid() = user_id);
-
--- RLS Policies for profiles
-CREATE POLICY "Users can view their own profile" ON profiles
-  FOR SELECT USING (auth.uid() = id);
-
-CREATE POLICY "Users can update their own profile" ON profiles
-  FOR UPDATE USING (auth.uid() = id);
-
-CREATE POLICY "Users can insert their own profile" ON profiles
-  FOR INSERT WITH CHECK (auth.uid() = id);
-
--- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_user_courses_user_id ON user_courses(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_courses_course_id ON user_courses(course_id);
-CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_progress_course_id ON user_progress(course_id);
-CREATE INDEX IF NOT EXISTS idx_user_progress_resource_id ON user_progress(resource_id);
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
+CREATE INDEX IF NOT EXISTS idx_courses_creator_id ON courses(creator_id);
+CREATE INDEX IF NOT EXISTS idx_courses_created_at ON courses(created_at);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_course_id ON orders(course_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_resources_course_id ON resources(course_id);
-CREATE INDEX IF NOT EXISTS idx_resources_order_index ON resources(order_index);
+CREATE INDEX IF NOT EXISTS idx_reviews_course_id ON reviews(course_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON reviews(user_id);
+CREATE INDEX IF NOT EXISTS idx_votes_review_id ON votes(review_id);
+CREATE INDEX IF NOT EXISTS idx_votes_user_id ON votes(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON bookmarks(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_course_id ON bookmarks(course_id);
+CREATE INDEX IF NOT EXISTS idx_tests_course_id ON tests(course_id);
+CREATE INDEX IF NOT EXISTS idx_questions_test_id ON questions(test_id);
+CREATE INDEX IF NOT EXISTS idx_answer_options_question_id ON answer_options(question_id);
+CREATE INDEX IF NOT EXISTS idx_user_tests_user_id ON user_tests(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_tests_test_id ON user_tests(test_id);
+CREATE INDEX IF NOT EXISTS idx_user_answers_user_test_id ON user_answers(user_test_id);
+CREATE INDEX IF NOT EXISTS idx_user_answers_question_id ON user_answers(question_id);
 
--- Insert some sample data
-INSERT INTO courses (id, title, description, instructor_name, total_resources) VALUES
-  ('550e8400-e29b-41d4-a716-446655440001', 'React Fundamentals', 'Learn the basics of React including components, props, state, and hooks.', 'Sarah Johnson', 12),
-  ('550e8400-e29b-41d4-a716-446655440002', 'Advanced TypeScript', 'Master TypeScript with advanced patterns, generics, and type safety.', 'Mike Chen', 15),
-  ('550e8400-e29b-41d4-a716-446655440003', 'Next.js App Router', 'Build modern web applications with Next.js 13+ App Router and Server Components.', 'Alex Rodriguez', 18)
-ON CONFLICT DO NOTHING;
+-- Create function to update updated_at column
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- Insert sample resources
-INSERT INTO resources (course_id, title, type, duration, order_index) VALUES
-  ('550e8400-e29b-41d4-a716-446655440001', 'Introduction to React', 'video', 15, 1),
-  ('550e8400-e29b-41d4-a716-446655440001', 'Components and Props', 'video', 20, 2),
-  ('550e8400-e29b-41d4-a716-446655440001', 'State and Lifecycle', 'video', 25, 3),
-  ('550e8400-e29b-41d4-a716-446655440001', 'Hooks Basics', 'video', 30, 4),
-  ('550e8400-e29b-41d4-a716-446655440001', 'Custom Hooks', 'video', 25, 5),
-  ('550e8400-e29b-41d4-a716-446655440002', 'TypeScript Basics', 'video', 20, 1),
-  ('550e8400-e29b-41d4-a716-446655440002', 'Advanced Types', 'video', 35, 2),
-  ('550e8400-e29b-41d4-a716-446655440003', 'App Router Introduction', 'video', 20, 1),
-  ('550e8400-e29b-41d4-a716-446655440003', 'Server Components', 'video', 30, 2),
-  ('550e8400-e29b-41d4-a716-446655440003', 'Server Components Deep Dive', 'video', 35, 3)
-ON CONFLICT DO NOTHING; 
+-- Create update triggers
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_courses_updated_at BEFORE UPDATE ON courses
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_resources_updated_at BEFORE UPDATE ON resources
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_votes_updated_at BEFORE UPDATE ON votes
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_bookmarks_updated_at BEFORE UPDATE ON bookmarks
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_tests_updated_at BEFORE UPDATE ON tests
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_questions_updated_at BEFORE UPDATE ON questions
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_answer_options_updated_at BEFORE UPDATE ON answer_options
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_user_tests_updated_at BEFORE UPDATE ON user_tests
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_user_answers_updated_at BEFORE UPDATE ON user_answers
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

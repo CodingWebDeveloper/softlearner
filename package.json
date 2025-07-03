@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup-db": "node scripts/setup-database.mjs"
   },
   "dependencies": {
     "@date-io/dayjs": "^3.2.0",

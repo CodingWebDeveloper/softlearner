@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Typography } from "@mui/material";
 import { HashLoader } from "react-spinners";
 
 import { useSupabase } from "@/contexts/SupabaseContext";
@@ -35,7 +34,10 @@ import {
   EmptyStateTitle,
   EmptyStateText,
 } from "@/components/styled/HomePage.styled";
-import { getMockCourses, type CourseProgress } from "@/lib/database";
+import {
+  getUserCoursesWithProgress,
+  type CourseProgress,
+} from "@/services/courseService";
 import { formatDate } from "@/utils/dateUtils";
 
 const Home = () => {
@@ -44,19 +46,23 @@ const Home = () => {
   const [coursesLoading, setCoursesLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      setCoursesLoading(true);
-      // Use mock data for now - replace with getUserCourses(user.id) when database is set up
-      try {
-        const mockCourses = getMockCourses();
-        setCourses(mockCourses);
-      } catch (error) {
-        console.error("Error fetching courses:", error);
-        setCourses([]);
-      } finally {
-        setCoursesLoading(false);
+    const fetchCourses = async () => {
+      if (user) {
+        setCoursesLoading(true);
+        // Get user courses with progress from database
+        try {
+          const userCourses = await getUserCoursesWithProgress(user.id);
+          setCourses(userCourses);
+        } catch (error) {
+          console.error("Error fetching courses:", error);
+          setCourses([]);
+        } finally {
+          setCoursesLoading(false);
+        }
       }
-    }
+    };
+
+    fetchCourses();
   }, [user]);
 
   // Show loading spinner while loading

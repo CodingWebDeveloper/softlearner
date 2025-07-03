@@ -1,0 +1,96 @@
+User (Application User)
+Id – Unique identifier of the user
+FullName – Full name of the user
+CreatedAt – Date and time when the record was created
+UpdatedAt – Date and time of the last update
+
+Course
+Id – Unique identifier of the course
+Name – Name of the course
+Description – Description of the course
+VideoUrl – URL to the video content of the course
+Price – Price of the course (decimal number)
+ThumbnailImageUrl – URL to the thumbnail image of the course
+CreatorId – Identifier of the course creator
+CreatedAt – Date and time when the course was created
+UpdatedAt – Date and time of the last update
+
+Order
+Id – Unique identifier of the order
+UserId – Identifier of the user who placed the order
+CourseId – Identifier of the purchased course
+Status – Status of the order (ACTIVE, PENDING, CANCELLED)
+CreatedAt – Date and time when the order was created
+UpdatedAt – Date and time of the last update
+
+Resource
+Id – Unique identifier of the resource
+Url – URL of the resource
+Name – Name of the resource
+CourseId – Identifier of the course to which the resource belongs
+CreatedAt – Date and time when the resource was created
+UpdatedAt – Date and time of the last update
+
+Review
+Id – Unique identifier of the review
+Content – Content of the review
+UserId – Identifier of the user who submitted the review
+CourseId – Identifier of the course for which the review was submitted
+CreatedAt – Date and time when the review was created
+UpdatedAt – Date and time of the last update
+
+Vote
+Id – Unique identifier of the vote
+UserId – Identifier of the user who voted on the review
+ReviewId – Identifier of the review that received the vote
+VoteType – Type of vote (Up, Down)
+CreatedAt – Date and time when the vote was created
+UpdatedAt – Date and time of the last update
+
+Bookmark
+Id – Unique identifier of the bookmark
+UserId – Identifier of the user who created the bookmark
+CourseId – Identifier of the bookmarked course
+CreatedAt – Date and time when the bookmark was created
+UpdatedAt – Date and time of the last update
+
+Test
+Id – Unique identifier of the test
+Title – Title or name of the test
+Description – Brief summary or instructions for the test
+CourseId – Identifier of the course the test belongs to
+CreatedAt – Date and time when the test was created
+UpdatedAt – Date and time of the last update
+
+Question
+Id – Unique identifier of the question
+Text – The content/text of the question
+Type – Indicates whether the question expects a single correct answer or multiple correct answers ("single" or "multiple")
+Points – Number of points assigned to the question
+TestId – Identifier of the test the question belongs to
+CreatedAt – Date and time when the question was created
+UpdatedAt – Date and time of the last update
+
+AnswerOption
+Id – Unique identifier of the answer option
+QuestionId – Identifier of the question this option belongs to
+Text – Text content of this answer option
+IsCorrect – Boolean flag indicating if this option is a correct answer
+CreatedAt – Date and time when the option was created
+UpdatedAt – Date and time of the last update
+
+UserTest
+Id – Unique identifier of the user’s test attempt
+UserId – Identifier of the user taking the test
+TestId – Identifier of the test taken
+Score – Total points earned in the test
+CreatedAt – Date and time when the record was created
+UpdatedAt – Date and time of the last update
+
+UserAnswer
+Id – Unique identifier of the user answer
+UserTestId – Identifier linking to the UserTest attempt
+QuestionId – Identifier of the question answered
+AnswerOptionId – Identifier of the selected answer option
+CreatedAt – Date and time when the answer was submitted
+UpdatedAt – Date and time of the last update
