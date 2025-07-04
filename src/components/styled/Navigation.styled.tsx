@@ -43,6 +43,7 @@ export const SidebarContent = styled(Box)(() => ({
 export const SidebarFooter = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   borderTop: "1px solid rgba(255,255,255,0.1)",
+
 }));
 
 export const UserInfo = styled(Box)(() => ({
@@ -127,7 +128,11 @@ export const BottomNavContainer = styled(Box)(() => ({
   bottom: 0,
   left: 0,
   right: 0,
-  zIndex: 1000,
+  zIndex: 1300,
+  background: "#252730",
+  boxShadow: "0 -2px 8px rgba(0,0,0,0.12)",
+  pointerEvents: "auto",
+  paddingBottom: "env(safe-area-inset-bottom)",
 }));
 
 export const BottomNavAction = styled(BottomNavigationAction)(() => ({
@@ -195,6 +200,7 @@ export const MobileDrawer = styled(Drawer)(() => ({
     backgroundColor: "#1a1b23",
     border: "none",
   },
+  zIndex: 1400,
 }));
 
 export const StyledBottomNavigation = styled(BottomNavigation)(() => ({
@@ -234,4 +240,17 @@ export const DesktopDrawer = styled(Drawer)(() => ({
     border: "none",
     borderRight: "1px solid rgba(255,255,255,0.1)",
   },
+}));
+
+export const MobileNavBar = styled(Box)(({ theme }) => ({
+  position: 'fixed',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  width: '100vw',
+  zIndex: 1200,
+  boxSizing: 'border-box',
+  margin: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
 }));

@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from "../components/ThemeRegistry";
 import { SupabaseProvider } from "../contexts/SupabaseContext";
 import ClientOnly from "../components/ClientOnly";
 import { HashLoader } from "react-spinners";
+import Layout from "../components/Layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,12 +18,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Next.js + MUI App",
-  description: "A Next.js application with Material-UI",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-  },
+  title: "Softlearner",
+  description: "Softlearner is a learning platform ",
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -54,7 +56,9 @@ export default function RootLayout({
           }
         >
           <SupabaseProvider>
-            <ThemeRegistry>{children}</ThemeRegistry>
+            <Layout>
+              <ThemeRegistry>{children}</ThemeRegistry>
+            </Layout>
           </SupabaseProvider>
         </ClientOnly>
       </body>

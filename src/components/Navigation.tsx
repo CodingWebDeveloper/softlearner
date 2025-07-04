@@ -5,6 +5,7 @@ import { List, useTheme, useMediaQuery, Tooltip } from "@mui/material";
 import {
   Home as HomeIcon,
   School as SchoolIcon,
+  Bookmark as BookmarkIcon,
   Book as BookIcon,
   Person as PersonIcon,
   Settings as SettingsIcon,
@@ -82,23 +83,23 @@ const NavigationContent = ({
 
   const navigationItems = [
     {
-      label: "Dashboard",
+      label: "Home",
       icon: <HomeIcon />,
       path: "/",
       showWhenAuthenticated: true,
       showWhenUnauthenticated: false,
     },
     {
-      label: "My Courses",
-      icon: <SchoolIcon />,
-      path: "/courses",
+      label: "Bookmarks",
+      icon: <BookmarkIcon />,
+      path: "/my-courses",
       showWhenAuthenticated: true,
       showWhenUnauthenticated: false,
     },
     {
-      label: "Browse Courses",
+      label: "Courses",
       icon: <BookIcon />,
-      path: "/browse",
+      path: "/courses",
       showWhenAuthenticated: true,
       showWhenUnauthenticated: true,
     },
@@ -224,20 +225,20 @@ const NavigationContent = ({
             }}
           >
             <BottomNavAction
-              label="Dashboard"
+              label="Home"
               value="/"
               icon={<HomeIcon />}
               showLabel
             />
             <BottomNavAction
-              label="Courses"
-              value="/courses"
-              icon={<SchoolIcon />}
+              label="Bookmarks"
+              value="/my-courses"
+              icon={<BookmarkIcon />}
               showLabel
             />
             <BottomNavAction
-              label="Browse"
-              value="/browse"
+              label="Courses"
+              value="/courses"
               icon={<BookIcon />}
               showLabel
             />

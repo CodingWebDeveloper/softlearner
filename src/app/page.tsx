@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { HashLoader } from "react-spinners";
 
 import { useSupabase } from "@/contexts/SupabaseContext";
-import Layout from "@/components/Layout";
 
 import {
   LoadingContainer,
@@ -75,8 +74,7 @@ const Home = () => {
   }
 
   return (
-    <Layout>
-      <ContentContainer maxWidth="lg">
+      <ContentContainer maxWidth="xl">
         {user && (
           <DashboardContainer>
             <DashboardHeader>
@@ -173,7 +171,6 @@ const Home = () => {
           </DashboardContainer>
         )}
       </ContentContainer>
-    </Layout>
   );
 };
 
