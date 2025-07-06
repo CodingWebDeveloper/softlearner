@@ -8,21 +8,21 @@ import {
   TypographyProps,
 } from "@mui/material";
 
-export const AuthFormPaper = styled(Paper)(() => ({
-  backgroundColor: "#252730",
+export const AuthFormPaper = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.background.secondary,
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "12px",
   padding: "32px",
   maxWidth: 400,
   margin: "0 auto",
   marginTop: "24px",
-  color: "#ffffff",
+  color: theme.palette.custom.text.white,
   "& .MuiTextField-root": {
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#1a1b23",
+      backgroundColor: theme.palette.custom.background.dark,
       border: "1px solid rgba(255,255,255,0.2)",
       borderRadius: "8px",
-      color: "#ffffff",
+      color: theme.palette.custom.text.white,
       "& fieldset": {
         border: "none",
       },
@@ -30,61 +30,61 @@ export const AuthFormPaper = styled(Paper)(() => ({
         border: "none",
       },
       "&.Mui-focused fieldset": {
-        border: "2px solid #4ecdc4",
+        border: `2px solid ${theme.palette.custom.accent.teal}`,
       },
       "&.Mui-error fieldset": {
-        border: "2px solid #ef4444",
+        border: `2px solid ${theme.palette.custom.status.error}`,
       },
     },
     "& .MuiInputLabel-root": {
-      color: "#9ca3af",
+      color: theme.palette.custom.text.light,
       "&.Mui-focused": {
-        color: "#4ecdc4",
+        color: theme.palette.custom.accent.teal,
       },
       "&.Mui-error": {
-        color: "#ef4444",
+        color: theme.palette.custom.status.error,
       },
     },
     "& .MuiFormHelperText-root": {
-      color: "#9ca3af",
+      color: theme.palette.custom.text.light,
       "&.Mui-error": {
-        color: "#ef4444",
+        color: theme.palette.custom.status.error,
       },
     },
   },
 }));
 
-export const AuthFormTitle = styled(Typography)<TypographyProps>(() => ({
+export const AuthFormTitle = styled(Typography)<TypographyProps>(({ theme }) => ({
   marginBottom: "16px",
   textAlign: "center",
-  color: "#ffffff",
+  color: theme.palette.custom.text.white,
   fontSize: "1.5rem",
   fontWeight: 600,
 }));
 
-export const AlertContainer = styled(Alert)(() => ({
+export const AlertContainer = styled(Alert)(({ theme }) => ({
   marginBottom: "16px",
   backgroundColor: "rgba(255,255,255,0.05)",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "8px",
   "& .MuiAlert-icon": {
-    color: "#4ecdc4",
+    color: theme.palette.custom.accent.teal,
   },
   "& .MuiAlert-message": {
-    color: "#ffffff",
+    color: theme.palette.custom.text.white,
   },
   "&.MuiAlert-standardError": {
     backgroundColor: "rgba(239, 68, 68, 0.1)",
     border: "1px solid rgba(239, 68, 68, 0.3)",
     "& .MuiAlert-icon": {
-      color: "#ef4444",
+      color: theme.palette.custom.status.error,
     },
   },
   "&.MuiAlert-standardSuccess": {
     backgroundColor: "rgba(16, 185, 129, 0.1)",
     border: "1px solid rgba(16, 185, 129, 0.3)",
     "& .MuiAlert-icon": {
-      color: "#10b981",
+      color: theme.palette.custom.status.success,
     },
   },
 }));
@@ -93,18 +93,18 @@ export const FormContainer = styled(Box)(() => ({
   marginTop: "16px",
 }));
 
-export const SubmitButton = styled(Button)(() => ({
+export const SubmitButton = styled(Button)(({ theme }) => ({
   marginTop: "24px",
   marginBottom: "16px",
-  backgroundColor: "#4ecdc4",
-  color: "#ffffff",
+  backgroundColor: theme.palette.custom.accent.teal,
+  color: theme.palette.custom.text.white,
   padding: "12px 24px",
   borderRadius: "8px",
   fontWeight: 500,
   textTransform: "none",
   fontSize: "1rem",
   "&:hover": {
-    backgroundColor: "#45b7af",
+    backgroundColor: theme.palette.custom.accent.tealDark,
   },
   "&:disabled": {
     backgroundColor: "rgba(255,255,255,0.1)",

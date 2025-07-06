@@ -4,6 +4,7 @@ import { Box, useTheme, useMediaQuery } from "@mui/material";
 import Navigation from "./Navigation";
 import { useSupabase } from "@/contexts/SupabaseContext";
 import ClientOnly from "./ClientOnly";
+import { LayoutContainer, MainContent, FallbackContainer, FallbackMain } from "./styled/Layout.styled";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,18 +14,11 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <ClientOnly
       fallback={
-        <Box sx={{ display: "flex", minHeight: "100vh" }}>
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              backgroundColor: "#1a1b23",
-              minHeight: "100vh",
-            }}
-          >
+        <FallbackContainer>
+          <FallbackMain component="main">
             {children}
-          </Box>
-        </Box>
+          </FallbackMain>
+        </FallbackContainer>
       }
     >
       <LayoutContent>{children}</LayoutContent>
@@ -38,27 +32,19 @@ const LayoutContent = ({ children }: { children: React.ReactNode }) => {
   const { user } = useSupabase();
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <LayoutContainer>
       {/* Navigation - only show for authenticated users */}
       <ClientOnly fallback={null}>{user && <Navigation />}</ClientOnly>
 
       {/* Main Content */}
-      <Box
+      <MainContent
         component="main"
-        sx={{
-          flexGrow: 1,
-          backgroundColor: "#1a1b23",
-          minHeight: "100vh",
-          // Add margin for mobile bottom navigation
-          ...(isMobile &&
-            user && {
-              paddingBottom: "80px", // Height of bottom navigation
-            }),
-        }}
+        isMobile={isMobile}
+        hasUser={!!user}
       >
         {children}
-      </Box>
-    </Box>
+      </MainContent>
+    </LayoutContainer>
   );
 };
 

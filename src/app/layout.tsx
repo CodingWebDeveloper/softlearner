@@ -4,8 +4,8 @@ import "./globals.css";
 import ThemeRegistry from "../components/ThemeRegistry";
 import { SupabaseProvider } from "../contexts/SupabaseContext";
 import ClientOnly from "../components/ClientOnly";
-import { HashLoader } from "react-spinners";
 import Layout from "../components/Layout";
+import LoadingFallback from "../components/LoadingFallback";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,24 +41,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClientOnly
-          fallback={
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100vh",
-                backgroundColor: "#1a1b23",
-              }}
-            >
-              <HashLoader color="#4ecdc4" size={50} />
-            </div>
-          }
+          fallback={<LoadingFallback />}
         >
           <SupabaseProvider>
-            <Layout>
-              <ThemeRegistry>{children}</ThemeRegistry>
-            </Layout>
+              <ThemeRegistry>
+                <Layout>
+                  {children}
+                </Layout>
+              </ThemeRegistry>
           </SupabaseProvider>
         </ClientOnly>
       </body>

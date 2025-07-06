@@ -80,15 +80,15 @@ export const CardButtonContainer = styled(Box)(({ theme }) => ({
 }));
 
 // Dashboard styled components
-export const DashboardContainer = styled(Box)(() => ({
-  backgroundColor: "#1a1b23",
+export const DashboardContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.background.dark,
   minHeight: "100vh",
-  color: "#ffffff",
+  color: theme.palette.custom.text.white,
 }));
 
 export const DashboardHeader = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
-  backgroundColor: "#252730",
+  backgroundColor: theme.palette.custom.background.secondary,
   borderBottom: "1px solid rgba(255,255,255,0.1)",
 }));
 
@@ -98,13 +98,13 @@ export const DashboardTitle = styled(Typography)<TypographyProps>(
     fontWeight: 700,
     lineHeight: 1.2,
     marginBottom: theme.spacing(1),
-    color: "#ffffff",
+    color: theme.palette.custom.text.white,
   })
 );
 
-export const DashboardSubtitle = styled(Typography)<TypographyProps>(() => ({
+export const DashboardSubtitle = styled(Typography)<TypographyProps>(({ theme }) => ({
   fontSize: "1.125rem",
-  color: "#9ca3af",
+  color: theme.palette.custom.text.light,
   fontWeight: 400,
 }));
 
@@ -121,14 +121,14 @@ export const CourseGrid = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(4),
 }));
 
-export const CourseCard = styled(Card)(() => ({
-  backgroundColor: "#252730",
+export const CourseCard = styled(Card)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.background.secondary,
   borderRadius: "12px",
   border: "1px solid rgba(255,255,255,0.1)",
   overflow: "hidden",
   transition: "all 150ms ease",
   "&:hover": {
-    backgroundColor: "#2d2f3a",
+    backgroundColor: theme.palette.custom.background.tertiary,
     transform: "translateY(-2px)",
     boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
   },
@@ -149,14 +149,14 @@ export const CourseTitle = styled(Typography)<TypographyProps>(({ theme }) => ({
   fontSize: "1.5rem",
   fontWeight: 600,
   lineHeight: 1.4,
-  color: "#ffffff",
+  color: theme.palette.custom.text.white,
   marginBottom: theme.spacing(1),
 }));
 
 export const CourseInstructor = styled(Typography)<TypographyProps>(
   ({ theme }) => ({
     fontSize: "0.875rem",
-    color: "#9ca3af",
+    color: theme.palette.custom.text.light,
     fontWeight: 400,
   })
 );
@@ -164,7 +164,7 @@ export const CourseInstructor = styled(Typography)<TypographyProps>(
 export const CourseDescription = styled(Typography)<TypographyProps>(
   ({ theme }) => ({
     fontSize: "0.875rem",
-    color: "#9ca3af",
+    color: theme.palette.custom.text.light,
     lineHeight: 1.5,
     marginBottom: theme.spacing(3),
   })
@@ -184,7 +184,7 @@ export const ProgressHeader = styled(Box)(({ theme }) => ({
 export const ProgressText = styled(Typography)<TypographyProps>(
   ({ theme }) => ({
     fontSize: "0.875rem",
-    color: "#9ca3af",
+    color: theme.palette.custom.text.light,
     fontWeight: 400,
   })
 );
@@ -192,7 +192,7 @@ export const ProgressText = styled(Typography)<TypographyProps>(
 export const ProgressPercentage = styled(Typography)<TypographyProps>(
   ({ theme }) => ({
     fontSize: "0.875rem",
-    color: "#4ecdc4",
+    color: theme.palette.custom.accent.teal,
     fontWeight: 600,
   })
 );
@@ -202,7 +202,7 @@ export const StyledProgressBar = styled(LinearProgress)(({ theme }) => ({
   borderRadius: "9999px",
   backgroundColor: "rgba(255,255,255,0.1)",
   "& .MuiLinearProgress-bar": {
-    backgroundColor: "#4ecdc4",
+    backgroundColor: theme.palette.custom.accent.teal,
     borderRadius: "9999px",
   },
 }));
@@ -219,21 +219,21 @@ export const CourseFooter = styled(Box)(({ theme }) => ({
 export const LastAccessed = styled(Typography)<TypographyProps>(
   ({ theme }) => ({
     fontSize: "0.75rem",
-    color: "#6b7280",
+    color: theme.palette.custom.accent.gray,
     fontWeight: 400,
   })
 );
 
 export const ContinueButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#4ecdc4",
-  color: "#ffffff",
+  backgroundColor: theme.palette.custom.accent.teal,
+  color: theme.palette.custom.text.white,
   padding: "8px 16px",
   borderRadius: "8px",
   fontWeight: 500,
   textTransform: "none",
   fontSize: "0.875rem",
   "&:hover": {
-    backgroundColor: "#45b7af",
+    backgroundColor: theme.palette.custom.accent.tealDark,
   },
 }));
 
@@ -242,23 +242,23 @@ export const StatusChip = styled(Chip)(({ theme }) => ({
   fontWeight: 500,
   height: "24px",
   "&.MuiChip-colorSuccess": {
-    backgroundColor: "#10b981",
-    color: "#ffffff",
+    backgroundColor: theme.palette.custom.status.success,
+    color: theme.palette.custom.text.white,
   },
   "&.MuiChip-colorWarning": {
-    backgroundColor: "#f59e0b",
-    color: "#ffffff",
+    backgroundColor: theme.palette.custom.status.warning,
+    color: theme.palette.custom.text.white,
   },
   "&.MuiChip-colorDefault": {
-    backgroundColor: "#6b7280",
-    color: "#ffffff",
+    backgroundColor: theme.palette.custom.accent.gray,
+    color: theme.palette.custom.text.white,
   },
 }));
 
 export const EmptyState = styled(Box)(({ theme }) => ({
   textAlign: "center",
   padding: theme.spacing(8),
-  color: "#9ca3af",
+  color: theme.palette.custom.text.light,
 }));
 
 export const EmptyStateTitle = styled(Typography)<TypographyProps>(
@@ -266,14 +266,14 @@ export const EmptyStateTitle = styled(Typography)<TypographyProps>(
     fontSize: "1.5rem",
     fontWeight: 600,
     marginBottom: theme.spacing(2),
-    color: "#ffffff",
+    color: theme.palette.custom.text.white,
   })
 );
 
 export const EmptyStateText = styled(Typography)<TypographyProps>(
   ({ theme }) => ({
     fontSize: "1rem",
-    color: "#9ca3af",
+    color: theme.palette.custom.text.light,
     marginBottom: theme.spacing(3),
   })
 );

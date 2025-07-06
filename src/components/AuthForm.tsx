@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { TextField } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { HashLoader } from "react-spinners";
 import { useSupabase } from "@/contexts/SupabaseContext";
 import {
@@ -37,6 +38,7 @@ const AuthForm = ({ mode }: AuthFormProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const theme = useTheme();
 
   const { signIn, signUp } = useSupabase();
 
@@ -120,7 +122,7 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                 disabled={loading || isSubmitting}
               >
                 {loading ? (
-                  <HashLoader color="#ffffff" size={20} />
+                  <HashLoader color={theme.palette.custom.text.white} size={20} />
                 ) : mode === "signin" ? (
                   "Sign In"
                 ) : (

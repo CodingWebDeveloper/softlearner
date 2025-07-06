@@ -14,12 +14,12 @@ import {
   BottomNavigation,
 } from "@mui/material";
 
-export const SidebarContainer = styled(Box)(() => ({
+export const SidebarContainer = styled(Box)(({ theme }) => ({
   height: "100vh",
   display: "flex",
   flexDirection: "column",
-  backgroundColor: "#1a1b23",
-  color: "#ffffff",
+  backgroundColor: theme.palette.custom.background.dark,
+  color: theme.palette.custom.text.white,
   overflow: "hidden",
   width: "100%",
 }));
@@ -55,8 +55,8 @@ export const UserInfo = styled(Box)(() => ({
   minWidth: 0,
 }));
 
-export const UserName = styled(Typography)<TypographyProps>(() => ({
-  color: "#ffffff",
+export const UserName = styled(Typography)<TypographyProps>(({ theme }) => ({
+  color: theme.palette.custom.text.white,
   fontWeight: 500,
   fontSize: "0.875rem",
   lineHeight: 1.2,
@@ -66,8 +66,8 @@ export const UserName = styled(Typography)<TypographyProps>(() => ({
   minWidth: 0,
 }));
 
-export const UserEmail = styled(Typography)<TypographyProps>(() => ({
-  color: "#9ca3af",
+export const UserEmail = styled(Typography)<TypographyProps>(({ theme }) => ({
+  color: theme.palette.custom.text.light,
   fontSize: "0.75rem",
   lineHeight: 1.2,
   overflow: "hidden",
@@ -86,10 +86,10 @@ export const SidebarListItem = styled(ListItem)(() => ({
   },
 }));
 
-export const SidebarListItemButton = styled(ListItemButton)(() => ({
+export const SidebarListItemButton = styled(ListItemButton)(({ theme }) => ({
   borderRadius: "8px",
   padding: "12px 16px",
-  color: "#9ca3af",
+  color: theme.palette.custom.text.light,
   width: "100%",
   minWidth: 0,
   "&:hover": {
@@ -97,7 +97,7 @@ export const SidebarListItemButton = styled(ListItemButton)(() => ({
   },
   "&.Mui-selected": {
     backgroundColor: "rgba(78, 205, 196, 0.1)",
-    color: "#4ecdc4",
+    color: theme.palette.custom.accent.teal,
     "&:hover": {
       backgroundColor: "rgba(78, 205, 196, 0.15)",
     },
@@ -123,13 +123,13 @@ export const SidebarListItemText = styled(ListItemText)(() => ({
   },
 }));
 
-export const BottomNavContainer = styled(Box)(() => ({
+export const BottomNavContainer = styled(Box)(({ theme }) => ({
   position: "fixed",
   bottom: 0,
   left: 0,
   right: 0,
   zIndex: 1300,
-  background: "#252730",
+  background: theme.palette.custom.background.secondary,
   boxShadow: "0 -2px 8px rgba(0,0,0,0.12)",
   pointerEvents: "auto",
   paddingBottom: "env(safe-area-inset-bottom)",
@@ -152,20 +152,20 @@ export const HeaderLogoContainer = styled(Box)(() => ({
   gap: 16,
 }));
 
-export const HeaderLogoIcon = styled("div")(() => ({
+export const HeaderLogoIcon = styled("div")(({ theme }) => ({
   fontSize: 32,
-  color: "#4ecdc4",
+  color: theme.palette.custom.accent.teal,
 }));
 
-export const HeaderLogoText = styled(Typography)(() => ({
-  color: "#ffffff",
+export const HeaderLogoText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.white,
   fontWeight: 600,
 }));
 
-export const CloseButton = styled("button")(() => ({
+export const CloseButton = styled("button")(({ theme }) => ({
   background: "none",
   border: "none",
-  color: "#9ca3af",
+  color: theme.palette.custom.text.light,
   cursor: "pointer",
   padding: 0,
   display: "flex",
@@ -178,10 +178,10 @@ export const UserInfoContainer = styled(Box)(() => ({
   minWidth: 0,
 }));
 
-export const UserAvatar = styled(Avatar)(() => ({
+export const UserAvatar = styled(Avatar)(({ theme }) => ({
   width: 40,
   height: 40,
-  backgroundColor: "#4ecdc4",
+  backgroundColor: theme.palette.custom.accent.teal,
   fontSize: "1rem",
 }));
 
@@ -194,49 +194,49 @@ export const SignOutListItem = styled(SidebarListItem)(() => ({
   marginTop: 8,
 }));
 
-export const MobileDrawer = styled(Drawer)(() => ({
+export const MobileDrawer = styled(Drawer)(({ theme }) => ({
   "& .MuiDrawer-paper": {
     width: 280,
-    backgroundColor: "#1a1b23",
+    backgroundColor: theme.palette.custom.background.dark,
     border: "none",
   },
   zIndex: 1400,
 }));
 
-export const StyledBottomNavigation = styled(BottomNavigation)(() => ({
-  backgroundColor: "#252730",
+export const StyledBottomNavigation = styled(BottomNavigation)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.background.secondary,
   borderTop: "1px solid rgba(255,255,255,0.1)",
   "& .MuiBottomNavigationAction-root": {
-    color: "#9ca3af",
+    color: theme.palette.custom.text.light,
     "&.Mui-selected": {
-      color: "#4ecdc4",
+      color: theme.palette.custom.accent.teal,
     },
   },
 }));
 
-export const MobileMenuButton = styled("button")(() => ({
+export const MobileMenuButton = styled("button")(({ theme }) => ({
   position: "fixed",
   top: 16,
   left: 16,
   zIndex: 1200,
-  background: "#252730",
+  background: theme.palette.custom.background.secondary,
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "8px",
   padding: "8px",
-  color: "#ffffff",
+  color: theme.palette.custom.text.white,
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
 }));
 
-export const DesktopDrawer = styled(Drawer)(() => ({
+export const DesktopDrawer = styled(Drawer)(({ theme }) => ({
   width: 240,
   flexShrink: 0,
   "& .MuiDrawer-paper": {
     width: 240,
     boxSizing: "border-box",
-    backgroundColor: "#1a1b23",
+    backgroundColor: theme.palette.custom.background.dark,
     border: "none",
     borderRight: "1px solid rgba(255,255,255,0.1)",
   },

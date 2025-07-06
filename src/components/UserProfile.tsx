@@ -35,7 +35,7 @@ const UserProfile = () => {
           <Typography variant="h6">
             {user.user_metadata?.full_name || "User"}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="custom.text.light">
             {user.email}
           </Typography>
         </ProfileInfo>
@@ -44,10 +44,10 @@ const UserProfile = () => {
       <ProfileDivider />
 
       <ProfileDetails>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" color="custom.text.light" gutterBottom>
           User ID: {user.id}
         </Typography>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" color="custom.text.light" gutterBottom>
           Last Sign In:{" "}
           {new Date(user.last_sign_in_at || "").toLocaleDateString()}
         </Typography>

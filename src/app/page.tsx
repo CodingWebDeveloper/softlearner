@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { HashLoader } from "react-spinners";
+import { useTheme } from "@mui/material/styles";
 
 import { useSupabase } from "@/contexts/SupabaseContext";
 
@@ -35,14 +36,33 @@ import {
 } from "@/components/styled/HomePage.styled";
 import {
   getUserCoursesWithProgress,
-  type CourseProgress,
 } from "@/services/courseService";
+import type { Course, Resource } from "@/lib/database";
 import { formatDate } from "@/utils/dateUtils";
+
+// Extended course interface for the transformed data
+interface ExtendedCourse extends Course {
+  title: string;
+  instructor_name: string;
+  total_resources: number;
+}
+
+// Custom course progress interface
+interface CustomCourseProgress {
+  course: ExtendedCourse;
+  total_resources: number;
+  completed_resources: number;
+  progress_percentage: number;
+  last_accessed: string;
+  status: 'not_started' | 'in_progress' | 'completed';
+  next_resource?: Resource;
+}
 
 const Home = () => {
   const { user, loading } = useSupabase();
-  const [courses, setCourses] = useState<CourseProgress[]>([]);
+  const [courses, setCourses] = useState<CustomCourseProgress[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -51,7 +71,7 @@ const Home = () => {
         // Get user courses with progress from database
         try {
           const userCourses = await getUserCoursesWithProgress(user.id);
-          setCourses(userCourses);
+          setCourses(userCourses as CustomCourseProgress[]);
         } catch (error) {
           console.error("Error fetching courses:", error);
           setCourses([]);
@@ -68,7 +88,7 @@ const Home = () => {
   if (loading || coursesLoading) {
     return (
       <LoadingContainer>
-        <HashLoader color="#4ecdc4" size={50} />
+        <HashLoader color={theme.palette.custom.accent.teal} size={50} />
       </LoadingContainer>
     );
   }
