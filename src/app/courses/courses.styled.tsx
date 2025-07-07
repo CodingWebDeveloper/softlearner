@@ -238,3 +238,7 @@ export const StyledPagination = styled(MuiPagination)(({ theme }) => ({
     color: theme.palette.custom.background.card,
   },
 })); 
+
+export const SidebarContainer = styled(Box)(({ theme }) => ({
+  paddingBlock: theme.spacing(2),
+}));

@@ -1,4 +1,4 @@
-import { Box, Typography, TypographyProps, Button, Tab, ListItem, ListItemText } from '@mui/material';
+import { Box, Typography, TypographyProps, Button, Tab, ListItem, ListItemText, DialogContent, IconButton, Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
@@ -167,4 +167,56 @@ export const CourseDetailsContainer = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down('md')]: {
     padding: theme.spacing(2),
   },
+}));
+
+export const DialogContentStyled = styled(DialogContent)(({ theme }) => ({
+  padding: 0,
+  position: 'relative',
+  background: theme.palette.background.default,
+}));
+
+export const VideoContainer = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  width: '100%',
+  paddingTop: '56.25%', // 16:9 aspect ratio
+}));
+
+export const VideoIframe = styled('iframe')(({ theme }) => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  border: 0,
+}));
+
+export const CloseButtonContainer = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: 16,
+  right: 16,
+  zIndex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  borderRadius: '50%',
+  '&:hover': {
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  },
+}));
+
+export const CloseButtonStyled = styled(IconButton)(({ theme }) => ({
+  color: 'white',
+}));
+
+export const PriceContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: theme.spacing(2),
+}));
+
+export const DividerStyled = styled(Divider)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+}));
+
+export const ClickablePreviewBox = styled(SidebarPreviewBox)(({ theme }) => ({
+  cursor: 'pointer',
 })); 

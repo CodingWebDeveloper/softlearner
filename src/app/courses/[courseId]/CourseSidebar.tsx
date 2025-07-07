@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, KeyboardEvent } from 'react';
 import { Button, Divider, Stack, Typography, Box } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
@@ -15,8 +15,20 @@ import {
   CardStyled,
   AddToCartButton,
   MetaItemText,
-  PreviewIcon
+  PreviewIcon,
+  DialogContentStyled,
+  VideoContainer,
+  VideoIframe,
+  CloseButtonContainer,
+  CloseButtonStyled,
+  PriceContainer,
+  DividerStyled,
+  ClickablePreviewBox
 } from './courseDetails.styled';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface Meta {
   level: string;
@@ -34,23 +46,79 @@ interface CourseSidebarProps {
   image: string;
 }
 
+const YOUTUBE_VIDEO_ID = 'dQw4w9WgXcQ'; // Replace with actual video id or pass as prop if needed
+
 const CourseSidebar: React.FC<CourseSidebarProps> = ({ price, discount, meta, image }) => {
+  // Hooks
   const theme = useTheme();
+  const [open, setOpen] = useState(false);
+
+  // Variables/State
   const discountedPrice = (price * (1 - discount)).toFixed(2);
-  
+
+  // Handlers
+  const handleOpenDialog = () => {
+    setOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpen(false);
+  };
+
+  const handlePreviewBoxKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleOpenDialog();
+    }
+  };
+
   return (
     <CardStyled>
-      <SidebarPreviewBox tabIndex={0} aria-label="Course Preview Image">
+      <ClickablePreviewBox
+        tabIndex={0}
+        aria-label="Course Preview Image"
+        onClick={handleOpenDialog}
+        onKeyDown={handlePreviewBoxKeyDown}
+        role="button"
+      >
         <PreviewIcon />
-      </SidebarPreviewBox>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+      </ClickablePreviewBox>
+      <Dialog
+        open={open}
+        onClose={handleCloseDialog}
+        aria-labelledby="course-preview-dialog-title"
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContentStyled>
+          <VideoContainer>
+            <VideoIframe
+              src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`}
+              title="Course Preview Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </VideoContainer>
+          <CloseButtonContainer>
+            <CloseButtonStyled
+              aria-label="close"
+              onClick={handleCloseDialog}
+            >
+              <CloseIcon />
+            </CloseButtonStyled>
+          </CloseButtonContainer>
+        </DialogContentStyled>
+      </Dialog>
+
+      <PriceContainer>
         <DiscountedPrice component="span" tabIndex={0} aria-label="Discounted Price">
           ${discountedPrice} USD
         </DiscountedPrice>
         <OldPrice component="span" tabIndex={0} aria-label="Original Price">
           ${price.toFixed(2)} USD
         </OldPrice>
-      </Box>
+      </PriceContainer>
+
       <AddToCartButton
         variant="contained"
         color="primary"
@@ -62,7 +130,8 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({ price, discount, meta, im
       >
         ADD TO CART
       </AddToCartButton>
-      <Divider sx={{ my: 2 }} />
+
+      <DividerStyled />
       <Stack spacing={1.5}>
         <MetaItem tabIndex={0} aria-label={`Level: ${meta.level}`}>
           <MenuBookOutlinedIcon color="primary" />

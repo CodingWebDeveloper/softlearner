@@ -6,6 +6,8 @@ import CourseHeader from './CourseHeader';
 import CourseSidebar from './CourseSidebar';
 import CourseTabs from './CourseTabs';
 import { SidebarSticky, CourseDetailsContainer } from './courseDetails.styled';
+import { useMediaQuery } from '@mui/material';
+import { SidebarContainer } from '../courses.styled';
 
 // Mock data
 const mockCourse = {
@@ -29,20 +31,33 @@ const mockCourse = {
 };
 
 const DefaultViewCourseDetails: React.FC = () => {
+  // General hooks
   const theme = useTheme();
+  const mobileMatches = useMediaQuery(theme.breakpoints.down('md'));
   
   return (
     <CourseDetailsContainer>
       <Grid container spacing={6} alignItems="start">
         <Grid size={{xs: 12, md: 8}}>
           <CourseHeader title={mockCourse.title} instructor={mockCourse.instructor} />
+          {
+            mobileMatches && (
+              <SidebarContainer>
+                <CourseSidebar price={mockCourse.price} discount={mockCourse.discount} meta={mockCourse.meta} image={mockCourse.image} />
+              </SidebarContainer>
+            )
+          }
+         
           <CourseTabs />
         </Grid>
-        <Grid size={{xs: 12, md: 4}}>
-          <SidebarSticky>
-            <CourseSidebar price={mockCourse.price} discount={mockCourse.discount} meta={mockCourse.meta} image={mockCourse.image} />
-          </SidebarSticky>
-        </Grid>
+        {
+          !mobileMatches && (
+            <Grid size={{xs: 12, md: 4}}>
+              <CourseSidebar price={mockCourse.price} discount={mockCourse.discount} meta={mockCourse.meta} image={mockCourse.image} />
+            </Grid>
+          )
+        }
+        
       </Grid>
     </CourseDetailsContainer>
   );

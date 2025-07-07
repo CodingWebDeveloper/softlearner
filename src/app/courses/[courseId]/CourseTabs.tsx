@@ -1,10 +1,13 @@
 import React from 'react';
-import { Tabs, Tab, Typography, Box, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
+import { Tabs, Tab, Typography, Box, List, ListItem, ListItemIcon, ListItemText, Divider, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { TabsContainer, CustomTab, TabIndicator, SectionTitle, ListItemStyled, ListItemTextStyled, DurationText, QuestionsText } from './courseDetails.styled';
+import { TabsContainer, CustomTab, SectionTitle, ListItemStyled, ListItemTextStyled, DurationText, QuestionsText } from './courseDetails.styled';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined';
+import CourseReviews from './CourseReviews';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -39,9 +42,26 @@ const quizzes = [
   { title: 'HTML and CSS Quiz', questions: 20 },
 ];
 
+// About the Course Markdown description
+const ABOUT_COURSE_MD = `
+This is a **comprehensive course** on _advanced funnels_ with Google Analytics.
+
+You will learn how to:
+- Set up funnels
+- Analyze funnel performance
+- Optimize for maximum conversion
+
+> _Master your analytics and boost your results!_
+`;
+
 const CourseTabs: React.FC = () => {
   const [tab, setTab] = React.useState(0);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  const DESCRIPTION_LABEL = isMobile ? 'Description' : 'About the Course';
+  const RESOURCES_LABEL = isMobile ? 'Resources' : 'Course Content';
+  const REVIEWS_LABEL = 'Reviews';
   
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
@@ -55,14 +75,26 @@ const CourseTabs: React.FC = () => {
         aria-label="Course Details Tabs"
         TabIndicatorProps={{ style: { backgroundColor: theme.palette.custom.accent.blue, height: 3, borderRadius: 2 } }}
       >
-        <CustomTab label="About the Course" id="course-tab-0" aria-controls="course-tabpanel-0" tabIndex={0} />
-        <CustomTab label="Course Content" id="course-tab-1" aria-controls="course-tabpanel-1" tabIndex={0} />
-        <CustomTab label="Reviews" id="course-tab-2" aria-controls="course-tabpanel-2" tabIndex={0} />
+        <CustomTab label={DESCRIPTION_LABEL} id="course-tab-0" aria-controls="course-tabpanel-0" tabIndex={0} />
+        <CustomTab label={RESOURCES_LABEL} id="course-tab-1" aria-controls="course-tabpanel-1" tabIndex={0} />
+        <CustomTab label={REVIEWS_LABEL} id="course-tab-2" aria-controls="course-tabpanel-2" tabIndex={0} />
       </Tabs>
       <TabPanel value={tab} index={0}>
-        <Typography variant="body1">
-          This is a comprehensive course on advanced funnels with Google Analytics. You will learn how to set up, analyze, and optimize funnels for maximum conversion.
-        </Typography>
+        <Box
+          component="section"
+          aria-label="About the Course Description"
+          sx={{ width: '100%' }}
+        >
+          <Typography
+            component="div"
+            variant="body1"
+            tabIndex={0}
+            aria-label="About the Course Markdown Content"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(marked.parse(ABOUT_COURSE_MD)),
+            }}
+          />
+        </Box>
       </TabPanel>
       <TabPanel value={tab} index={1}>
         {/* Modules Section */}
@@ -107,7 +139,7 @@ const CourseTabs: React.FC = () => {
         </List>
       </TabPanel>
       <TabPanel value={tab} index={2}>
-        <Typography variant="body1">Reviews go here (mock).</Typography>
+        <CourseReviews />
       </TabPanel>
     </TabsContainer>
   );
