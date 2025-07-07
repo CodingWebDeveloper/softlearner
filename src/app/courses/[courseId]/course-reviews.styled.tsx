@@ -194,8 +194,8 @@ export const StarRatingRow = styled(Box)(({ theme }) => ({
   marginLeft: theme.spacing(1),
 }));
 
-export const StarIconStyled = styled(StarIcon)<{ $filled?: boolean }>(({ theme, $filled }) => ({
-  color: $filled ? theme.palette.custom.accent.yellow : theme.palette.custom.text.light,
+export const StarIconStyled = styled(StarIcon)<{ filled?: boolean }>(({ theme, filled }) => ({
+  color: filled ? theme.palette.custom.accent.yellow : theme.palette.custom.text.light,
   fontSize: 18,
 }));
 

@@ -83,7 +83,7 @@ const CourseReviews: React.FC = () => {
       {/* Ratings Summary */}
       <RatingsSummary>
         <RatingValue>
-          <StarIconStyled $filled style={{ fontSize: 32 }} />
+          <StarIconStyled filled style={{ fontSize: 32 }} />
           {ratingSummary.average} course rating
         </RatingValue>
         <RatingCount>
@@ -93,7 +93,7 @@ const CourseReviews: React.FC = () => {
           {[5, 4, 3, 2, 1].map((star, idx) => (
             <RatingRow key={star}>
               <Typography variant="body2" sx={{ minWidth: 24 }}>{star}</Typography>
-              <StarIconStyled $filled />
+              <StarIconStyled filled />
               <RatingBar variant="determinate" value={ratingSummary.breakdown[idx]} />
               <Typography variant="body2" sx={{ minWidth: 32, textAlign: 'right' }}>{ratingSummary.breakdown[idx]}%</Typography>
             </RatingRow>
@@ -144,7 +144,7 @@ const CourseReviews: React.FC = () => {
                           {Array.from({ length: 5 }).map((_, i) => (
                             <StarIconStyled
                               key={i}
-                              $filled={i < review.rating}
+                              filled={i < review.rating}
                               aria-label={i < review.rating ? 'Filled star' : 'Empty star'}
                             />
                           ))}

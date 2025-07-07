@@ -169,10 +169,22 @@ export const CourseDetailsContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-export const DialogContentStyled = styled(DialogContent)(({ theme }) => ({
+interface DialogContentStyledProps {
+  $isMobile?: boolean;
+}
+
+export const DialogContentStyled = styled(DialogContent, {
+  shouldForwardProp: (prop) => prop !== '$isMobile',
+})<DialogContentStyledProps>(({ theme, $isMobile }) => ({
   padding: 0,
   position: 'relative',
-  background: theme.palette.background.default,
+  background: $isMobile ? 'rgba(0,0,0,0.85)' : theme.palette.background.default,
+  ...(!!$isMobile && {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+  }),
 }));
 
 export const VideoContainer = styled(Box)(({ theme }) => ({
@@ -194,12 +206,8 @@ export const CloseButtonContainer = styled(Box)(({ theme }) => ({
   position: 'absolute',
   top: 16,
   right: 16,
-  zIndex: 1,
-  backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  borderRadius: '50%',
-  '&:hover': {
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-  },
+  zIndex: 2,
+  padding: theme.spacing(0.5),
 }));
 
 export const CloseButtonStyled = styled(IconButton)(({ theme }) => ({

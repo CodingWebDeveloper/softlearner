@@ -1,6 +1,7 @@
 import React, { useState, KeyboardEvent } from 'react';
 import { Button, Divider, Stack, Typography, Box } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
@@ -52,6 +53,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({ price, discount, meta, im
   // Hooks
   const theme = useTheme();
   const [open, setOpen] = useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // Variables/State
   const discountedPrice = (price * (1 - discount)).toFixed(2);
@@ -89,25 +91,47 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({ price, discount, meta, im
         aria-labelledby="course-preview-dialog-title"
         maxWidth="md"
         fullWidth
+        fullScreen={isMobile}
       >
-        <DialogContentStyled>
-          <VideoContainer>
-            <VideoIframe
-              src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`}
-              title="Course Preview Video"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </VideoContainer>
-          <CloseButtonContainer>
-            <CloseButtonStyled
-              aria-label="close"
-              onClick={handleCloseDialog}
-            >
-              <CloseIcon />
-            </CloseButtonStyled>
-          </CloseButtonContainer>
-        </DialogContentStyled>
+        {isMobile ? (
+          <DialogContentStyled $isMobile>
+            <CloseButtonContainer>
+              <CloseButtonStyled
+                aria-label="close"
+                onClick={handleCloseDialog}
+              >
+                <CloseIcon />
+              </CloseButtonStyled>
+            </CloseButtonContainer>
+            <VideoContainer>
+              <VideoIframe
+                src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`}
+                title="Course Preview Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </VideoContainer>
+          </DialogContentStyled>
+        ) : (
+          <DialogContentStyled $isMobile={false}>
+            <CloseButtonContainer>
+              <CloseButtonStyled
+                aria-label="close"
+                onClick={handleCloseDialog}
+              >
+                <CloseIcon />
+              </CloseButtonStyled>
+            </CloseButtonContainer>
+            <VideoContainer>
+              <VideoIframe
+                src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`}
+                title="Course Preview Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </VideoContainer>
+          </DialogContentStyled>
+        )}
       </Dialog>
 
       <PriceContainer>
