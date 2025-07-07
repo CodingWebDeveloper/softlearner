@@ -6,6 +6,7 @@ import { SupabaseProvider } from "../contexts/SupabaseContext";
 import ClientOnly from "../components/ClientOnly";
 import Layout from "../components/Layout";
 import LoadingFallback from "../components/LoadingFallback";
+import StoreProvider from "./StoreProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,25 +34,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <meta name="emotion-insertion-point" content="" />
-      </head>
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ClientOnly
           fallback={<LoadingFallback />}
         >
-          <SupabaseProvider>
+          <StoreProvider>
+            <SupabaseProvider>
               <ThemeRegistry>
                 <Layout>
                   {children}
                 </Layout>
               </ThemeRegistry>
-          </SupabaseProvider>
+            </SupabaseProvider>
+          </StoreProvider>
         </ClientOnly>
       </body>
     </html>
+
   );
 }

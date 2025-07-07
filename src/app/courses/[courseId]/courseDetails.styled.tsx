@@ -227,4 +227,12 @@ export const DividerStyled = styled(Divider)(({ theme }) => ({
 
 export const ClickablePreviewBox = styled(SidebarPreviewBox)(({ theme }) => ({
   cursor: 'pointer',
+}));
+
+export const BackIconButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.custom.accent.blue,
+  marginRight: theme.spacing(2),
+  width: 48,
+  height: 48,
+  alignSelf: 'flex-start',
 })); 
