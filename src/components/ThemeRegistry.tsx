@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeProvider, CssBaseline } from "@mui/material";
+import { ThemeProvider, CssBaseline, GlobalStyles } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
@@ -46,31 +46,32 @@ declare module '@mui/material/styles' {
   }
   interface PaletteOptions {
     custom?: {
-      background?: {
-        dark?: string;
-        secondary?: string;
-        tertiary?: string;
-        card?: string;
-        filter?: string;
+      background: {
+        dark: string;
+        secondary: string;
+        tertiary: string;
+        card: string;
+        filter: string;
       };
       text?: {
-        light?: string;
-        white?: string;
+        light: string;
+        white: string;
+        black: string;
       };
-      accent?: {
-        teal?: string;
-        tealDark?: string;
-        blue?: string;
-        yellow?: string;
-        orange?: string;
-        green?: string;
-        gray?: string;
-        red?: string;
+      accent: {
+        teal: string;
+        tealDark: string;
+        blue: string;
+        yellow: string;
+        orange: string;
+        green: string;
+        gray: string;
+        red: string;
       };
-      status?: {
-        success?: string;
-        warning?: string;
-        error?: string;
+      status: {
+        success: string;
+        warning: string;
+        error: string;
         info?: string;
       };
     };
@@ -98,6 +99,7 @@ const theme = createTheme({
       text: {
         light: "#b0b3b8",
         white: "#ffffff",
+        black: "#000000",
       },
       accent: {
         teal: "#4ecdc4",
@@ -129,6 +131,16 @@ const theme = createTheme({
   },
 });
 
+export const ThemeGlobalStyles = (
+  <GlobalStyles
+    styles={{
+      html: {
+        scrollbarColor: "#767676 #292929", // Thumb color, track color
+      },
+    }}
+  />
+);
+
 export default function ThemeRegistry({
   children,
 }: {
@@ -138,6 +150,7 @@ export default function ThemeRegistry({
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        {ThemeGlobalStyles}
         {children}
       </ThemeProvider>
     </CacheProvider>

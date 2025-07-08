@@ -1,16 +1,35 @@
 'use client';
 import React from 'react';
-import { Tabs, Typography, List, ListItemAvatar, Avatar, useTheme } from '@mui/material';
+import { Tabs, Typography, useTheme } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/store/index';
 import { setTab, setCurrentVideo, selectCurrentVideoId } from '@/lib/store/features/courseMaterialsSlice';
-import { VideoListSection, TabPanel, StyledTab, StyledVideoListItem, StyledListItemText, StyledVideoNumber } from './styles/materials.styled';
+import {
+  VideoListSection,
+  TabPanel,
+  StyledTab,
+} from './styles/materials.styled';
+import QuizList from './QuizList';
+import ResourceList from './ResourceList';
+import VideosList from './VideosList';
 
 interface Video {
   id: number;
   title: string;
   duration: string;
   youtubeId: string;
+}
+
+interface Resource {
+  id: number;
+  title: string;
+  url: string;
+}
+
+interface Quiz {
+  id: number;
+  title: string;
+  progress: number; // percent
 }
 
 interface CourseMaterialsTabsProps {
@@ -21,6 +40,18 @@ const TABS = [
   { label: 'All Videos', value: 0 },
   { label: 'Resources', value: 1 },
   { label: 'Quizzes', value: 2 },
+];
+
+const MOCK_RESOURCES: Resource[] = [
+  { id: 1, title: 'Module 1: HTML and CSS', url: '/downloads/module1.pdf' },
+  { id: 2, title: 'Module 2: JavaScript Fundamentals', url: '/downloads/module2.pdf' },
+  { id: 3, title: 'Module 3: Web Application Development', url: '/downloads/module3.pdf' },
+];
+
+const MOCK_QUIZZES: Quiz[] = [
+  { id: 1, title: 'Quiz 1: HTML Basics', progress: 100 },
+  { id: 2, title: 'Quiz 2: CSS Selectors', progress: 60 },
+  { id: 3, title: 'Quiz 3: JavaScript Variables', progress: 0 },
 ];
 
 const CourseMaterialsTabs: React.FC<CourseMaterialsTabsProps> = ({ videoList }) => {
@@ -58,43 +89,23 @@ const CourseMaterialsTabs: React.FC<CourseMaterialsTabsProps> = ({ videoList }) 
         ))}
       </Tabs>
       <TabPanel value={tab} index={0}>
-        <List>
-          {videoList.map((video) => (
-            <StyledVideoListItem
-              key={video.id}
-              component="div"
-              role="button"
-              tabIndex={0}
-              onClick={() => handleVideoSelect(video.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') handleVideoSelect(video.id);
-              }}
-              aria-label={`Play ${video.title}`}
-              selected={currentVideoId === video.id}
-            >
-              <ListItemAvatar>
-                <Avatar>
-                  <StyledVideoNumber selected={currentVideoId === video.id}>{video.id}</StyledVideoNumber>
-                </Avatar>
-              </ListItemAvatar>
-              <StyledListItemText
-                primary={video.title}
-                secondary={video.duration}
-                selected={currentVideoId === video.id}
-              />
-            </StyledVideoListItem>
-          ))}
-        </List>
+        <VideosList
+          videoList={videoList}
+          currentVideoId={currentVideoId}
+          handleVideoSelect={handleVideoSelect}
+        />
       </TabPanel>
       <TabPanel value={tab} index={1}>
-        <Typography variant="body2" color="inherit">
-          Resources will be available soon.
+        <Typography variant="subtitle1" sx={{ color: theme.palette.custom.text.light, mb: 1, fontWeight: 600 }}>
+          Modules
         </Typography>
+        <ResourceList resources={MOCK_RESOURCES} />
       </TabPanel>
       <TabPanel value={tab} index={2}>
-        <Typography variant="body2" color="inherit">
-          Quizzes will be available soon.
+        <Typography variant="subtitle1" sx={{ color: theme.palette.custom.text.light, mb: 1, fontWeight: 600 }}>
+          Quizzes
         </Typography>
+        <QuizList quizzes={MOCK_QUIZZES} />
       </TabPanel>
     </VideoListSection>
   );

@@ -27,8 +27,6 @@ const CourseProgressCard = ({ course }: { course: CustomCourseProgress }) => {
       tabIndex={0}
       aria-label={`Course: ${course.course.title}`}
       role="button"
-      onClick={() => handleCourseCardClick(course.course.id)}
-      onKeyDown={(e) => handleCourseCardKeyDown(e, course.course.id)}
     >
       <CourseCardContent>
         <CourseHeader>
@@ -85,7 +83,7 @@ const CourseProgressCard = ({ course }: { course: CustomCourseProgress }) => {
             course.next_resource && (
               <ContinueButton
                 variant="contained"
-                href={`#/courses/${course.course.id}/resources/${course.next_resource.id}`}
+                onClick={() => handleCourseCardClick(course.course.id)}
                 aria-label={`Continue course: ${course.course.title}`}
               >
                 Continue

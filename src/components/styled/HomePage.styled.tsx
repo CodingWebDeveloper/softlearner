@@ -132,6 +132,7 @@ export const CourseCard = styled(Card)(({ theme }) => ({
     transform: "translateY(-2px)",
     boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
   },
+  cursor: "pointer",
 }));
 
 export const CourseCardContent = styled(Box)(({ theme }) => ({

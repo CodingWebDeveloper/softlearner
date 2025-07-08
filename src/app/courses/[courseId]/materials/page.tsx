@@ -40,7 +40,6 @@ const CourseMaterialsPage = () => {
       />
       <CourseMaterialsTabs
         videoList={VIDEO_LIST}
-        currentVideoId={VIDEO_LIST[0].id} // fallback for type, not used
       />
     </CourseMaterialsContainer>
   );
