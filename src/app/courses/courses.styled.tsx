@@ -49,6 +49,11 @@ export const CourseCard = styled(Card, {
   alignItems: isMobile ? 'stretch' : 'flex-start',
   position: 'relative',
   cursor: 'pointer',
+  "&:hover": {
+    backgroundColor: theme.palette.custom.background.tertiary,
+    transform: "translateY(-2px)",
+    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+  },
 }));
 
 export const CardImage = styled(CardMedia, {

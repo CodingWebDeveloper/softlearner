@@ -2,13 +2,9 @@
 'use client';
 
 import React from 'react';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material/styles';
-import CourseHeader from './CourseHeader';
-import CourseSidebar from './CourseSidebar';
-import CourseTabs from './CourseTabs';
-import { SidebarSticky, CourseDetailsContainer } from './courseDetails.styled';
+
+import { CourseDetailsContainer } from './courseDetails.styled';
 import DefaultViewCourseDetails from './DefaultViewCourseDetails';
 
 // Mock data

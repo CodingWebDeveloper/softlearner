@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { HashLoader } from "react-spinners";
 import { useTheme } from "@mui/material/styles";
-
 import { useSupabase } from "@/contexts/SupabaseContext";
 
 import {
@@ -15,21 +14,6 @@ import {
   DashboardSubtitle,
   DashboardContent,
   CourseGrid,
-  CourseCard,
-  CourseCardContent,
-  CourseHeader,
-  CourseTitle,
-  CourseInstructor,
-  CourseDescription,
-  ProgressSection,
-  ProgressHeader,
-  ProgressText,
-  ProgressPercentage,
-  StyledProgressBar,
-  CourseFooter,
-  LastAccessed,
-  ContinueButton,
-  StatusChip,
   EmptyState,
   EmptyStateTitle,
   EmptyStateText,
@@ -38,7 +22,8 @@ import {
   getUserCoursesWithProgress,
 } from "@/services/courseService";
 import type { Course, Resource } from "@/lib/database";
-import { formatDate } from "@/utils/dateUtils";
+import CourseProgressCard from "./courses/CourseProgressCard";
+
 
 // Extended course interface for the transformed data
 interface ExtendedCourse extends Course {
@@ -58,6 +43,81 @@ interface CustomCourseProgress {
   next_resource?: Resource;
 }
 
+// MOCK DATA FOR COURSES
+const MOCK_COURSES: CustomCourseProgress[] = [
+  {
+    course: {
+      id: "1",
+      name: "react-fundamentals",
+      title: "React Fundamentals",
+      instructor_name: "Jane Doe",
+      description: "Learn the basics of React, including components, hooks, and state management.",
+      total_resources: 10,
+      price: 49.99,
+      created_at: new Date(Date.now() - 100000000).toISOString(),
+      updated_at: new Date(Date.now() - 50000000).toISOString(),
+    } as ExtendedCourse,
+    total_resources: 10,
+    completed_resources: 3,
+    progress_percentage: 30,
+    last_accessed: new Date().toISOString(),
+    status: "in_progress",
+    next_resource: {
+      id: "101",
+      url: "https://example.com/resource/101",
+      name: "React useState Hook",
+      course_id: "1",
+      created_at: new Date(Date.now() - 90000000).toISOString(),
+      updated_at: new Date(Date.now() - 80000000).toISOString(),
+    },
+  },
+  {
+    course: {
+      id: "2",
+      name: "advanced-typescript",
+      title: "Advanced TypeScript",
+      instructor_name: "John Smith",
+      description: "Master advanced TypeScript features and patterns.",
+      total_resources: 8,
+      price: 59.99,
+      created_at: new Date(Date.now() - 200000000).toISOString(),
+      updated_at: new Date(Date.now() - 100000000).toISOString(),
+    } as ExtendedCourse,
+    total_resources: 8,
+    completed_resources: 8,
+    progress_percentage: 100,
+    last_accessed: new Date(Date.now() - 86400000).toISOString(),
+    status: "completed",
+    next_resource: undefined,
+  },
+  {
+    course: {
+      id: "3",
+      name: "ui-ux-design-principles",
+      title: "UI/UX Design Principles",
+      instructor_name: "Emily Clark",
+      description: "Understand the fundamentals of UI/UX design for web applications.",
+      total_resources: 5,
+      price: 39.99,
+      created_at: new Date(Date.now() - 300000000).toISOString(),
+      updated_at: new Date(Date.now() - 200000000).toISOString(),
+    } as ExtendedCourse,
+    total_resources: 5,
+    completed_resources: 0,
+    progress_percentage: 0,
+    last_accessed: new Date(Date.now() - 172800000).toISOString(),
+    status: "not_started",
+    next_resource: {
+      id: "201",
+      url: "https://example.com/resource/201",
+      name: "Introduction to UI/UX",
+      course_id: "3",
+      created_at: new Date(Date.now() - 290000000).toISOString(),
+      updated_at: new Date(Date.now() - 280000000).toISOString(),
+    },
+  },
+];
+
 const Home = () => {
   const { user, loading } = useSupabase();
   const [courses, setCourses] = useState<CustomCourseProgress[]>([]);
@@ -68,16 +128,19 @@ const Home = () => {
     const fetchCourses = async () => {
       if (user) {
         setCoursesLoading(true);
-        // Get user courses with progress from database
-        try {
-          const userCourses = await getUserCoursesWithProgress(user.id);
-          setCourses(userCourses as CustomCourseProgress[]);
-        } catch (error) {
-          console.error("Error fetching courses:", error);
-          setCourses([]);
-        } finally {
-          setCoursesLoading(false);
-        }
+        // Use mock data for now
+        setCourses(MOCK_COURSES);
+        setCoursesLoading(false);
+        // Uncomment below to use real data later
+        // try {
+        //   const userCourses = await getUserCoursesWithProgress(user.id);
+        //   setCourses(userCourses as CustomCourseProgress[]);
+        // } catch (error) {
+        //   console.error("Error fetching courses:", error);
+        //   setCourses([]);
+        // } finally {
+        //   setCoursesLoading(false);
+        // }
       }
     };
 
@@ -115,75 +178,7 @@ const Home = () => {
               ) : (
                 <CourseGrid>
                   {courses.map((course) => (
-                    <CourseCard
-                      key={course.course.id}
-                      tabIndex={0}
-                      aria-label={`Course: ${course.course.title}`}
-                    >
-                      <CourseCardContent>
-                        <CourseHeader>
-                          <div>
-                            <CourseTitle variant="h3" component="h2">
-                              {course.course.title}
-                            </CourseTitle>
-                            <CourseInstructor>
-                              {course.course.instructor_name}
-                            </CourseInstructor>
-                          </div>
-                          <StatusChip
-                            label={
-                              course.status === "completed"
-                                ? "Completed"
-                                : course.status === "in_progress"
-                                ? "In Progress"
-                                : "Not Started"
-                            }
-                            color={
-                              course.status === "completed"
-                                ? "success"
-                                : course.status === "in_progress"
-                                ? "warning"
-                                : "default"
-                            }
-                            aria-label={`Status: ${course.status}`}
-                          />
-                        </CourseHeader>
-                        <CourseDescription>
-                          {course.course.description}
-                        </CourseDescription>
-                        <ProgressSection>
-                          <ProgressHeader>
-                            <ProgressText>
-                              {course.completed_resources} of{" "}
-                              {course.total_resources} resources completed
-                            </ProgressText>
-                            <ProgressPercentage>
-                              {Math.round(course.progress_percentage)}%
-                            </ProgressPercentage>
-                          </ProgressHeader>
-                          <StyledProgressBar
-                            variant="determinate"
-                            value={course.progress_percentage}
-                            aria-label="Course progress"
-                          />
-                        </ProgressSection>
-                        <CourseFooter>
-                          <LastAccessed>
-                            Last accessed: {formatDate(course.last_accessed)}
-                          </LastAccessed>
-                          {course.status !== "completed" &&
-                            course.next_resource && (
-                              <ContinueButton
-                                variant="contained"
-                                href={`#/courses/${course.course.id}/resources/${course.next_resource.id}`}
-                                aria-label={`Continue course: ${course.course.title}`}
-                              >
-                                Continue
-                              </ContinueButton>
-                            )}
-                        </CourseFooter>
-                      </CourseCardContent>
-                    </CourseCard>
+                    <CourseProgressCard key={course.course.id} course={course} />
                   ))}
                 </CourseGrid>
               )}
