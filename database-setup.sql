@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS courses (
   price DECIMAL(10,2) NOT NULL,
   thumbnail_image_url TEXT,
   creator_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -40,7 +41,12 @@ CREATE TABLE IF NOT EXISTS resources (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   url TEXT NOT NULL,
   name TEXT NOT NULL,
+  short_summary TEXT,
+  predefined TEXT CHECK (predefined IN ('video', 'downloadable file')),
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  section_id UUID REFERENCES sections(id) ON DELETE SET NULL,
+  order_index INTEGER,
+  duration INTERVAL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -158,18 +164,11 @@ CREATE TABLE IF NOT EXISTS user_resources (
   PRIMARY KEY (user_id, resource_id)
 );
 
--- Alter users table: add description
-ALTER TABLE users ADD COLUMN IF NOT EXISTS description TEXT;
-
--- Alter courses table: add category
-ALTER TABLE courses ADD COLUMN IF NOT EXISTS category TEXT;
-
--- Alter resources table: add new fields
-ALTER TABLE resources ADD COLUMN IF NOT EXISTS short_summary TEXT;
-ALTER TABLE resources ADD COLUMN IF NOT EXISTS predefined TEXT CHECK (predefined IN ('video', 'downloadable file'));
-ALTER TABLE resources ADD COLUMN IF NOT EXISTS section_id UUID REFERENCES sections(id) ON DELETE SET NULL;
-ALTER TABLE resources ADD COLUMN IF NOT EXISTS order_index INTEGER;
-ALTER TABLE resources ADD COLUMN IF NOT EXISTS duration INTERVAL;
+-- Add Category table
+CREATE TABLE IF NOT EXISTS categories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
 
 -- Enable Row Level Security on all custom tables (NOT auth.users)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -184,6 +183,11 @@ ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE answer_options ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_tests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_answers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE course_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_resources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
@@ -206,6 +210,14 @@ CREATE INDEX IF NOT EXISTS idx_user_tests_user_id ON user_tests(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_tests_test_id ON user_tests(test_id);
 CREATE INDEX IF NOT EXISTS idx_user_answers_user_test_id ON user_answers(user_test_id);
 CREATE INDEX IF NOT EXISTS idx_user_answers_question_id ON user_answers(question_id);
+CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name);
+CREATE INDEX IF NOT EXISTS idx_course_tags_course_id ON course_tags(course_id);
+CREATE INDEX IF NOT EXISTS idx_course_tags_tag_id ON course_tags(tag_id);
+CREATE INDEX IF NOT EXISTS idx_sections_course_id ON sections(course_id);
+CREATE INDEX IF NOT EXISTS idx_sections_order_index ON sections(order_index);
+CREATE INDEX IF NOT EXISTS idx_user_resources_user_id ON user_resources(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_resources_resource_id ON user_resources(resource_id);
+CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
 
 -- Create function to update updated_at column
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -217,27 +229,48 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create update triggers
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_courses_updated_at ON courses;
 CREATE TRIGGER update_courses_updated_at BEFORE UPDATE ON courses
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_resources_updated_at ON resources;
 CREATE TRIGGER update_resources_updated_at BEFORE UPDATE ON resources
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_reviews_updated_at ON reviews;
 CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_votes_updated_at ON votes;
 CREATE TRIGGER update_votes_updated_at BEFORE UPDATE ON votes
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_bookmarks_updated_at ON bookmarks;
 CREATE TRIGGER update_bookmarks_updated_at BEFORE UPDATE ON bookmarks
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_tests_updated_at ON tests;
 CREATE TRIGGER update_tests_updated_at BEFORE UPDATE ON tests
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_questions_updated_at ON questions;
 CREATE TRIGGER update_questions_updated_at BEFORE UPDATE ON questions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_answer_options_updated_at ON answer_options;
 CREATE TRIGGER update_answer_options_updated_at BEFORE UPDATE ON answer_options
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_user_tests_updated_at ON user_tests;
 CREATE TRIGGER update_user_tests_updated_at BEFORE UPDATE ON user_tests
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_user_answers_updated_at ON user_answers;
 CREATE TRIGGER update_user_answers_updated_at BEFORE UPDATE ON user_answers
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_tags_updated_at ON tags;
+CREATE TRIGGER update_tags_updated_at BEFORE UPDATE ON tags
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_sections_updated_at ON sections;
+CREATE TRIGGER update_sections_updated_at BEFORE UPDATE ON sections
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
+CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

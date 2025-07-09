@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, useTheme, useMediaQuery } from "@mui/material";
-import { useSupabase } from "@/contexts/SupabaseContext";
+import { useSupabase } from "@/contexts/supabase-context";
 import ClientOnly from "./client-only";
 import { LayoutContainer, MainContent, FallbackContainer, FallbackMain } from "@/components/styles/infrastructure/layout.styles";
 import Navigation from "@/components/navigation";

@@ -197,6 +197,9 @@ export const TagsTextField = styled(TextField)(({ theme }) => ({
   '& .MuiAutocomplete-endAdornment': {
     color: theme.palette.custom.accent.teal
   },
+  '& .MuiInputBase-input': {
+    color: theme.palette.custom.text.white
+  },
   '& .MuiInputLabel-root': {
     color: theme.palette.custom.text.white
   },

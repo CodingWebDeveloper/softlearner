@@ -13,7 +13,7 @@ import {
   Close as CloseIcon,
 } from "@mui/icons-material";
 import { useRouter, usePathname } from "next/navigation";
-import { useSupabase } from "@/contexts/SupabaseContext";
+import { useSupabase } from "@/contexts/supabase-context";
 import ClientOnly from "./client-only";
 import {
   SidebarContainer,

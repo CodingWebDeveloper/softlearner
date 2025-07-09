@@ -32,8 +32,29 @@ export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesRe
     query = query.eq('category', category);
   }
 
+  // Filter by tags using course_tags join table
+  let courseIds: string[] = [];
   if (tags && tags.length > 0) {
-    query = query.overlaps('tags', tags);
+    const { data: tagRows, error: tagError } = await supabase
+      .from('course_tags')
+      .select('course_id')
+      .in('tag_id', tags);
+
+    if (tagError) {
+      throw new Error(`Failed to fetch course tags: ${tagError.message}`);
+    }
+    courseIds = tagRows?.map(row => row.course_id) || [];
+  }
+
+  if (tags && tags.length > 0) {
+    if (courseIds.length === 0) {
+      // No courses match the tags, return empty result
+      return {
+        courses: [],
+        totalRecord: 0,
+      };
+    }
+    query = query.in('id', courseIds);
   }
 
   // Apply pagination

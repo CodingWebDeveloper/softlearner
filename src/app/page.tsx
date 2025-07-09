@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { HashLoader } from "react-spinners";
 import { useTheme } from "@mui/material/styles";
-import { useSupabase } from "@/contexts/SupabaseContext";
+import { useSupabase } from "@/contexts/supabase-context";
 
 import {
   LoadingContainer,

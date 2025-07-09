@@ -1,6 +1,6 @@
 import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
-import { getCourses } from '../../../services/course-service';
+import { getCourses } from '../../../services/courses-service';
 
 const t = initTRPC.create();
 
@@ -12,7 +12,7 @@ const getCoursesInput = z.object({
   tags: z.array(z.string()).optional(),
 });
 
-export const courseRouter = t.router({
+export const coursesRouter = t.router({
   getCourses: t.procedure
     .input(getCoursesInput)
     .query(async ({ input }) => {

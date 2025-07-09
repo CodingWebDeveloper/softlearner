@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Typography, Link, Breadcrumbs, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { HashLoader } from "react-spinners";
-import { useSupabase } from "@/contexts/SupabaseContext";
+import { useSupabase } from "@/contexts/supabase-context";
 import AuthForm from "@/components/auth-form";
 import {
   AuthContainer,

@@ -698,6 +698,23 @@ export async function createTag(name: string): Promise<Tag> {
   return data
 }
 
+// Category interface
+export interface Category {
+  id: string
+  name: string
+}
+
+// Category operations
+export async function getCategories(): Promise<Category[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('name')
+  if (error) throw error
+  return data
+}
+
 // Section operations
 export async function getSections(courseId: string): Promise<Section[]> {
   const supabase = createClient()

@@ -1,29 +1,23 @@
 import React from 'react';
-import { FormControl, InputLabel, Select, MenuItem, TextField, Autocomplete } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { 
   FilterBar, 
   FilterLabel, 
   CategorySelect,
   CategoryInputLabel,
-  TagsTextField,
-  TagsAutocompleteContainer,
-  TagChipStyled,
-  CloseIconStyled,
-  ExtraTagChip,
   FormControlStyled,
   ArrowDropDownIconStyled
 } from '@/components/styles/courses/courses.styles';
+import TagsFilter from './tags-filter';
 
 interface FilterProps {
   formik: any;
   allCategories: string[];
-  allTags: string[];
   isMobile: boolean;
 }
 
-const Filter = ({ formik, allCategories, allTags }: FilterProps) => {
+const Filter = ({ formik, allCategories }: FilterProps) => {
   const theme = useTheme();
   
   return (
@@ -53,53 +47,11 @@ const Filter = ({ formik, allCategories, allTags }: FilterProps) => {
             ))}
           </CategorySelect>
         </FormControlStyled>
-        {/* Tags Autocomplete */}
-        <TagsAutocompleteContainer>
-          <Autocomplete
-            multiple
-            id="tags-autocomplete"
-            options={allTags}
-            value={formik.values.tags}
-            onChange={(_, value) => formik.setFieldValue('tags', value)}
-            filterSelectedOptions
-            disableCloseOnSelect
-            popupIcon={<ArrowDropDownIconStyled />}
-            renderInput={(params) => (
-              <TagsTextField
-                {...params}
-                variant="outlined"
-                label="Tags"
-              />
-            )}
-            slotProps={{
-              paper: {
-                sx: {
-                  background: theme.palette.custom.background.secondary, 
-                  color: theme.palette.custom.text.white
-                },
-              },
-            }}
-            renderTags={(value, getTagProps) => {
-              const visible = value.slice(0, 2);
-              const extra = value.length - 2;
-              return [
-                ...visible.map((option, index) => (
-                  <TagChipStyled
-                    label={option}
-                    {...getTagProps({ index })}
-                    deleteIcon={<CloseIconStyled />}
-                  />
-                )),
-                extra > 0 && (
-                  <ExtraTagChip
-                    key="extra-tags"
-                    label={`+${extra}`}
-                  />
-                ),
-              ].filter(Boolean);
-            }}
-          />
-        </TagsAutocompleteContainer>
+        {/* Tags Filter */}
+        <TagsFilter
+          value={formik.values.tags}
+          onChange={(tags) => formik.setFieldValue('tags', tags)}
+        />
       </FilterBar>
     </form>
   );

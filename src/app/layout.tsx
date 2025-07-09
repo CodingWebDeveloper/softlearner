@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from "../providers/theme-provider";
-import { SupabaseProvider } from "../contexts/SupabaseContext";
+import { SupabaseProvider } from "../contexts/supabase-context";
 import ClientOnly from "@/components/client-only";
 import Layout from "@/components/layout";
 import LoadingFallback from "../components/loading-fallback";
