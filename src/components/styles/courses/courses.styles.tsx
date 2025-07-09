@@ -218,7 +218,7 @@ export const TagChipStyled = styled(Chip)(({ theme }) => ({
 }));
 
 export const CloseIconStyled = styled(CloseRoundedIcon)(({ theme }) => ({
-  color: theme.palette.custom.accent.teal,
+  color: `${theme.palette.custom.accent.teal} !important`,
   fontSize: 18,
 }));
 
@@ -272,5 +272,5 @@ export const FormControlStyled = styled(FormControl)(({ theme }) => ({
 }));
 
 export const ArrowDropDownIconStyled = styled(ArrowDropDownIcon)(({ theme }) => ({
-  color: theme.palette.custom.accent.teal,
+  color: `${theme.palette.custom.accent.teal} !important`,
 }));

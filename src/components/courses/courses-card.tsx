@@ -1,4 +1,4 @@
-import React from 'react';
+
 import Typography from '@mui/material/Typography';
 import Rating from '@mui/material/Rating';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';

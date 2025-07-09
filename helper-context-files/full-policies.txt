@@ -1,0 +1,33 @@
+We should have the following policies:
+Categories:
+-only admin can add, update and delete records
+-all users can view them
+Tags:
+-only admin can add, update and delete records
+-all users can view them
+Courses
+-admin/creator can add, update and delete records
+-all users can view them
+Resources
+-admin/creator can add, update and delete records
+-all users can view them
+Bookmarks
+-all users can add or delete records
+-all users can view them
+Orders
+-all users can add records
+-only creators can view there own Orders
+Reviews
+-admin/users with purchased course can add,update and delete records
+-all users can view them
+Votes
+-user created vote can add, update and detete records
+-all users can view them
+Tests
+-admin/creator of course can add, update and delete records
+-only user/admin that have purchased the course can view them
+Questions is the same as Tests
+Answers
+-admin/user can add, update and delete records
+-only user that have purcahse the course can view them
+

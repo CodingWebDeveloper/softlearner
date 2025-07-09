@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import courseMaterialsReducer from './features/courseMaterialsSlice'
+import selectedTagsReducer from './features/selectedTagsSlice';
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       courseMaterials: courseMaterialsReducer,
+      selectedTags: selectedTagsReducer,
     }
   })
 }

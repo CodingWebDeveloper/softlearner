@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { PaginationContainer, StyledPagination } from '@/components/styles/courses/courses.styles';
 
 interface PaginationProps {

@@ -1,0 +1,11 @@
+We should have the following policies:
+Categories:
+-only admin can add, update and delete records
+-all users can view them
+Tags:
+-only admin can add, update and delete records
+-all users can view them
+Courses
+-admin/creator can add, update and delete records
+-all users can view them
+

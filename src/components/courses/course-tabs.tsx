@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Tabs, Tab, Typography, Box, List, ListItem, ListItemIcon, ListItemText, Divider, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { TabsContainer, CustomTab, SectionTitle, ListItemStyled, ListItemTextStyled, DurationText, QuestionsText, TabPanelContainer, ListItemIconStyled, ResourcesDivider } from '@/components/styles/courses/course-details.styles';

@@ -1,7 +1,7 @@
 // Course Details Page for [courseId]
 'use client';
 
-import React from 'react';
+
 import { useTheme } from '@mui/material/styles';
 
 import { CourseDetailsContainer } from '@/components/styles/courses/course-details.styles';

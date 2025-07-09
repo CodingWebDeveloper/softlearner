@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+
 import { Tabs, Typography, useTheme } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/store/index';

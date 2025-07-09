@@ -12,6 +12,23 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Function to insert into users table after new auth.users row
+CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id)
+  VALUES (NEW.id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to call function after insert on auth.users
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION public.handle_new_auth_user();
+
 -- Create Course table
 CREATE TABLE IF NOT EXISTS courses (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -274,3 +291,31 @@ CREATE TRIGGER update_sections_updated_at BEFORE UPDATE ON sections
 DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================
+-- RLS POLICIES (Categories, Tags, Courses)
+-- =====================
+
+-- Categories Policies
+-- Allow all users to view categories
+CREATE POLICY "Allow all users to view categories" ON categories
+FOR SELECT USING (true);
+-- Allow only admin to add, update, delete categories
+CREATE POLICY "Allow only admin to modify categories" ON categories
+FOR ALL USING (auth.role() = 'admin') WITH CHECK (auth.role() = 'admin');
+
+-- Tags Policies
+-- Allow all users to view tags
+CREATE POLICY "Allow all users to view tags" ON tags
+FOR SELECT USING (true);
+-- Allow only admin to add, update, delete tags
+CREATE POLICY "Allow only admin to modify tags" ON tags
+FOR ALL USING (auth.role() = 'admin') WITH CHECK (auth.role() = 'admin');
+
+-- Courses Policies
+-- Allow all users to view courses
+CREATE POLICY "Allow all users to view courses" ON courses
+FOR SELECT USING (true);
+-- Allow only admin or creator to add, update, delete courses
+CREATE POLICY "Allow admin or creator to modify courses" ON courses
+FOR ALL USING (auth.role() = 'admin' OR auth.uid() = creator_id) WITH CHECK (auth.role() = 'admin' OR auth.uid() = creator_id);
