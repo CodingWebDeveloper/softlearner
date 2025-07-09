@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Typography, InputAdornment, Divider, Skeleton, Grid } from '@mui/material';
 import { StarIconStyled, ReviewStarsContainer, ReviewStarsWrapper, ReviewSkeleton } from '@/components/styles/courses/course-reviews.styles';
 import SearchIcon from '@mui/icons-material/Search';

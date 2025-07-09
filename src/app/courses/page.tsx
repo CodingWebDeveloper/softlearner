@@ -18,7 +18,6 @@ const MAX_ENROLLED_DISPLAY = 999;
 const COURSES_PER_PAGE = 15;
 
 const allCategories = ['Design', 'Marketing', 'Development'];
-const allTags = ['UX Design', 'UI Design', 'Web Design'];
 const priceRange = [0, 100];
 
 const CoursesPage = () => {
@@ -41,7 +40,7 @@ const CoursesPage = () => {
   });
 
   // tRPC Query for courses
-  const { data: coursesData, isLoading, error } = trpc.course.getCourses.useQuery({
+  const { data: coursesData, isLoading, error } = trpc.courses.getCourses.useQuery({
     page: currentPage,
     pageSize: COURSES_PER_PAGE,
     search: search || undefined,
@@ -117,7 +116,7 @@ const CoursesPage = () => {
         aria-label="Search courses"
       />
       {/* Filters */}
-      <Filter formik={formik} allCategories={allCategories} allTags={allTags} isMobile={isMobile} />
+      <Filter formik={formik} allCategories={allCategories} isMobile={isMobile} />
       {/* Courses List */}
       {courses.length === 0 ? (
         <Box

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ListItemAvatar, Avatar } from '@mui/material';
 import { StyledVideoListItem, StyledListItemText, StyledVideoNumber, VideoListContainer } from '@/components/styles/courses/materials.styles';
 

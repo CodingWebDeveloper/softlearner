@@ -6,7 +6,7 @@ import * as Yup from "yup";
 import { TextField } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { HashLoader } from "react-spinners";
-import { useSupabase } from "@/contexts/SupabaseContext";
+import { useSupabase } from "@/contexts/supabase-context";
 import {
   AuthFormPaper,
   AuthFormTitle,

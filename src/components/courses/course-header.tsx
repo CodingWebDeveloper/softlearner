@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Typography, Avatar, Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/navigation';

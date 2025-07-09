@@ -1,4 +1,4 @@
-import React from 'react';
+
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import {
   ResourcesListContainer,

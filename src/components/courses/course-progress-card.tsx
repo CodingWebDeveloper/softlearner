@@ -1,6 +1,6 @@
 import { CourseCard, CourseCardContent, CourseHeader, CourseTitle, CourseInstructor, StatusChip, CourseDescription, ProgressSection, ProgressHeader, ProgressText, ProgressPercentage, StyledProgressBar, CourseFooter, LastAccessed, ContinueButton } from '@/components/styles/home-page/home-page.styles'
 import { formatDate } from "@/utils/dateUtils";
-import React from 'react';
+
 import { useRouter } from 'next/navigation';
 import type { CustomCourseProgress } from '../page';
 
