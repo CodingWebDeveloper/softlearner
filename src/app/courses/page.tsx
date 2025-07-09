@@ -1,78 +1,36 @@
 'use client';
-import React, { useState, useMemo } from 'react';
+import { useState, ChangeEvent, KeyboardEvent } from 'react';
+import { useFormik } from 'formik';
 import {
   useMediaQuery,
   useTheme,
+  CircularProgress,
+  Box,
+  Typography,
 } from '@mui/material';
-import { useFormik } from 'formik';
-import {
-  CoursesPageContainer,
-  SearchTextField,
-} from './courses.styled';
-import Filter from './Filter';
-import CoursesList from './CoursesList';
-import Pagination from './Pagination';
+import Filter from '@/components/courses/filter';
+import CoursesList from '@/components/courses/courses-list';
+import Pagination from '@/components/courses/pagination';
+import { trpc } from '@/lib/trpc/trpc';
+import { AlertStyled, CoursesPageContainer, SearchTextField, TextLightText } from '@/components/styles/courses/courses.styles';
 
 const MAX_ENROLLED_DISPLAY = 999;
 const COURSES_PER_PAGE = 15;
-
-// Mock data
-const mockCourses = [
-  {
-    id: 1,
-    image: '/globe.svg',
-    title: 'Strategy, Design, Development',
-    description: 'Learn how to apply User Experience (UX) principles to your website designs...',
-    creator: 'Lina Blacksmith',
-    tags: ['UX Design', 'UI Design', 'Web Design'],
-    category: 'Design',
-    price: 49,
-    rating: 4.0,
-    ratingsCount: 3500,
-    isBookmarked: false,
-    enrolled: 1200,
-  },
-  {
-    id: 2,
-    image: '/next.svg',
-    title: 'Web Design: from Figma to Webflow',
-    description: 'Learn to design websites with Figma, build with webflow and make a living freelancing.',
-    creator: 'Lina Blacksmith',
-    tags: ['UX Design', 'UI Design'],
-    category: 'Design',
-    price: 59,
-    rating: 4.0,
-    ratingsCount: 3500,
-    isBookmarked: false,
-    enrolled: 850,
-  },
-  {
-    id: 3,
-    image: '/window.svg',
-    title: 'Landing Page Design & conversion Rate',
-    description: 'Triple your conversion rate with these laning page design prinsiples and build a landing page',
-    creator: 'Lina Blacksmith',
-    tags: ['UX Design', 'UI Design', 'Web Design'],
-    category: 'Marketing',
-    price: 39,
-    rating: 4.0,
-    ratingsCount: 3500,
-    isBookmarked: false,
-    enrolled: 2100,
-  },
-];
 
 const allCategories = ['Design', 'Marketing', 'Development'];
 const allTags = ['UX Design', 'UI Design', 'Web Design'];
 const priceRange = [0, 100];
 
 const CoursesPage = () => {
-  const [courses, setCourses] = useState(mockCourses);
-  const [search, setSearch] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  // General Hooks
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // States
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Formik
   const formik = useFormik({
     initialValues: {
       category: '',
@@ -82,66 +40,66 @@ const CoursesPage = () => {
     onSubmit: () => {},
   });
 
-  // Filtering logic
-  const filteredCourses = useMemo(() => {
-    return courses.filter((course) => {
-      // Search
-      if (
-        search &&
-        !course.title.toLowerCase().includes(search.toLowerCase()) &&
-        !course.description.toLowerCase().includes(search.toLowerCase())
-      ) {
-        return false;
-      }
-      // Category
-      if (formik.values.category && course.category !== formik.values.category) {
-        return false;
-      }
-      // Tags
-      if (
-        formik.values.tags.length > 0 &&
-        !formik.values.tags.every((tag) => course.tags.includes(tag))
-      ) {
-        return false;
-      }
-      // Price
-      if (
-        course.price < formik.values.price[0] ||
-        course.price > formik.values.price[1]
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [courses, search, formik.values]);
+  // tRPC Query for courses
+  const { data: coursesData, isLoading, error } = trpc.course.getCourses.useQuery({
+    page: currentPage,
+    pageSize: COURSES_PER_PAGE,
+    search: search || undefined,
+    category: formik.values.category || undefined,
+    tags: formik.values.tags.length > 0 ? formik.values.tags : undefined,
+  });
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredCourses.length / COURSES_PER_PAGE);
-  const paginatedCourses = filteredCourses.slice(
-    (currentPage - 1) * COURSES_PER_PAGE,
-    currentPage * COURSES_PER_PAGE
-  );
+  // Data
+  const courses = coursesData?.courses || [];
+  const totalRecord = coursesData?.totalRecord || 0;
 
-  // Reset to page 1 on filter/search change
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [search, formik.values.category, formik.values.tags]);
+  // Pagination
+  const totalPages = Math.ceil(totalRecord / COURSES_PER_PAGE);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <CoursesPageContainer>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="400px"
+        >
+          <CircularProgress color="primary" />
+        </Box>
+      </CoursesPageContainer>
+    );
+  }
+
+  // Error state
+  if (error) {  
+    return (
+      <CoursesPageContainer>
+        <AlertStyled severity="error" >
+          <Typography variant="body1">
+            Failed to load courses. Please try again later.
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {error.message}
+          </Typography>
+        </AlertStyled>
+      </CoursesPageContainer>
+    );
+  }
 
   // Handlers
   const handleBookmark = (id: number) => {
-    setCourses((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, isBookmarked: !c.isBookmarked } : c
-      )
-    );
+    // TODO: Implement bookmark functionality with tRPC mutation
+    console.log('Bookmark course:', id);
   };
 
-  const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
   };
 
   // Accessibility: handle Enter/Space for bookmark
-  const handleBookmarkKeyDown = (e: React.KeyboardEvent, id: number) => {
+  const handleBookmarkKeyDown = (e: KeyboardEvent, id: number) => {
     if (e.key === 'Enter' || e.key === ' ') {
       handleBookmark(id);
     }
@@ -161,18 +119,33 @@ const CoursesPage = () => {
       {/* Filters */}
       <Filter formik={formik} allCategories={allCategories} allTags={allTags} isMobile={isMobile} />
       {/* Courses List */}
-      <CoursesList
-        filteredCourses={paginatedCourses}
-        isMobile={isMobile}
-        handleBookmark={handleBookmark}
-        handleBookmarkKeyDown={handleBookmarkKeyDown}
-        MAX_ENROLLED_DISPLAY={MAX_ENROLLED_DISPLAY}
-      />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onChange={handlePageChange}
-      />
+      {courses.length === 0 ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="200px"
+        >
+          <TextLightText variant="h6">
+            No courses found. Try adjusting your search or filters.
+          </TextLightText>
+        </Box>
+      ) : (
+        <>
+          <CoursesList
+            filteredCourses={courses}
+            isMobile={isMobile}
+            handleBookmark={handleBookmark}
+            handleBookmarkKeyDown={handleBookmarkKeyDown}
+            MAX_ENROLLED_DISPLAY={MAX_ENROLLED_DISPLAY}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onChange={handlePageChange}
+          />
+        </>
+      )}
     </CoursesPageContainer>
   );
 };

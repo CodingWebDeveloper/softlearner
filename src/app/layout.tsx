@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ThemeRegistry from "../components/ThemeRegistry";
+import ThemeRegistry from "../providers/theme-provider";
 import { SupabaseProvider } from "../contexts/SupabaseContext";
-import ClientOnly from "../components/ClientOnly";
-import Layout from "../components/Layout";
-import LoadingFallback from "../components/LoadingFallback";
-import StoreProvider from "./StoreProvider";
+import ClientOnly from "@/components/client-only";
+import Layout from "@/components/layout";
+import LoadingFallback from "../components/loading-fallback";
+import StoreProvider from "../providers/store-provider";
+import TrpcProvider from "../providers/trpc-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,11 +45,13 @@ export default function RootLayout({
         >
           <StoreProvider>
             <SupabaseProvider>
-              <ThemeRegistry>
-                <Layout>
-                  {children}
-                </Layout>
-              </ThemeRegistry>
+              <TrpcProvider>
+                <ThemeRegistry>
+                  <Layout>
+                    {children}
+                  </Layout>
+                </ThemeRegistry>
+              </TrpcProvider>
             </SupabaseProvider>
           </StoreProvider>
         </ClientOnly>

@@ -6,7 +6,7 @@ import { Typography, Link, Breadcrumbs, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { HashLoader } from "react-spinners";
 import { useSupabase } from "@/contexts/SupabaseContext";
-import AuthForm from "@/components/AuthForm";
+import AuthForm from "@/components/auth-form";
 import {
   AuthContainer,
   BreadcrumbsContainer,
@@ -18,7 +18,7 @@ import {
   LoadingContainer,
   BreadcrumbsStyled,
   FooterText,
-} from "@/components/styled/AuthPages.styled";
+} from "@/components/styles/auth/auth-pages.styles";
 
 const SignInPage = () => {
   const { user, loading } = useSupabase();

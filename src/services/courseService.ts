@@ -1,5 +1,5 @@
-import { getUserPurchasedCourses, getCourseResources } from '../lib/database'
-import type { CourseProgress, Course, Resource } from '../lib/database'
+import { getUserPurchasedCourses, getCourseResources } from '../lib/database/database'
+import type { CourseProgress, Course, Resource } from '../lib/database/database'
 
 export const getUserCoursesWithProgress = async (userId: string): Promise<CourseProgress[]> => {
   // Get user's purchased courses (raw order data)

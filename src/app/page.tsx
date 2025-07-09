@@ -17,12 +17,12 @@ import {
   EmptyState,
   EmptyStateTitle,
   EmptyStateText,
-} from "@/components/styled/HomePage.styled";
+} from "@/components/styles/home-page/home-page.styles";
 import {
   getUserCoursesWithProgress,
 } from "@/services/courseService";
-import type { Course, Resource } from "@/lib/database";
-import CourseProgressCard from "./courses/CourseProgressCard";
+import type { Course, Resource } from "@/lib/database/database";
+import CourseProgressCard from "@/components/courses/course-progress-card";
 
 
 // Extended course interface for the transformed data

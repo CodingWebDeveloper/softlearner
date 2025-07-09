@@ -1,6 +1,6 @@
 'use client'
-import CourseVideoSection from './CourseVideoSection';
-import CourseMaterialsTabs from './CourseMaterialsTabs';
+import CourseVideoSection from '@/components/courses/materials/course-video-section';
+import CourseMaterialsTabs from '@/components/courses/materials/course-materials-tabs';
 
 // --- Constants ---
 const COURSE_TITLE = 'The Ultimate Guide to Usability Testing and UX Law';
@@ -27,7 +27,7 @@ const VIDEO_LIST = [
   { id: 12, title: 'Creating a UX Law Compliance Plan', duration: '1:23', youtubeId: '60ItHLz5WEA' },
 ];
 
-import { CourseMaterialsContainer } from './styles/materials.styled';
+import { CourseMaterialsContainer } from '../../../../components/styles/courses/materials.styles';
 
 const CourseMaterialsPage = () => {
   return (

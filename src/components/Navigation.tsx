@@ -14,7 +14,7 @@ import {
 } from "@mui/icons-material";
 import { useRouter, usePathname } from "next/navigation";
 import { useSupabase } from "@/contexts/SupabaseContext";
-import ClientOnly from "./ClientOnly";
+import ClientOnly from "./client-only";
 import {
   SidebarContainer,
   SidebarHeader,
@@ -41,7 +41,7 @@ import {
   StyledBottomNavigation,
   MobileMenuButton,
   DesktopDrawer,
-} from "@/components/styled/Navigation.styled";
+} from "@/components/styles/infrastructure/navigation.styles";
 
 const Navigation = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

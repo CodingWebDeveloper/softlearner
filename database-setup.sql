@@ -127,6 +127,50 @@ CREATE TABLE IF NOT EXISTS user_answers (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add Tag table
+CREATE TABLE IF NOT EXISTS tags (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
+
+-- Add CourseTags join table
+CREATE TABLE IF NOT EXISTS course_tags (
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (course_id, tag_id)
+);
+
+-- Add Section table
+CREATE TABLE IF NOT EXISTS sections (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  order_index INTEGER,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Add UserResource table
+CREATE TABLE IF NOT EXISTS user_resources (
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  resource_id UUID REFERENCES resources(id) ON DELETE CASCADE,
+  completed BOOLEAN DEFAULT FALSE,
+  PRIMARY KEY (user_id, resource_id)
+);
+
+-- Alter users table: add description
+ALTER TABLE users ADD COLUMN IF NOT EXISTS description TEXT;
+
+-- Alter courses table: add category
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS category TEXT;
+
+-- Alter resources table: add new fields
+ALTER TABLE resources ADD COLUMN IF NOT EXISTS short_summary TEXT;
+ALTER TABLE resources ADD COLUMN IF NOT EXISTS predefined TEXT CHECK (predefined IN ('video', 'downloadable file'));
+ALTER TABLE resources ADD COLUMN IF NOT EXISTS section_id UUID REFERENCES sections(id) ON DELETE SET NULL;
+ALTER TABLE resources ADD COLUMN IF NOT EXISTS order_index INTEGER;
+ALTER TABLE resources ADD COLUMN IF NOT EXISTS duration INTERVAL;
+
 -- Enable Row Level Security on all custom tables (NOT auth.users)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE courses ENABLE ROW LEVEL SECURITY;

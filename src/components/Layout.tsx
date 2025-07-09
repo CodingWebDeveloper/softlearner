@@ -1,11 +1,10 @@
 "use client";
 
 import { Box, useTheme, useMediaQuery } from "@mui/material";
-import Navigation from "./Navigation";
 import { useSupabase } from "@/contexts/SupabaseContext";
-import ClientOnly from "./ClientOnly";
-import { LayoutContainer, MainContent, FallbackContainer, FallbackMain } from "./styled/Layout.styled";
-
+import ClientOnly from "./client-only";
+import { LayoutContainer, MainContent, FallbackContainer, FallbackMain } from "@/components/styles/infrastructure/layout.styles";
+import Navigation from "@/components/navigation";
 interface LayoutProps {
   children: React.ReactNode;
 }

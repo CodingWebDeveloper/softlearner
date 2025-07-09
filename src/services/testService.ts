@@ -1,5 +1,5 @@
-import { getUserTestAnswers } from '../lib/database'
-import type { UserAnswer } from '../lib/database'
+import { getUserTestAnswers } from '../lib/database/database'
+import type { UserAnswer } from '../lib/database/database'
 
 interface UserAnswerWithDetails extends UserAnswer {
   answer_options?: { is_correct: boolean }
