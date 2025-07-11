@@ -1,12 +1,7 @@
-
+import { KeyboardEvent } from 'react';
 import Typography from '@mui/material/Typography';
-import Rating from '@mui/material/Rating';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import PersonIcon from '@mui/icons-material/Person';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@mui/material/styles';
-import { Box } from '@mui/material';
 import {
   CourseCard as StyledCourseCard,
   CardImage,
@@ -29,7 +24,7 @@ interface CourseCardProps {
   course: any;
   isMobile: boolean;
   handleBookmark: (id: number) => void;
-  handleBookmarkKeyDown: (e: React.KeyboardEvent, id: number) => void;
+  handleBookmarkKeyDown: (e: KeyboardEvent, id: number) => void;
   MAX_ENROLLED_DISPLAY: number;
 }
 
@@ -41,7 +36,7 @@ const CourseCard = ({ course, isMobile, handleBookmark, handleBookmarkKeyDown, M
     router.push(`/courses/${course.id}`);
   };
 
-  const handleCardKeyDown = (e: React.KeyboardEvent) => {
+  const handleCardKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       handleNavigate();

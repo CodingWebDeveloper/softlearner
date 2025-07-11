@@ -1,7 +1,7 @@
 // Course Details Page for [courseId]
 'use client';
 
-
+import { FC } from 'react';
 import { useTheme } from '@mui/material/styles';
 
 import { CourseDetailsContainer } from '@/components/styles/courses/course-details.styles';
@@ -33,7 +33,7 @@ const mockCourse = {
   },
 };
 
-const CourseDetailsPage: React.FC = () => {
+const CourseDetailsPage: FC = () => {
   // General hooks
   const theme = useTheme();
   const mobileMatches = useMediaQuery(theme.breakpoints.down('md'));

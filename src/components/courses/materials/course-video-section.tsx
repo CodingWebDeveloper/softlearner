@@ -1,5 +1,6 @@
 'use client';
 
+import { FC } from 'react';
 import { Box, Typography, Avatar, useTheme } from '@mui/material';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
@@ -29,7 +30,7 @@ interface CourseVideoSectionProps {
   videoList: Video[];
 }
 
-const CourseVideoSection: React.FC<CourseVideoSectionProps> = ({
+const CourseVideoSection: FC<CourseVideoSectionProps> = ({
   courseTitle,
   courseDescription,
   instructor,

@@ -1,10 +1,9 @@
-
-import { Typography, InputAdornment, Divider, Skeleton, Grid } from '@mui/material';
-import { StarIconStyled, ReviewStarsContainer, ReviewStarsWrapper, ReviewSkeleton } from '@/components/styles/courses/course-reviews.styles';
+import { Fragment, useEffect, useState, useMemo, ChangeEvent } from 'react';
+import { Typography, InputAdornment, Divider, Grid, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
-import { RatingValue, RatingCount, RatingBar, RatingRow, ReviewsList, ReviewItem, ReviewAvatar, ReviewContent, ReviewHeader, ReviewName, ReviewDate, ReviewText, HelpfulActions, SearchBarContainer, NoReviewsBox, SearchInput, HelpfulText, HelpfulButton, ShowMoreButton, ShowMoreContainer } from '@/components/styles/courses/course-reviews.styles';
+import { RatingValue, RatingCount, RatingBar, RatingRow, ReviewsList, ReviewItem, ReviewAvatar, ReviewContent, ReviewHeader, ReviewName, ReviewDate, ReviewText, HelpfulActions, SearchBarContainer, NoReviewsBox, SearchInput, HelpfulText, HelpfulButton, ShowMoreButton, ShowMoreContainer, ReviewStarsContainer, StarIconStyled, ReviewStarsWrapper } from '@/components/styles/courses/course-reviews.styles';
 
 // Review type
 type Review = {
@@ -39,24 +38,23 @@ const ratingSummary = {
 
 const REVIEWS_PER_PAGE = 15;
 
-const CourseReviews: React.FC = () => {
-  const [search, setSearch] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
-  const [page, setPage] = React.useState(1);
-
+const CourseReviews = () => {
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
   // Simulate loading
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(true);
     const timer = setTimeout(() => setLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
 
-  const filteredReviews = React.useMemo(() => {
+  const filteredReviews = useMemo(() => {
     if (!search) return reviewsMock;
     return reviewsMock.filter(r =>
       r.text.toLowerCase().includes(search.toLowerCase()) ||
@@ -64,7 +62,7 @@ const CourseReviews: React.FC = () => {
     );
   }, [search]);
 
-  const paginatedReviews = React.useMemo(() => {
+  const paginatedReviews = useMemo(() => {
     return filteredReviews.slice(0, page * REVIEWS_PER_PAGE);
   }, [filteredReviews, page]);
 
@@ -125,7 +123,7 @@ const CourseReviews: React.FC = () => {
         {loading ? (
           <>
             {[1, 2].map(i => (
-              <ReviewSkeleton key={i} variant="rectangular" height={80} />
+              <Skeleton key={i} variant="rectangular" height={80} />
             ))}
           </>
         ) : filteredReviews.length === 0 ? (
@@ -134,7 +132,7 @@ const CourseReviews: React.FC = () => {
           <>
             <ReviewsList>
               {paginatedReviews.map(review => (
-                <React.Fragment key={review.id}>
+                <Fragment key={review.id}>
                   <ReviewItem tabIndex={0} aria-label={`Review by ${review.name}`} alignItems="flex-start" disableGutters>
                     <ReviewAvatar>{review.initials}</ReviewAvatar>
                     <ReviewContent>
@@ -164,7 +162,7 @@ const CourseReviews: React.FC = () => {
                     </ReviewContent>
                   </ReviewItem>
                   <Divider component="li" />
-                </React.Fragment>
+                </Fragment>
               ))}
             </ReviewsList>
             {hasMore && (

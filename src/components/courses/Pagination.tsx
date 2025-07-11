@@ -1,10 +1,10 @@
-
+import { ChangeEvent } from 'react';
 import { PaginationContainer, StyledPagination } from '@/components/styles/courses/courses.styles';
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onChange: (event: React.ChangeEvent<unknown>, value: number) => void;
+  onChange: (event: ChangeEvent<unknown>, value: number) => void;
 }
 
 const Pagination = ({ currentPage, totalPages, onChange }: PaginationProps) => {

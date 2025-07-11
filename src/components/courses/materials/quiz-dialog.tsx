@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { FC, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import Typography from '@mui/material/Typography';
@@ -22,7 +22,7 @@ interface QuizDialogProps {
   quiz: Quiz;
 }
 
-const QuizDialog: React.FC<QuizDialogProps & { maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' }> = ({ open, onClose, quiz, maxWidth = 'md' }) => {
+const QuizDialog: FC<QuizDialogProps & { maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' }> = ({ open, onClose, quiz, maxWidth = 'md' }) => {
   const theme = useTheme();
   const questions = quiz.questions || [];
   const [started, setStarted] = useState(false);

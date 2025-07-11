@@ -1,4 +1,4 @@
-
+import { FC } from 'react';
 import { ListItemAvatar, Avatar } from '@mui/material';
 import { StyledVideoListItem, StyledListItemText, StyledVideoNumber, VideoListContainer } from '@/components/styles/courses/materials.styles';
 
@@ -15,7 +15,7 @@ interface VideosListProps {
   handleVideoSelect: (videoId: number) => void;
 }
 
-const VideosList: React.FC<VideosListProps> = ({ videoList, currentVideoId, handleVideoSelect }) => (
+const VideosList: FC<VideosListProps> = ({ videoList, currentVideoId, handleVideoSelect }) => (
   <VideoListContainer>
     {videoList.map((video) => (
       <StyledVideoListItem

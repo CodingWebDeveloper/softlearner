@@ -1,15 +1,13 @@
-
+import { FC } from 'react';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import {
-  ConfirmDialog,
   TopLevelDialog,
   StyledDialogText,
   ConfirmDialogButton,
-  CloseDialogButton,
   StyledDivider,
   MaxContentButton,
   StyledDialog,
@@ -32,7 +30,7 @@ interface ConfirmAlertProps {
   label?: string;
 }
 
-const ConfirmAlert: React.FC<ConfirmAlertProps> = ({
+const ConfirmAlert: FC<ConfirmAlertProps> = ({
   open,
   onClose,
   onConfirm,

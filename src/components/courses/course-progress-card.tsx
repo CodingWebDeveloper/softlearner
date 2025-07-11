@@ -1,3 +1,4 @@
+import { KeyboardEvent } from 'react';
 import { CourseCard, CourseCardContent, CourseHeader, CourseTitle, CourseInstructor, StatusChip, CourseDescription, ProgressSection, ProgressHeader, ProgressText, ProgressPercentage, StyledProgressBar, CourseFooter, LastAccessed, ContinueButton } from '@/components/styles/home-page/home-page.styles'
 import { formatDate } from "@/utils/dateUtils";
 
@@ -13,7 +14,7 @@ const CourseProgressCard = ({ course }: { course: CustomCourseProgress }) => {
     router.push(`/courses/${courseId}/materials`);
   };
 
-  const handleCourseCardKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, courseId: string) => {
+  const handleCourseCardKeyDown = (e: KeyboardEvent<HTMLDivElement>, courseId: string) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleCourseCardClick(courseId);
