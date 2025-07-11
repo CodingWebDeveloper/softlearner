@@ -1,4 +1,4 @@
-
+import { FC } from 'react';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import {
   ResourcesListContainer,
@@ -17,7 +17,7 @@ interface ResourceListProps {
   resources: Resource[];
 }
 
-const ResourceList: React.FC<ResourceListProps> = ({ resources }) => (
+const ResourceList: FC<ResourceListProps> = ({ resources }) => (
   <ResourcesListContainer>
     {resources.map((resource) => (
       <a key={resource.id} href={resource.url} download style={{ textDecoration: 'none' }}>

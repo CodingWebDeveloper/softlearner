@@ -1,5 +1,5 @@
-
-import { Tabs, Tab, Typography, Box, List, ListItem, ListItemIcon, ListItemText, Divider, useMediaQuery } from '@mui/material';
+import { FC, ReactNode, SyntheticEvent, useState } from 'react';
+import { Tabs, Typography, Box, List, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { TabsContainer, CustomTab, SectionTitle, ListItemStyled, ListItemTextStyled, DurationText, QuestionsText, TabPanelContainer, ListItemIconStyled, ResourcesDivider } from '@/components/styles/courses/course-details.styles';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
@@ -10,12 +10,12 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   value: number;
   index: number;
 }
 
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other }) => (
+const TabPanel: FC<TabPanelProps> = ({ children, value, index, ...other }) => (
   <div
     role="tabpanel"
     hidden={value !== index}
@@ -54,8 +54,8 @@ You will learn how to:
 > _Master your analytics and boost your results!_
 `;
 
-const CourseTabs: React.FC = () => {
-  const [tab, setTab] = React.useState(0);
+const CourseTabs: FC = () => {
+  const [tab, setTab] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
@@ -63,7 +63,7 @@ const CourseTabs: React.FC = () => {
   const RESOURCES_LABEL = isMobile ? 'Resources' : 'Course Content';
   const REVIEWS_LABEL = 'Reviews';
   
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = (_: SyntheticEvent, newValue: number) => {
     setTab(newValue);
   };
   

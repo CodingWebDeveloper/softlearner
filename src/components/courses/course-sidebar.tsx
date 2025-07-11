@@ -1,5 +1,5 @@
-import React, { useState, KeyboardEvent } from 'react';
-import { Button, Divider, Stack, Typography, Box } from '@mui/material';
+import { FC, useState, KeyboardEvent } from 'react';
+import { Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
@@ -49,7 +49,7 @@ interface CourseSidebarProps {
 
 const YOUTUBE_VIDEO_ID = 'dQw4w9WgXcQ'; // Replace with actual video id or pass as prop if needed
 
-const CourseSidebar: React.FC<CourseSidebarProps> = ({ price, discount, meta, image }) => {
+const CourseSidebar: FC<CourseSidebarProps> = ({ price, discount, meta, image }) => {
   // Hooks
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -150,7 +150,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({ price, discount, meta, im
         aria-label="Add to Cart"
         tabIndex={0}
         onClick={() => {}}
-        onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter') {/* handle add to cart */} }}
+        onKeyDown={(e: KeyboardEvent) => { if (e.key === 'Enter') {/* handle add to cart */} }}
       >
         ADD TO CART
       </AddToCartButton>

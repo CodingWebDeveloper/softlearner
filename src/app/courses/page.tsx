@@ -8,11 +8,11 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import Filter from '@/components/courses/filter';
 import CoursesList from '@/components/courses/courses-list';
 import Pagination from '@/components/courses/pagination';
 import { trpc } from '@/lib/trpc/trpc';
 import { AlertStyled, CoursesPageContainer, SearchTextField, TextLightText } from '@/components/styles/courses/courses.styles';
+import Filter from '@/components/courses/filter';
 
 const MAX_ENROLLED_DISPLAY = 999;
 const COURSES_PER_PAGE = 15;

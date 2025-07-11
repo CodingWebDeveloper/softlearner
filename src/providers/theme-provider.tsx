@@ -1,5 +1,6 @@
 "use client";
 
+import { ReactNode } from "react";
 import { ThemeProvider as MuiThemeProvider, CssBaseline, GlobalStyles } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { CacheProvider } from "@emotion/react";
@@ -145,7 +146,7 @@ export const ThemeGlobalStyles = (
 export default function ThemeProvider({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <CacheProvider value={cache}>

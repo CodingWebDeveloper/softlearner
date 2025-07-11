@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import { Stack, Typography } from '@mui/material';
+import { KeyboardEvent } from 'react';
+import { Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import CourseCard from './courses-card';
 import { CoursesListContainer, CourseListItemBox, NoCoursesMessage } from '@/components/styles/courses/courses.styles';
@@ -8,7 +8,7 @@ interface CoursesListProps {
   filteredCourses: any[];
   isMobile: boolean;
   handleBookmark: (id: number) => void;
-  handleBookmarkKeyDown: (e: React.KeyboardEvent, id: number) => void;
+  handleBookmarkKeyDown: (e: KeyboardEvent, id: number) => void;
   MAX_ENROLLED_DISPLAY: number;
 }
 

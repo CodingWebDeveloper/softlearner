@@ -1,6 +1,5 @@
-
-import React, { useEffect, useState, useMemo } from 'react';
-import { Autocomplete, CircularProgress, MenuItem, Typography } from '@mui/material';
+import { useEffect, useState, useMemo } from 'react';
+import { Autocomplete, CircularProgress } from '@mui/material';
 import { 
   ArrowDropDownIconStyled,
   TagsAutocompleteContainer,

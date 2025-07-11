@@ -1,6 +1,7 @@
 'use client';
 
-import { Tabs, Typography, useTheme } from '@mui/material';
+import { FC, SyntheticEvent } from 'react';
+import { Tabs, useTheme } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/store/index';
 import { setTab, setCurrentVideo, selectCurrentVideoId } from '@/lib/store/features/courseMaterialsSlice';
@@ -55,13 +56,13 @@ const MOCK_QUIZZES: Quiz[] = [
   { id: 3, title: 'Quiz 3: JavaScript Variables', progress: 0 },
 ];
 
-const CourseMaterialsTabs: React.FC<CourseMaterialsTabsProps> = ({ videoList }) => {
+const CourseMaterialsTabs: FC<CourseMaterialsTabsProps> = ({ videoList }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const tab = useSelector((state: RootState) => state.courseMaterials.tab);
   const currentVideoId = useSelector(selectCurrentVideoId);
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: SyntheticEvent, newValue: number) => {
     dispatch(setTab(newValue));
   };
 

@@ -1,8 +1,7 @@
-
-import { Typography, Avatar, Box } from '@mui/material';
+import { useCallback, FC, KeyboardEvent } from 'react';
+import { Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/navigation';
-import { useTheme } from '@mui/material/styles';
 import { InstructorBox, HeaderContainer, CourseTitle, InstructorName, InstructorRole, BackIconButton, InstructorAvatar } from '@/components/styles/courses/course-details.styles';
 
 interface Instructor {
@@ -16,15 +15,14 @@ interface CourseHeaderProps {
   instructor: Instructor;
 }
 
-const CourseHeader: React.FC<CourseHeaderProps> = ({ title, instructor }) => {
-  const theme = useTheme();
+const CourseHeader: FC<CourseHeaderProps> = ({ title, instructor }) => {
   const router = useRouter();
 
-  const handleBack = React.useCallback(() => {
+  const handleBack = useCallback(() => {
     router.push('/courses');
   }, [router]);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       handleBack();

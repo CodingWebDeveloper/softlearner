@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, KeyboardEvent } from 'react';
 import { Select, TextField, CircularProgress, MenuItem, Box, Chip, Autocomplete } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { trpc } from '@/lib/trpc/trpc';
 import { 
   TagsTextField,
   TagsAutocompleteContainer,
-  TagChipStyled,
-  CloseIconStyled,
   ArrowDropDownIconStyled
 } from '@/components/styles/courses/courses.styles';
 import { useDispatch, useSelector } from 'react-redux';
@@ -98,7 +96,7 @@ const TagsFilter = ({ value, onChange }: TagsFilterProps) => {
   };
 
   // Handle key press for custom tag creation
-  const handleKeyPress = (event: React.KeyboardEvent) => {
+  const handleKeyPress = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleCustomTag();

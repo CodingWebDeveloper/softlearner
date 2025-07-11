@@ -1,5 +1,5 @@
 'use client';
-import { Box, Typography } from '@mui/material';
+import { FC, useState } from 'react';
 import {
   QuizzesListContainer,
   QuizListItem,
@@ -9,7 +9,6 @@ import {
   QuizProgressText,
 } from '@/components/styles/courses/materials.styles';
 import QuizDialog from './quiz-dialog';
-import { useState } from 'react';
 
 interface Quiz {
   id: number;
@@ -49,7 +48,7 @@ const mockQuestions = [
   // Add more mock questions as needed
 ];
 
-const QuizList: React.FC<QuizListProps> = ({ quizzes }) => {
+const QuizList: FC<QuizListProps> = ({ quizzes }) => {
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
