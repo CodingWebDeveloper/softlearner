@@ -5,10 +5,10 @@ import "./globals.css";
 import ThemeRegistry from "../providers/theme-provider";
 import { SupabaseProvider } from "../contexts/supabase-context";
 import ClientOnly from "@/components/client-only";
-import Layout from "@/components/layout";
 import LoadingFallback from "../components/loading-fallback";
 import StoreProvider from "../providers/store-provider";
 import TrpcProvider from "../providers/trpc-provider";
+import LayoutWrapper from "@/components/layout-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,9 +48,9 @@ export default function RootLayout({
             <SupabaseProvider>
               <TrpcProvider>
                 <ThemeRegistry>
-                  <Layout>
+                  <LayoutWrapper>
                     {children}
-                  </Layout>
+                  </LayoutWrapper>
                 </ThemeRegistry>
               </TrpcProvider>
             </SupabaseProvider>

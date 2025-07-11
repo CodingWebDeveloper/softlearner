@@ -11,7 +11,7 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+const LayoutWrapper = ({ children }: LayoutProps) => {
   return (
     <ClientOnly
       fallback={
@@ -49,4 +49,4 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default Layout;
+export default LayoutWrapper;
