@@ -1,5 +1,5 @@
 import { createClient } from '../lib/supabase/client';
-import type { Category } from '@/lib/database/database';
+import type { Category } from '@/lib/database/database.types';
 
 export const getCategories = async (): Promise<Category[]> => {
   const supabase = createClient();

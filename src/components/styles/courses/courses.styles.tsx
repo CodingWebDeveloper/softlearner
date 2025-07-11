@@ -111,40 +111,40 @@ export const SearchTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-export const StyledCardContent = styled(CardContent)(({ theme }) => ({
+export const StyledCardContent = styled(CardContent)({
   flex: 1,
   minWidth: 0,
   padding: 0,
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
-}));
+});
 
-export const CardContentTop = styled(Box)(({ theme }) => ({
+export const CardContentTop = styled(Box)({
   // No extra styles for now, but can be extended
-}));
+});
 
-export const CoursesListContainer = styled(Box)(({ theme }) => ({
+export const CoursesListContainer = styled(Box)({
   width: '100%',
-}));
+});
 
-export const CourseGridItem = styled(Grid)(({ theme }) => ({
+export const CourseGridItem = styled(Grid)({
   width: '100%',
-}));
+});
 
-export const TagsContainer = styled(Box)(({ theme }) => ({
+export const TagsContainer = styled(Box)({
   marginBottom: 16,
   display: 'flex',
   gap: 8,
   flexWrap: 'wrap',
-}));
+});
 
-export const RatingContainer = styled(Box)(({ theme }) => ({
+export const RatingContainer = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   gap: 8,
   marginTop: 8,
-}));
+});
 
 export const BookmarkIconStyled = styled(BookmarkIcon)(({ theme }) => ({
   color: theme.palette.custom.accent.teal,
@@ -271,9 +271,9 @@ export const BookmarkBorderIconStyled = styled(BookmarkBorderIcon)(({ theme }) =
   color: theme.palette.custom.accent.teal,
 }));
 
-export const FormControlStyled = styled(FormControl)(({ theme }) => ({
+export const FormControlStyled = styled(FormControl)({
   minWidth: 120,
-}));
+});
 
 export const ArrowDropDownIconStyled = styled(ArrowDropDownIcon)(({ theme }) => ({
   color: `${theme.palette.custom.accent.teal} !important`,

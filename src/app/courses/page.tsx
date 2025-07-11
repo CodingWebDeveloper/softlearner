@@ -1,20 +1,14 @@
 'use client';
 import { useEffect, useState, ChangeEvent, KeyboardEvent } from 'react';
-import { useFormik } from 'formik';
 import {
   useMediaQuery,
   useTheme,
-  CircularProgress,
-  Box,
-  Typography,
 } from '@mui/material';
 import CoursesList from '@/components/courses/courses-list/courses-list';
-import Pagination from '@/components/courses/courses-list/course-list-pagination';
-import { trpc } from '@/lib/trpc/trpc';
-import { AlertStyled, CoursesPageContainer, SearchTextField, TextLightText } from '@/components/styles/courses/courses.styles';
+import { CoursesPageContainer, SearchTextField } from '@/components/styles/courses/courses.styles';
 import Filter from '@/components/courses/courses-list/filter';
 import { useAppSelector, useAppDispatch } from '@/lib/store/hooks';
-import { setSearch, setCategory, setTags } from '@/lib/store/features/filterSlice';
+import { setSearch } from '@/lib/store/features/filterSlice';
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);

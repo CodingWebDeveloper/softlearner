@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
-import type { Tag } from '@/lib/database/database';
+import type { Tag } from '@/lib/database/database.types';
 
 export interface GetTagsParams {
   search?: string;

@@ -35,3 +35,8 @@ FOR SELECT USING (true);
 -- Allow all users to view sections
 CREATE POLICY "Allow all users to view sections" ON sections
 FOR SELECT USING (true);
+
+-- Resources Policies
+-- Allow all users to view resources
+CREATE POLICY "Allow all users to view resources" ON resources
+FOR SELECT USING (true);

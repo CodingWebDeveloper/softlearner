@@ -14,16 +14,6 @@ export interface Tag {
   name: string
 }
 
-// Section interface
-export interface Section {
-  id: string
-  course_id: string
-  name: string
-  order_index?: number
-  created_at: string
-  updated_at: string
-}
-
 // UserResource interface
 export interface UserResource {
   user_id: string
@@ -74,7 +64,6 @@ export interface Resource {
   short_summary?: string
   predefined?: 'video' | 'downloadable file'
   course_id: string
-  section_id?: string
   order_index?: number
   duration?: string
   created_at: string
@@ -200,7 +189,6 @@ export type PreviewResource = {
   short_summary?: string;
   predefined?: 'video' | 'downloadable file';
   course_id: string;
-  section_id?: string;
   order_index?: number;
   duration?: string;
   created_at: string;

@@ -1,4 +1,4 @@
-import { Category, User } from "@/lib/database/database";
+import { Category, User } from "@/lib/database/database.types";
 
 export interface BasicCourse {
     id: string;

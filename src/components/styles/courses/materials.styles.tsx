@@ -89,20 +89,6 @@ export const VideoListSection = styled(Box)(({ theme }) => ({
   },
 }));
 
-export const TabPanel = ({ children, value, index, ...other }: any) => {
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`tabpanel-${index}`}
-      aria-labelledby={`tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box pt={2}>{children}</Box>}
-    </div>
-  );
-};
-
 export const StyledTab = styled(Tab, {
   shouldForwardProp: (prop) => prop !== 'selected',
 })<{ selected?: boolean }>(({ theme, selected }) => ({
@@ -376,14 +362,14 @@ export const QuizProgressContainer = styled(Box)(({ theme }) => ({
 }));
 
 
-export const QuizProgressText = styled(Typography)(({ theme }) => ({
+export const QuizProgressText = styled(Typography)({
   color: 'inherit',
   minWidth: 40,
   textAlign: 'right',
   flexShrink: 0,
-}));
+});
 
-export const VideoListContainer = styled(Box)(({ theme }) => ({
+export const VideoListContainer = styled(Box)({
   overflowY: 'auto',
   maxHeight: '500px'
-}));
+});

@@ -59,16 +59,6 @@ CREATE TABLE IF NOT EXISTS orders (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Add Section table
-CREATE TABLE IF NOT EXISTS sections (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  order_index INTEGER,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- Create Resource table
 CREATE TABLE IF NOT EXISTS resources (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -77,7 +67,6 @@ CREATE TABLE IF NOT EXISTS resources (
   short_summary TEXT,
   predefined TEXT CHECK (predefined IN ('video', 'downloadable file')),
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  section_id UUID REFERENCES sections(id) ON DELETE SET NULL,
   order_index INTEGER,
   duration INTERVAL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -202,7 +191,6 @@ ALTER TABLE user_tests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_answers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_tags ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
@@ -230,8 +218,6 @@ CREATE INDEX IF NOT EXISTS idx_user_answers_question_id ON user_answers(question
 CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name);
 CREATE INDEX IF NOT EXISTS idx_course_tags_course_id ON course_tags(course_id);
 CREATE INDEX IF NOT EXISTS idx_course_tags_tag_id ON course_tags(tag_id);
-CREATE INDEX IF NOT EXISTS idx_sections_course_id ON sections(course_id);
-CREATE INDEX IF NOT EXISTS idx_sections_order_index ON sections(order_index);
 CREATE INDEX IF NOT EXISTS idx_user_resources_user_id ON user_resources(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_resources_resource_id ON user_resources(resource_id);
 CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
@@ -284,9 +270,6 @@ CREATE TRIGGER update_user_answers_updated_at BEFORE UPDATE ON user_answers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS update_tags_updated_at ON tags;
 CREATE TRIGGER update_tags_updated_at BEFORE UPDATE ON tags
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_sections_updated_at ON sections;
-CREATE TRIGGER update_sections_updated_at BEFORE UPDATE ON sections
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories

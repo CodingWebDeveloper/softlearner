@@ -21,7 +21,7 @@ import {
 import {
   getUserCoursesWithProgress,
 } from "@/services/courseService";
-import type { Course, Resource } from "@/lib/database/database";
+import type { Course, Resource } from "@/lib/database/database.types";
 import CourseProgressCard from "@/components/courses/course-progress-card";
 
 

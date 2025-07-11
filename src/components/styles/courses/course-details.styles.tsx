@@ -187,20 +187,20 @@ export const DialogContentStyled = styled(DialogContent, {
   }),
 }));
 
-export const VideoContainer = styled(Box)(({ theme }) => ({
+export const VideoContainer = styled(Box)({
   position: 'relative',
   width: '100%',
   paddingTop: '56.25%', // 16:9 aspect ratio
-}));
+});
 
-export const VideoIframe = styled('iframe')(({ theme }) => ({
+export const VideoIframe = styled('iframe')({
   position: 'absolute',
   top: 0,
   left: 0,
   width: '100%',
   height: '100%',
   border: 0,
-}));
+});
 
 export const CloseButtonContainer = styled(Box)(({ theme }) => ({
   position: 'absolute',
