@@ -1,5 +1,5 @@
 import { styled } from '@mui/material/styles';
-import { Box, Card, CardMedia, Chip, Typography, Divider, IconButton, TextField, CardContent, Select, InputLabel, Autocomplete, Alert, FormControl } from '@mui/material';
+import { Box, Card, CardMedia, Chip, Typography, Divider, IconButton, TextField, CardContent, Select, InputLabel, Autocomplete, Alert, FormControl, Grid } from '@mui/material';
 import MuiPagination from '@mui/material/Pagination';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import PersonIcon from '@mui/icons-material/Person';
@@ -34,11 +34,7 @@ export const TagChip = styled(Chip)(({ theme }) => ({
   marginRight: theme.spacing(1),
 }));
 
-export const CourseCard = styled(Card, {
-  shouldForwardProp: (prop) => prop !== 'isMobile',
-})<{
-  isMobile?: boolean;
-}>(({ isMobile, theme }) => ({
+export const CourseCard = styled(Card)(({ theme }) => ({
   background: theme.palette.custom.background.card,
   border: '1.5px solid rgba(255,255,255,0.08)',
   color: theme.palette.custom.text.white,
@@ -48,8 +44,7 @@ export const CourseCard = styled(Card, {
   width: '100%',
   maxWidth: '100%',
   display: 'flex',
-  flexDirection: isMobile ? 'column' : 'row',
-  alignItems: isMobile ? 'stretch' : 'flex-start',
+  flexDirection: 'column',
   position: 'relative',
   cursor: 'pointer',
   "&:hover": {
@@ -60,16 +55,13 @@ export const CourseCard = styled(Card, {
 }));
 
 export const CardImage = styled(CardMedia, {
-  shouldForwardProp: (prop) => prop !== 'isMobile',
-})<{
-  isMobile?: boolean;
-}>(({ isMobile, theme }) => ({
-  width: isMobile ? '100%' : 120,
-  height: isMobile ? 160 : 120,
+})(({ theme }) => ({
+  width: "100%",
+  height: "160px",
   borderRadius: 2,
   objectFit: 'cover',
-  marginBottom: isMobile ? theme.spacing(2) : 0,
-  marginRight: isMobile ? 0 : theme.spacing(3),
+  marginBottom: theme.spacing(2),
+  marginRight: theme.spacing(3),
 }));
 
 export const BottomRow = styled(Box)(({ theme }) => ({
@@ -136,7 +128,7 @@ export const CoursesListContainer = styled(Box)(({ theme }) => ({
   width: '100%',
 }));
 
-export const CourseListItemBox = styled(Box)(({ theme }) => ({
+export const CourseGridItem = styled(Grid)(({ theme }) => ({
   width: '100%',
 }));
 
@@ -244,10 +236,22 @@ export const StyledPagination = styled(MuiPagination)(({ theme }) => ({
   '& .MuiPaginationItem-root': {
     color: theme.palette.custom.text.white,
     borderColor: theme.palette.custom.accent.teal,
-  },
-  '& .Mui-selected': {
-    backgroundColor: theme.palette.custom.accent.teal,
-    color: theme.palette.custom.background.card,
+    '&:hover': {
+      backgroundColor: theme.palette.custom.background.secondary,
+      color: theme.palette.custom.accent.teal,
+    },
+    '&.Mui-selected': {
+      backgroundColor: theme.palette.custom.accent.teal,
+      color: theme.palette.custom.background.card,
+      '&:hover': {
+        backgroundColor: theme.palette.custom.accent.tealDark,
+        color: theme.palette.custom.background.card,
+      },
+      '&.Mui-focusVisible': {
+        backgroundColor: theme.palette.custom.accent.tealDark,
+        color: theme.palette.custom.background.card,
+      },
+    },
   },
 }));
 
@@ -273,4 +277,10 @@ export const FormControlStyled = styled(FormControl)(({ theme }) => ({
 
 export const ArrowDropDownIconStyled = styled(ArrowDropDownIcon)(({ theme }) => ({
   color: `${theme.palette.custom.accent.teal} !important`,
+}));
+
+export const PaginationWrapper = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  marginTop: theme.spacing(2),
 }));

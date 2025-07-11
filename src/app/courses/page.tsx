@@ -1,5 +1,5 @@
 'use client';
-import { useState, ChangeEvent, KeyboardEvent } from 'react';
+import { useEffect, useState, ChangeEvent, KeyboardEvent } from 'react';
 import { useFormik } from 'formik';
 import {
   useMediaQuery,
@@ -8,97 +8,62 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import CoursesList from '@/components/courses/courses-list';
-import Pagination from '@/components/courses/pagination';
+import CoursesList from '@/components/courses/courses-list/courses-list';
+import Pagination from '@/components/courses/courses-list/course-list-pagination';
 import { trpc } from '@/lib/trpc/trpc';
 import { AlertStyled, CoursesPageContainer, SearchTextField, TextLightText } from '@/components/styles/courses/courses.styles';
-import Filter from '@/components/courses/filter';
+import Filter from '@/components/courses/courses-list/filter';
+import { useAppSelector, useAppDispatch } from '@/lib/store/hooks';
+import { setSearch, setCategory, setTags } from '@/lib/store/features/filterSlice';
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 const MAX_ENROLLED_DISPLAY = 999;
-const COURSES_PER_PAGE = 15;
-
-const allCategories = ['Design', 'Marketing', 'Development'];
-const priceRange = [0, 100];
 
 const CoursesPage = () => {
   // General Hooks
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const dispatch = useAppDispatch();
+
+  // Redux filter state
+  const { search } = useAppSelector((state) => state.filter);
 
   // States
-  const [search, setSearch] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchInput, setSearchInput] = useState(search);
+  const debouncedSearch = useDebounce(searchInput, 500);
 
-  // Formik
-  const formik = useFormik({
-    initialValues: {
-      category: '',
-      tags: [] as string[],
-      price: priceRange,
-    },
-    onSubmit: () => {},
-  });
-
-  // tRPC Query for courses
-  const { data: coursesData, isLoading, error } = trpc.courses.getCourses.useQuery({
-    page: currentPage,
-    pageSize: COURSES_PER_PAGE,
-    search: search || undefined,
-    category: formik.values.category || undefined,
-    tags: formik.values.tags.length > 0 ? formik.values.tags : undefined,
-  });
-
-  // Data
-  const courses = coursesData?.courses || [];
-  const totalRecord = coursesData?.totalRecord || 0;
-
-  // Pagination
-  const totalPages = Math.ceil(totalRecord / COURSES_PER_PAGE);
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <CoursesPageContainer>
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="400px"
-        >
-          <CircularProgress color="primary" />
-        </Box>
-      </CoursesPageContainer>
-    );
-  }
-
-  // Error state
-  if (error) {  
-    return (
-      <CoursesPageContainer>
-        <AlertStyled severity="error" >
-          <Typography variant="body1">
-            Failed to load courses. Please try again later.
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {error.message}
-          </Typography>
-        </AlertStyled>
-      </CoursesPageContainer>
-    );
-  }
+  useEffect(() => {
+    dispatch(setSearch(debouncedSearch));
+  }, [debouncedSearch, dispatch]);
 
   // Handlers
-  const handleBookmark = (id: number) => {
+  const handleBookmark = (id: string) => {
     // TODO: Implement bookmark functionality with tRPC mutation
     console.log('Bookmark course:', id);
   };
 
-  const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
-    setCurrentPage(value);
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
   };
 
   // Accessibility: handle Enter/Space for bookmark
-  const handleBookmarkKeyDown = (e: KeyboardEvent, id: number) => {
+  const handleBookmarkKeyDown = (e: KeyboardEvent, id: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
       handleBookmark(id);
     }
@@ -111,40 +76,18 @@ const CoursesPage = () => {
         fullWidth
         variant="outlined"
         placeholder="Search courses..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        value={searchInput}
+        onChange={handleSearchChange}
         aria-label="Search courses"
       />
       {/* Filters */}
-      <Filter formik={formik} allCategories={allCategories} isMobile={isMobile} />
+      <Filter isMobile={isMobile} />
       {/* Courses List */}
-      {courses.length === 0 ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="200px"
-        >
-          <TextLightText variant="h6">
-            No courses found. Try adjusting your search or filters.
-          </TextLightText>
-        </Box>
-      ) : (
-        <>
-          <CoursesList
-            filteredCourses={courses}
-            isMobile={isMobile}
-            handleBookmark={handleBookmark}
-            handleBookmarkKeyDown={handleBookmarkKeyDown}
-            MAX_ENROLLED_DISPLAY={MAX_ENROLLED_DISPLAY}
-          />
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onChange={handlePageChange}
-          />
-        </>
-      )}
+      <CoursesList
+        handleBookmark={handleBookmark}
+        handleBookmarkKeyDown={handleBookmarkKeyDown}
+        MAX_ENROLLED_DISPLAY={MAX_ENROLLED_DISPLAY}
+      />
     </CoursesPageContainer>
   );
 };

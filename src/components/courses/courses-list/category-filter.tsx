@@ -8,13 +8,14 @@ import {
 import { trpc } from '@/lib/trpc/trpc';
 
 interface CategoryFilterProps {
-  formik: any;
+  value: string;
+  onChange: (category: string) => void;
   theme: any;
 }
 
 const DEBOUNCE_MS = 1000;
 
-export const CategoryFilter = ({ formik, theme }: CategoryFilterProps) => {
+export const CategoryFilter = ({ value, onChange, theme }: CategoryFilterProps) => {
   const [inputValue, setInputValue] = useState('');
   const [search, setSearch] = useState('');
 
@@ -59,8 +60,8 @@ export const CategoryFilter = ({ formik, theme }: CategoryFilterProps) => {
       <Autocomplete
         id="category-autocomplete"
         options={filteredCategories.map(cat => cat.name)}
-        value={formik.values.category || ''}
-        onChange={(_, newValue) => formik.setFieldValue('category', newValue || '')}
+        value={value || ''}
+        onChange={(_, newValue) => onChange(newValue || '')}
         inputValue={inputValue}
         onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
         loading={loading}

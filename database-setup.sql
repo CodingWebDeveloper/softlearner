@@ -29,6 +29,12 @@ AFTER INSERT ON auth.users
 FOR EACH ROW
 EXECUTE FUNCTION public.handle_new_auth_user();
 
+-- Add Category table
+CREATE TABLE IF NOT EXISTS categories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
+
 -- Create Course table
 CREATE TABLE IF NOT EXISTS courses (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -49,6 +55,16 @@ CREATE TABLE IF NOT EXISTS orders (
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
   status TEXT CHECK (status IN ('ACTIVE', 'PENDING', 'CANCELLED')) DEFAULT 'PENDING',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Add Section table
+CREATE TABLE IF NOT EXISTS sections (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  order_index INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -163,28 +179,12 @@ CREATE TABLE IF NOT EXISTS course_tags (
   PRIMARY KEY (course_id, tag_id)
 );
 
--- Add Section table
-CREATE TABLE IF NOT EXISTS sections (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  order_index INTEGER,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- Add UserResource table
 CREATE TABLE IF NOT EXISTS user_resources (
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   resource_id UUID REFERENCES resources(id) ON DELETE CASCADE,
   completed BOOLEAN DEFAULT FALSE,
   PRIMARY KEY (user_id, resource_id)
-);
-
--- Add Category table
-CREATE TABLE IF NOT EXISTS categories (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE
 );
 
 -- Enable Row Level Security on all custom tables (NOT auth.users)
@@ -291,31 +291,3 @@ CREATE TRIGGER update_sections_updated_at BEFORE UPDATE ON sections
 DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- =====================
--- RLS POLICIES (Categories, Tags, Courses)
--- =====================
-
--- Categories Policies
--- Allow all users to view categories
-CREATE POLICY "Allow all users to view categories" ON categories
-FOR SELECT USING (true);
--- Allow only admin to add, update, delete categories
-CREATE POLICY "Allow only admin to modify categories" ON categories
-FOR ALL USING (auth.role() = 'admin') WITH CHECK (auth.role() = 'admin');
-
--- Tags Policies
--- Allow all users to view tags
-CREATE POLICY "Allow all users to view tags" ON tags
-FOR SELECT USING (true);
--- Allow only admin to add, update, delete tags
-CREATE POLICY "Allow only admin to modify tags" ON tags
-FOR ALL USING (auth.role() = 'admin') WITH CHECK (auth.role() = 'admin');
-
--- Courses Policies
--- Allow all users to view courses
-CREATE POLICY "Allow all users to view courses" ON courses
-FOR SELECT USING (true);
--- Allow only admin or creator to add, update, delete courses
-CREATE POLICY "Allow admin or creator to modify courses" ON courses
-FOR ALL USING (auth.role() = 'admin' OR auth.uid() = creator_id) WITH CHECK (auth.role() = 'admin' OR auth.uid() = creator_id);

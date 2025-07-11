@@ -1,18 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
-import type { Course } from '@/lib/database/database';
-
-export interface GetCoursesParams {
-  page: number;
-  pageSize: number;
-  search?: string;
-  category?: string;
-  tags?: string[];
-}
-
-export interface GetCoursesResult {
-  courses: Course[];
-  totalRecord: number;
-}
+import { BasicCourse, GetCoursesParams, GetCoursesResult } from './interfaces/service.interfaces';
 
 export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesResult> => {
   const supabase = createClient();
@@ -21,7 +8,20 @@ export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesRe
 
   let query = supabase
     .from('courses')
-    .select('*', { count: 'exact' });
+    .select(`
+      *,
+      creator:users!courses_creator_id_fkey(
+        id,
+        full_name,
+        avatar_url,
+        created_at,
+        updated_at
+      ),
+      category:categories!courses_category_id_fkey(
+        id,
+        name
+      )
+    `, { count: 'exact' });
 
   // Apply filters
   if (search) {
@@ -29,7 +29,7 @@ export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesRe
   }
 
   if (category) {
-    query = query.eq('category', category);
+    query = query.eq('category_id', category);
   }
 
   // Filter by tags using course_tags join table
@@ -66,8 +66,64 @@ export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesRe
     throw new Error(`Failed to fetch courses: ${error.message}`);
   }
 
+  // Transform the data to match BasicCourse interface
+  const transformedCourses: BasicCourse[] = (courses || []).map(course => ({
+    id: course.id,
+    name: course.name,
+    description: course.description,
+    video_url: course.video_url,
+    price: course.price,
+    thumbnail_image_url: course.thumbnail_image_url,
+    creator: course.creator,
+    category: course.category,
+    created_at: course.created_at,
+    updated_at: course.updated_at,
+  }));
+
   return {
-    courses: courses as Course[],
+    courses: transformedCourses,
     totalRecord: count || 0,
   };
+};
+
+export const getCourseById = async (id: string): Promise<BasicCourse | null> => {
+  const supabase = createClient();
+
+  const { data: course, error } = await supabase
+    .from('courses')
+    .select(`
+      *,
+      creator:users!courses_creator_id_fkey(
+        id,
+        full_name,
+        avatar_url,
+        created_at,
+        updated_at
+      ),
+      category:categories!courses_category_id_fkey(
+        id,
+        name
+      )
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error || !course) {
+    return null;
+  }
+
+  const result: BasicCourse = {
+    id: course.id,
+    name: course.name,
+    description: course.description,
+    video_url: course.video_url,
+    price: course.price,
+    thumbnail_image_url: course.thumbnail_image_url,
+    creator: course.creator,
+    category: course.category,
+    created_at: course.created_at,
+    updated_at: course.updated_at,
+  };
+
+  return result;
 }; 

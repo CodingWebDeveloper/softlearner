@@ -1,6 +1,6 @@
 import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
-import { getCourses } from '../../../services/courses-service';
+import { getCourses, getCourseById } from '../../../services/courses-service';
 
 const t = initTRPC.create();
 
@@ -21,6 +21,15 @@ export const coursesRouter = t.router({
         return result;
       } catch (error) {
         throw new Error(`Failed to fetch courses: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }),
+  getCourseById: t.procedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      try {
+        return await getCourseById(input);
+      } catch (error) {
+        throw new Error(`Failed to fetch course: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }),
 }); 
