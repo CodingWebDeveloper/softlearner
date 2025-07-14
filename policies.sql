@@ -31,12 +31,29 @@ FOR ALL USING (auth.role() = 'admin' OR auth.uid() = creator_id) WITH CHECK (aut
 CREATE POLICY "Allow all users to view users" ON users
 FOR SELECT USING (true);
 
--- Sections Policies
--- Allow all users to view sections
-CREATE POLICY "Allow all users to view sections" ON sections
-FOR SELECT USING (true);
-
 -- Resources Policies
 -- Allow all users to view resources
 CREATE POLICY "Allow all users to view resources" ON resources
 FOR SELECT USING (true);
+
+-- Reviews Policies
+-- Allow all users to view reviews
+CREATE POLICY "Allow all users to view reviews" ON reviews
+FOR SELECT USING (true);
+-- Allow authenticated users to create reviews only for courses they have purchased
+CREATE POLICY "Allow authenticated users to create reviews for purchased courses" ON reviews
+FOR INSERT WITH CHECK (
+  auth.uid() = user_id AND 
+  EXISTS (
+    SELECT 1 FROM orders 
+    WHERE user_id = auth.uid() 
+    AND course_id = reviews.course_id 
+    AND status = 'ACTIVE'
+  )
+);
+-- Allow users to update their own reviews
+CREATE POLICY "Allow users to update their own reviews" ON reviews
+FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+-- Allow users to delete their own reviews
+CREATE POLICY "Allow users to delete their own reviews" ON reviews
+FOR DELETE USING (auth.uid() = user_id);

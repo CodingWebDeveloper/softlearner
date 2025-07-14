@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
-import { BasicCourse, GetCoursesParams, GetCoursesResult } from './interfaces/service.interfaces';
+import { BasicCourse, GetCoursesParams, GetCoursesResult, Review, CourseWithReviews } from './interfaces/service.interfaces';
 
 export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesResult> => {
   const supabase = createClient();
@@ -20,7 +20,8 @@ export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesRe
       category:categories!courses_category_id_fkey(
         id,
         name
-      )
+      ),
+      reviews(rating)
     `, { count: 'exact' });
 
   // Apply filters
@@ -48,7 +49,6 @@ export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesRe
 
   if (tags && tags.length > 0) {
     if (courseIds.length === 0) {
-      // No courses match the tags, return empty result
       return {
         courses: [],
         totalRecord: 0,
@@ -66,19 +66,29 @@ export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesRe
     throw new Error(`Failed to fetch courses: ${error.message}`);
   }
 
-  // Transform the data to match BasicCourse interface
-  const transformedCourses: BasicCourse[] = (courses || []).map(course => ({
-    id: course.id,
-    name: course.name,
-    description: course.description,
-    video_url: course.video_url,
-    price: course.price,
-    thumbnail_image_url: course.thumbnail_image_url,
-    creator: course.creator,
-    category: course.category,
-    created_at: course.created_at,
-    updated_at: course.updated_at,
-  }));
+  const transformedCourses: BasicCourse[] = (courses || []).map((course: CourseWithReviews) => {
+    // Calculate average rating
+    const ratings = course.reviews?.map((review: Review) => review.rating) || [];
+    const averageRating = ratings.length > 0
+      ? Number((ratings.reduce((acc: number, curr: number) => acc + curr, 0) / ratings.length).toFixed(1))
+      : null;
+
+    return {
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      video_url: course.video_url,
+      new_price: course.new_price,
+      price: course.price,
+      thumbnail_image_url: course.thumbnail_image_url,
+      creator: course.creator,
+      category: course.category,
+      rating: averageRating,
+      ratings_count: ratings.length,
+      created_at: course.created_at,
+      updated_at: course.updated_at,
+    };
+  });
 
   return {
     courses: transformedCourses,
@@ -103,7 +113,8 @@ export const getCourseById = async (id: string): Promise<BasicCourse | null> => 
       category:categories!courses_category_id_fkey(
         id,
         name
-      )
+      ),
+      reviews(rating)
     `)
     .eq('id', id)
     .single();
@@ -112,17 +123,28 @@ export const getCourseById = async (id: string): Promise<BasicCourse | null> => 
     return null;
   }
 
+  const courseWithReviews = course as CourseWithReviews;
+  
+  // Calculate average rating
+  const ratings = courseWithReviews.reviews?.map((review: Review) => review.rating) || [];
+  const averageRating = ratings.length > 0
+    ? Number((ratings.reduce((acc: number, curr: number) => acc + curr, 0) / ratings.length).toFixed(1))
+    : null;
+
   const result: BasicCourse = {
-    id: course.id,
-    name: course.name,
-    description: course.description,
-    video_url: course.video_url,
-    price: course.price,
-    thumbnail_image_url: course.thumbnail_image_url,
-    creator: course.creator,
-    category: course.category,
-    created_at: course.created_at,
-    updated_at: course.updated_at,
+    id: courseWithReviews.id,
+    name: courseWithReviews.name,
+    description: courseWithReviews.description,
+    video_url: courseWithReviews.video_url,
+    price: courseWithReviews.price,
+    new_price: courseWithReviews.new_price,
+    thumbnail_image_url: courseWithReviews.thumbnail_image_url,
+    creator: courseWithReviews.creator,
+    category: courseWithReviews.category,
+    rating: averageRating,
+    ratings_count: ratings.length,
+    created_at: courseWithReviews.created_at,
+    updated_at: courseWithReviews.updated_at,
   };
 
   return result;

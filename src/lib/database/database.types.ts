@@ -38,6 +38,7 @@ export interface Course {
   description?: string
   video_url?: string
   price: number
+  newPrice?: number
   thumbnail_image_url?: string
   creator_id?: string
   category?: string
@@ -62,7 +63,7 @@ export interface Resource {
   url: string
   name: string
   short_summary?: string
-  predefined?: 'video' | 'downloadable file'
+  type?: 'video' | 'downloadable file'
   course_id: string
   order_index?: number
   duration?: string
@@ -187,7 +188,7 @@ export type PreviewResource = {
   id: string;
   name: string;
   short_summary?: string;
-  predefined?: 'video' | 'downloadable file';
+  type?: 'video' | 'downloadable file';
   course_id: string;
   order_index?: number;
   duration?: string;

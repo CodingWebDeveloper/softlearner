@@ -5,16 +5,19 @@ import { ListItemStyled, ListItemIconStyled, ListItemTextStyled, SectionTitle, D
 import { trpc } from '@/lib/trpc/trpc';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
+import { formatDuration } from '@/utils/dateUtils';
 
 interface ResourceListProps {
   courseId?: string;
 }
 
 const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
+  console.log(courseId);
   const { data: resources, isLoading, error } = trpc.resources.getResourcesByCourseId.useQuery(
     { courseId: courseId || '' },
     { enabled: !!courseId }
   );
+
 
   if (isLoading) {
     return (
@@ -41,8 +44,8 @@ const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
     return <ListItemTextStyled primary="No resources found." />;
   }
 
-  const videos = resources.filter(r => r.predefined === 'video');
-  const downloads = resources.filter(r => r.predefined === 'downloadable file');
+  const videos = resources.filter(r => r.type === 'video');
+  const downloads = resources.filter(r => r.type === 'downloadable file');
 
   console.log(resources);
   return (
@@ -75,7 +78,7 @@ const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
             {videos.map((resource, idx) => (
               <ListItemStyled key={resource.id}
                 secondaryAction={resource.duration ? (
-                  <DurationText>{resource.duration}</DurationText>
+                  <DurationText>{formatDuration(resource.duration)}</DurationText>
                 ) : undefined}>
                 <ListItemIconStyled>
                   <PlayArrowRoundedIcon />

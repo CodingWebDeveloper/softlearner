@@ -3,6 +3,7 @@ INSERT INTO courses (
   description,
   video_url,
   price,
+  new_price,
   thumbnail_image_url,
   creator_id,
   category_id
@@ -12,6 +13,7 @@ INSERT INTO courses (
   '**A foundational course covering:**\n- Basic mathematical concepts\n- Problem-solving strategies\n- Real-world applications\n\n_This course is perfect for beginners looking to build a strong math foundation._',
   'https://www.youtube.com/embed/VKlcZCc5uQQ?si=99qTsSATXKoc4fCD',
   49.99,
+  39.99,
   'https://images.pexels.com/photos/374918/pexels-photo-374918.jpeg',
   '11111111-1111-1111-1111-111111111111',
   (SELECT id FROM categories WHERE name = 'Mathematics')
@@ -21,6 +23,7 @@ INSERT INTO courses (
   '**Learn to build modern web applications from scratch:**\n- HTML, CSS, and JavaScript essentials\n- Hands-on projects\n- Responsive design techniques\n\n_Join this bootcamp to kickstart your web development career!_',
   'https://www.youtube.com/embed/TG6XSFeOT3g?si=2gikLYtZ43KHTncW',
   99.99,
+  79.99,
   'https://images.pexels.com/photos/577585/pexels-photo-577585.jpeg',
   '11111111-1111-1111-1111-111111111111',
   (SELECT id FROM categories WHERE name = 'Web Development')
@@ -30,6 +33,7 @@ INSERT INTO courses (
   '**Master the basics of business analytics and data-driven decision making:**\n- Data analysis fundamentals\n- Excel for business insights\n- Real-world case studies\n\n_Unlock the power of analytics for your business success._',
   'https://www.youtube.com/embed/diaZdX1s5L4?si=GcivOv98ZeaOpLQ8',
   79.99,
+  59.99,
   'https://images.pexels.com/photos/577585/pexels-photo-577585.jpeg',
   '11111111-1111-1111-1111-111111111111',
   (SELECT id FROM categories WHERE name = 'Business Analytics')
@@ -54,14 +58,13 @@ INSERT INTO course_tags (course_id, tag_id) VALUES
 
 -- Business Analytics Essentials: Data Science & Machine Learning, Excel, Career Advancement, Intermediate
 INSERT INTO course_tags (course_id, tag_id) VALUES
-  ((SELECT id FROM courses WHERE name = 'Business Analytics Essentials'), (SELECT id FROM tags WHERE name = 'Data Science & Machine Learning')),
   ((SELECT id FROM courses WHERE name = 'Business Analytics Essentials'), (SELECT id FROM tags WHERE name = 'Excel')),
   ((SELECT id FROM courses WHERE name = 'Business Analytics Essentials'), (SELECT id FROM tags WHERE name = 'Career Advancement')),
   ((SELECT id FROM courses WHERE name = 'Business Analytics Essentials'), (SELECT id FROM tags WHERE name = 'Intermediate'));
 
 -- Resources for Introduction to Mathematics
 -- YouTube Video Resources
-INSERT INTO resources (url, name, short_summary, predefined, course_id, order_index, duration) VALUES
+INSERT INTO resources (url, name, short_summary, type, course_id, order_index, duration) VALUES
 (
   'https://www.youtube.com/embed/dQw4w9WgXcQ?si=example1',
   'Basic Arithmetic Operations',
@@ -82,7 +85,7 @@ INSERT INTO resources (url, name, short_summary, predefined, course_id, order_in
 );
 
 -- Downloadable Resources for Introduction to Mathematics
-INSERT INTO resources (url, name, short_summary, predefined, course_id, order_index) VALUES
+INSERT INTO resources (url, name, short_summary, type, course_id, order_index) VALUES
 (
   'https://drive.google.com/uc?export=download&id=1ABC123DEF456',
   'Mathematics Practice Workbook',
@@ -102,7 +105,7 @@ INSERT INTO resources (url, name, short_summary, predefined, course_id, order_in
 
 -- Resources for Web Development Bootcamp
 -- YouTube Video Resources
-INSERT INTO resources (url, name, short_summary, predefined, course_id, order_index, duration) VALUES
+INSERT INTO resources (url, name, short_summary, type, course_id, order_index, duration) VALUES
 (
   'https://www.youtube.com/embed/UB1O30fR-EE?si=example3',
   'HTML Fundamentals',
@@ -123,7 +126,7 @@ INSERT INTO resources (url, name, short_summary, predefined, course_id, order_in
 );
 
 -- Downloadable Resources for Web Development Bootcamp
-INSERT INTO resources (url, name, short_summary, predefined, course_id, order_index) VALUES
+INSERT INTO resources (url, name, short_summary, type, course_id, order_index) VALUES
 (
   'https://drive.google.com/uc?export=download&id=3JKL345MNO678',
   'Web Development Project Templates',
@@ -143,7 +146,7 @@ INSERT INTO resources (url, name, short_summary, predefined, course_id, order_in
 
 -- Resources for Business Analytics Essentials
 -- YouTube Video Resources
-INSERT INTO resources (url, name, short_summary, predefined, course_id, order_index, duration) VALUES
+INSERT INTO resources (url, name, short_summary, type, course_id, order_index, duration) VALUES
 (
   'https://www.youtube.com/embed/aircAruvnKk?si=example5',
   'Data Analysis Fundamentals',
@@ -164,7 +167,7 @@ INSERT INTO resources (url, name, short_summary, predefined, course_id, order_in
 );
 
 -- Downloadable Resources for Business Analytics Essentials
-INSERT INTO resources (url, name, short_summary, predefined, course_id, order_index) VALUES
+INSERT INTO resources (url, name, short_summary, type, course_id, order_index) VALUES
 (
   'https://drive.google.com/uc?export=download&id=5VWX567YZA890',
   'Business Analytics Case Studies',

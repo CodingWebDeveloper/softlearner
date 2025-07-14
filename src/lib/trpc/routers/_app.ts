@@ -4,6 +4,7 @@ import { tagsRouter } from './tags-router';
 import { categoriesRouter } from './categories-router';
 import { sectionsRouter } from './sections-router';
 import { resourcesRouter } from './resources-router';
+import { reviewsRouter } from './reviews-router';
 
 const t = initTRPC.create();
 
@@ -13,6 +14,7 @@ export const appRouter = t.router({
   categories: categoriesRouter,
   sections: sectionsRouter,
   resources: resourcesRouter,
+  reviews: reviewsRouter,
 });
 
 export type AppRouter = typeof appRouter; 

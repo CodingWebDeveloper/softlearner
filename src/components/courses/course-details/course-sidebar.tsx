@@ -1,18 +1,14 @@
 import { FC, useState, KeyboardEvent } from 'react';
-import { Stack } from '@mui/material';
+import { Skeleton, Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import DevicesOutlinedIcon from '@mui/icons-material/DevicesOutlined';
 import { 
   DiscountedPrice, 
   OldPrice, 
   MetaItem, 
-  SidebarPreviewBox, 
   CardStyled,
   AddToCartButton,
   MetaItemText,
@@ -27,36 +23,50 @@ import {
   ClickablePreviewBox
 } from '@/components/styles/courses/course-details.styles';
 import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-
-interface Meta {
-  level: string;
-  duration: string;
-  videos: number;
-  files: number;
-  lifetime: boolean;
-  deviceAccess: boolean;
-}
+import { BasicCourse } from '@/services/interfaces/service.interfaces';
+import { PreviewResource } from '@/lib/database/database.types';
+import { trpc } from '@/lib/trpc/trpc';
 
 interface CourseSidebarProps {
-  price: number;
-  discount: number;
-  meta: Meta;
-  image: string;
+  course: BasicCourse
 }
 
-const YOUTUBE_VIDEO_ID = 'dQw4w9WgXcQ'; // Replace with actual video id or pass as prop if needed
-
-const CourseSidebar: FC<CourseSidebarProps> = ({ price, discount, meta, image }) => {
+const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
   // Hooks
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { data: resourcesData, isLoading: isResourcesLoading} = trpc.resources.getResourcesByCourseId.useQuery(
+    { courseId: course?.id},
+    {enabled: !!course?.id});
 
   // Variables/State
-  const discountedPrice = (price * (1 - discount)).toFixed(2);
+  const hasDiscount = course?.new_price !== null && course?.new_price !== undefined;
+  const displayPrice = hasDiscount ? course?.new_price?.toFixed(2) : course?.price.toFixed(2);
+  const resources = resourcesData || [];
+  
+  const totalMinutes = resourcesData?.reduce((total: number, resource: PreviewResource) => {
+    if (resource.duration) {
+      // Parse PostgreSQL interval format (HH:MM:SS)
+      const parts = resource.duration.split(':');
+      if (parts.length === 3) {
+        const hours = parseInt(parts[0], 10);
+        const minutes = parseInt(parts[1], 10);
+        return total + (hours * 60) + minutes;
+      }
+    }
+    return total;
+  }, 0) || 0;
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const durationDisplay = hours > 0 
+    ? `${hours} hr${hours > 1 ? 's' : ''} ${minutes > 0 ? `${minutes} min` : ''}`
+    : `${minutes} min`;
+
+  const totalVideos = resources.filter((r: PreviewResource) => r.type === 'video').length;
+  const totalFiles = resources.filter((r: PreviewResource) => r.type === 'downloadable file').length;
 
   // Handlers
   const handleOpenDialog = () => {
@@ -74,6 +84,11 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ price, discount, meta, image })
     }
   };
 
+  if (isResourcesLoading) {
+    return (
+      <Skeleton variant="rectangular" width="100%" height={320} sx={{ borderRadius: 2 }} />
+    )
+  }
   return (
     <CardStyled>
       <ClickablePreviewBox
@@ -105,7 +120,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ price, discount, meta, image })
             </CloseButtonContainer>
             <VideoContainer>
               <VideoIframe
-                src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`}
+                src={`https://www.youtube.com/embed/${course.video_url}`}
                 title="Course Preview Video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -124,7 +139,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ price, discount, meta, image })
             </CloseButtonContainer>
             <VideoContainer>
               <VideoIframe
-                src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`}
+                src={`https://www.youtube.com/embed/${course.video_url}`}
                 title="Course Preview Video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -135,12 +150,20 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ price, discount, meta, image })
       </Dialog>
 
       <PriceContainer>
-        <DiscountedPrice component="span" tabIndex={0} aria-label="Discounted Price">
-          ${discountedPrice} USD
-        </DiscountedPrice>
-        <OldPrice component="span" tabIndex={0} aria-label="Original Price">
-          ${price.toFixed(2)} USD
-        </OldPrice>
+        {hasDiscount ? (
+          <>
+            <DiscountedPrice component="span" tabIndex={0} aria-label={`Discounted Price: $${displayPrice} USD`}>
+              ${displayPrice} USD
+            </DiscountedPrice>
+            <OldPrice component="span" tabIndex={0} aria-label={`Original Price: $${course.price.toFixed(2)} USD`}>
+              ${course.price.toFixed(2)} USD
+            </OldPrice>
+          </>
+        ) : (
+          <DiscountedPrice component="span" tabIndex={0} aria-label={`Price: $${displayPrice} USD`}>
+            ${displayPrice} USD
+          </DiscountedPrice>
+        )}
       </PriceContainer>
 
       <AddToCartButton
@@ -157,42 +180,24 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ price, discount, meta, image })
 
       <DividerStyled />
       <Stack spacing={1.5}>
-        <MetaItem tabIndex={0} aria-label={`Level: ${meta.level}`}>
-          <MenuBookOutlinedIcon color="primary" />
-          <MetaItemText>
-            <b>Level:</b> {meta.level}
-          </MetaItemText>
-        </MetaItem>
-        <MetaItem tabIndex={0} aria-label={`Duration: ${meta.duration}`}>
+        <MetaItem tabIndex={0} aria-label={`Duration: ${durationDisplay}`}>
           <AccessTimeOutlinedIcon color="primary" />
           <MetaItemText>
-            <b>Duration:</b> {meta.duration}
+            <b>Duration:</b> {durationDisplay}
           </MetaItemText>
         </MetaItem>
-        <MetaItem tabIndex={0} aria-label={`Videos: ${meta.videos}`}>
+        <MetaItem tabIndex={0} aria-label={`Videos: ${totalVideos}`}>
           <PlayCircleOutlineIcon color="primary" />
           <MetaItemText>
-            <b>Videos:</b> {meta.videos}
+            <b>Videos:</b> {totalVideos}
           </MetaItemText>
         </MetaItem>
-        <MetaItem tabIndex={0} aria-label={`Downloadable Files: ${meta.files}`}>
+        <MetaItem tabIndex={0} aria-label={`Downloadable Files: ${totalFiles}`}>
           <CloudDownloadOutlinedIcon color="primary" />
           <MetaItemText>
-            <b>Downloadable Files:</b> {meta.files}
+            <b>Downloadable Files:</b> {totalFiles}
           </MetaItemText>
         </MetaItem>
-        {meta.lifetime && (
-          <MetaItem tabIndex={0} aria-label="Lifetime Access">
-            <CheckCircleOutlineOutlinedIcon color="primary" />
-            <MetaItemText>Lifetime Access</MetaItemText>
-          </MetaItem>
-        )}
-        {meta.deviceAccess && (
-          <MetaItem tabIndex={0} aria-label="Device Access">
-            <DevicesOutlinedIcon color="primary" />
-            <MetaItemText>Access from any Computer, Tablet or Mobile</MetaItemText>
-          </MetaItem>
-        )}
       </Stack>
     </CardStyled>
   );

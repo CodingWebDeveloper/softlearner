@@ -43,7 +43,7 @@ const CourseCard = ({ course, handleBookmark, handleBookmarkKeyDown }: CourseCar
     }
   };
 
-
+  console.log(course);
   return (
     <StyledCourseCard
       tabIndex={0}
@@ -75,14 +75,14 @@ const CourseCard = ({ course, handleBookmark, handleBookmarkKeyDown }: CourseCar
           </TagsContainer>
           <RatingContainer>
             <RatingStyled
-              value={4.5} // TODO: Add rating to BasicCourse interface when reviews are implemented
+              value={course.rating || 0}
               precision={0.1}
               readOnly
               size="small"
-              aria-label="Rating: 4.5"
+              aria-label={`Rating: ${course.rating || 0} out of 5 (${course.ratings_count} ratings)`}
             />
             <Typography variant="body1" color={theme.palette.custom.text.white} fontWeight={600} fontSize={18}>
-              4.5
+              {course.rating || 0}
             </Typography>
             <Typography
               variant="body1"
@@ -91,7 +91,7 @@ const CourseCard = ({ course, handleBookmark, handleBookmarkKeyDown }: CourseCar
               fontSize={16}
               ml={1}
             >
-              (0 ratings)
+              ({course.ratings_count} {course.ratings_count === 1 ? 'rating' : 'ratings'})
             </Typography>
           </RatingContainer>
         </CardContentTop>

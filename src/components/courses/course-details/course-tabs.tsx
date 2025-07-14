@@ -80,7 +80,7 @@ const CourseTabs: FC<{ course: BasicCourse }> = ({ course }) => {
         <QuizzesList quizzes={quizzes} />
       </TabPanel>
       <TabPanel value={tab} index={2}>
-     <CourseReviews />
+        <CourseReviews courseId={course.id} />
       </TabPanel>
     </TabsContainer>
   );

@@ -55,7 +55,6 @@ const CourseDetailsPage: FC = () => {
     );
   }
 
-  // Prepare instructor and meta data for child components
   const instructor = course.creator
     ? {
         name: course.creator.full_name || '',
@@ -68,18 +67,6 @@ const CourseDetailsPage: FC = () => {
         avatar: '',
       };
 
-  // Placeholder meta, adapt as needed
-  const meta = {
-    level: 'N/A',
-    duration: 'N/A',
-    videos: 0,
-    files: 0,
-    lifetime: true,
-    deviceAccess: true,
-  };
-
-  const discount = 0; // Adjust if discount logic is available
-
   return (
     <CourseDetailsContainer>
       <Grid container spacing={6} alignItems="start">
@@ -87,14 +74,14 @@ const CourseDetailsPage: FC = () => {
           <CourseHeader title={course.name} instructor={instructor} />
           {mobileMatches && (
             <SidebarContainer>
-              <CourseSidebar price={course.price} discount={discount} meta={meta} image={course.thumbnail_image_url || ''} />
+              <CourseSidebar course={course} />
             </SidebarContainer>
           )}
           <CourseTabs course={course} />
         </Grid>
         {!mobileMatches && (
           <Grid size={{xs: 12, md: 4}}>
-            <CourseSidebar price={course.price} discount={discount} meta={meta} image={course.thumbnail_image_url || ''} />
+            <CourseSidebar course={course} />
           </Grid>
         )}
       </Grid>
