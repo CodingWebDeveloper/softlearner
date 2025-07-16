@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS courses (
   video_url TEXT,
   price DECIMAL(10,2) NOT NULL,
   new_price DECIMAL(10,2),
+  currency TEXT NOT NULL DEFAULT 'USD',
   thumbnail_image_url TEXT,
   creator_id UUID REFERENCES users(id) ON DELETE SET NULL,
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
@@ -55,9 +56,13 @@ CREATE TABLE IF NOT EXISTS orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  status TEXT CHECK (status IN ('ACTIVE', 'PENDING', 'CANCELLED')) DEFAULT 'PENDING',
+  total_amount DECIMAL(10,2) NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'USD',
+  status TEXT CHECK (status IN ('PENDING', 'SUCCEEDED', 'FAILED')) DEFAULT 'PENDING',
+  stripe_payment_intent_id TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, course_id)
 );
 
 -- Create Resource table

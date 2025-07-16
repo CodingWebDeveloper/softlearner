@@ -1,8 +1,7 @@
-import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
 import { getCourseReviews, getReviewById, getCourseRatingStats } from '../../../services/reviews-service';
+import { router, procedure } from '../server';
 
-const t = initTRPC.create();
 
 const getReviewsInput = z.object({
   courseId: z.string(),
@@ -11,8 +10,8 @@ const getReviewsInput = z.object({
   search: z.string().optional(),
 });
 
-export const reviewsRouter = t.router({
-  getCourseReviews: t.procedure
+export const reviewsRouter = router({
+  getCourseReviews: procedure
     .input(getReviewsInput)
     .query(async ({ input }) => {
       try {
@@ -23,7 +22,7 @@ export const reviewsRouter = t.router({
       }
     }),
 
-  getCourseRatingStats: t.procedure
+  getCourseRatingStats: procedure
     .input(z.string())
     .query(async ({ input }) => {
       try {
@@ -33,7 +32,7 @@ export const reviewsRouter = t.router({
       }
     }),
 
-  getReviewById: t.procedure
+  getReviewById: procedure
     .input(z.string())
     .query(async ({ input }) => {
       try {

@@ -1,5 +1,110 @@
 import { createClient } from '../supabase/client'
 
+export type Database = {
+  public: {
+    Tables: {
+      users: {
+        Row: User;
+        Insert: Omit<User, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<User, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      courses: {
+        Row: Course;
+        Insert: Omit<Course, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Course, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      orders: {
+        Row: Order;
+        Insert: Omit<Order, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Order, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      resources: {
+        Row: Resource;
+        Insert: Omit<Resource, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Resource, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      reviews: {
+        Row: Review;
+        Insert: Omit<Review, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Review, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      votes: {
+        Row: Vote;
+        Insert: Omit<Vote, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Vote, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      bookmarks: {
+        Row: Bookmark;
+        Insert: Omit<Bookmark, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Bookmark, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      tests: {
+        Row: Test;
+        Insert: Omit<Test, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Test, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      questions: {
+        Row: Question;
+        Insert: Omit<Question, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Question, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      answer_options: {
+        Row: AnswerOption;
+        Insert: Omit<AnswerOption, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<AnswerOption, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      user_tests: {
+        Row: UserTest;
+        Insert: Omit<UserTest, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<UserTest, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      user_answers: {
+        Row: UserAnswer;
+        Insert: Omit<UserAnswer, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<UserAnswer, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      categories: {
+        Row: Category;
+        Insert: Omit<Category, 'id'>;
+        Update: Partial<Omit<Category, 'id'>>;
+      };
+      tags: {
+        Row: Tag;
+        Insert: Omit<Tag, 'id'>;
+        Update: Partial<Omit<Tag, 'id'>>;
+      };
+      course_tags: {
+        Row: {
+          course_id: string;
+          tag_id: string;
+        };
+        Insert: {
+          course_id: string;
+          tag_id: string;
+        };
+        Update: {
+          course_id?: string;
+          tag_id?: string;
+        };
+      };
+      user_resources: {
+        Row: UserResource;
+        Insert: UserResource;
+        Update: Partial<UserResource>;
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+  };
+};
+
 // Type definitions based on database.txt schema
 
 // Category interface
@@ -52,7 +157,10 @@ export interface Order {
   id: string
   user_id: string
   course_id: string
-  status: 'ACTIVE' | 'PENDING' | 'CANCELLED'
+  total_amount: number
+  currency: string
+  status: 'PENDING' | 'SUCCEEDED' | 'FAILED'
+  stripe_payment_intent_id?: string
   created_at: string
   updated_at: string
 }

@@ -1,151 +1,134 @@
 import { createClient } from '@/lib/supabase/client';
-import { BasicCourse, GetCoursesParams, GetCoursesResult, Review, CourseWithReviews } from './interfaces/service.interfaces';
+import { BasicCourse, Review } from './interfaces/service.interfaces';
 
-export const getCourses = async (params: GetCoursesParams): Promise<GetCoursesResult> => {
-  const supabase = createClient();
-  const { page, pageSize, search, category, tags } = params;
-  const offset = (page - 1) * pageSize;
+const supabase = createClient();
 
-  let query = supabase
-    .from('courses')
-    .select(`
-      *,
-      creator:users!courses_creator_id_fkey(
-        id,
-        full_name,
-        avatar_url,
-        created_at,
-        updated_at
-      ),
-      category:categories!courses_category_id_fkey(
-        id,
-        name
-      ),
-      reviews(rating)
-    `, { count: 'exact' });
+export async function getCourses({ page = 1, pageSize = 15, search, category, tags }: { 
+  page: number; 
+  pageSize: number;
+  search?: string;
+  category?: string;
+  tags?: string[];
+}) {
+  try {
+    let query = supabase
+      .from('courses')
+      .select(`
+        *,
+        creator:creator_id(*),
+        category:category_id(*),
+        reviews!course_id(rating)
+      `);
 
-  // Apply filters
-  if (search) {
-    query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
-  }
-
-  if (category) {
-    query = query.eq('category_id', category);
-  }
-
-  // Filter by tags using course_tags join table
-  let courseIds: string[] = [];
-  if (tags && tags.length > 0) {
-    const { data: tagRows, error: tagError } = await supabase
-      .from('course_tags')
-      .select('course_id')
-      .in('tag_id', tags);
-
-    if (tagError) {
-      throw new Error(`Failed to fetch course tags: ${tagError.message}`);
+    // Apply search filter if provided
+    if (search) {
+      query = query.ilike('name', `%${search}%`);
     }
-    courseIds = tagRows?.map(row => row.course_id) || [];
-  }
 
-  if (tags && tags.length > 0) {
-    if (courseIds.length === 0) {
+    // Apply category filter if provided
+    if (category) {
+      query = query.eq('category_id', category);
+    }
+
+    // Apply tags filter if provided
+    if (tags && tags.length > 0) {
+      const taggedCourseIds = await supabase
+        .from('course_tags')
+        .select('course_id')
+        .in('tag_id', tags);
+
+      if (taggedCourseIds.data) {
+        query = query.in('id', taggedCourseIds.data.map(row => row.course_id));
+      }
+    }
+
+    // Calculate pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    // Get total count for pagination
+    const { count } = await supabase
+      .from('courses')
+      .select('*', { count: 'exact', head: true });
+
+    // Get paginated results
+    const { data, error } = await query
+      .range(from, to)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    // Transform the data to calculate rating and ratings_count
+    const transformedData = data?.map(course => {
+      const ratings = (course.reviews || []) as Review[];
+      const ratingsCount = ratings.length;
+      const averageRating = ratingsCount > 0 
+        ? ratings.reduce((sum: number, review: Review) => sum + (review.rating || 0), 0) / ratingsCount 
+        : 0;
+
       return {
-        courses: [],
-        totalRecord: 0,
+        ...course,
+        rating: Number(averageRating.toFixed(1)),
+        ratings_count: ratingsCount,
+        reviews: undefined // Remove reviews from the final object since we've processed them
       };
-    }
-    query = query.in('id', courseIds);
-  }
-
-  // Apply pagination
-  const { data: courses, count, error } = await query
-    .range(offset, offset + pageSize - 1)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(`Failed to fetch courses: ${error.message}`);
-  }
-
-  const transformedCourses: BasicCourse[] = (courses || []).map((course: CourseWithReviews) => {
-    // Calculate average rating
-    const ratings = course.reviews?.map((review: Review) => review.rating) || [];
-    const averageRating = ratings.length > 0
-      ? Number((ratings.reduce((acc: number, curr: number) => acc + curr, 0) / ratings.length).toFixed(1))
-      : null;
+    });
 
     return {
-      id: course.id,
-      name: course.name,
-      description: course.description,
-      video_url: course.video_url,
-      new_price: course.new_price,
-      price: course.price,
-      thumbnail_image_url: course.thumbnail_image_url,
-      creator: course.creator,
-      category: course.category,
-      rating: averageRating,
-      ratings_count: ratings.length,
-      created_at: course.created_at,
-      updated_at: course.updated_at,
+      data: transformedData || [],
+      totalRecords: count || 0,
     };
-  });
-
-  return {
-    courses: transformedCourses,
-    totalRecord: count || 0,
-  };
-};
-
-export const getCourseById = async (id: string): Promise<BasicCourse | null> => {
-  const supabase = createClient();
-
-  const { data: course, error } = await supabase
-    .from('courses')
-    .select(`
-      *,
-      creator:users!courses_creator_id_fkey(
-        id,
-        full_name,
-        avatar_url,
-        created_at,
-        updated_at
-      ),
-      category:categories!courses_category_id_fkey(
-        id,
-        name
-      ),
-      reviews(rating)
-    `)
-    .eq('id', id)
-    .single();
-
-  if (error || !course) {
-    return null;
+  } catch (error) {
+    console.error('Error fetching courses:', error);
+    throw error;
   }
+}
 
-  const courseWithReviews = course as CourseWithReviews;
-  
-  // Calculate average rating
-  const ratings = courseWithReviews.reviews?.map((review: Review) => review.rating) || [];
-  const averageRating = ratings.length > 0
-    ? Number((ratings.reduce((acc: number, curr: number) => acc + curr, 0) / ratings.length).toFixed(1))
-    : null;
+export async function getCourseById(courseId: string): Promise<BasicCourse | null> {
+  try {
+    const { data, error } = await supabase
+      .from('courses')
+      .select(`
+        *,
+        creator:creator_id(*),
+        category:category_id(*)
+      `)
+      .eq('id', courseId)
+      .single();
 
-  const result: BasicCourse = {
-    id: courseWithReviews.id,
-    name: courseWithReviews.name,
-    description: courseWithReviews.description,
-    video_url: courseWithReviews.video_url,
-    price: courseWithReviews.price,
-    new_price: courseWithReviews.new_price,
-    thumbnail_image_url: courseWithReviews.thumbnail_image_url,
-    creator: courseWithReviews.creator,
-    category: courseWithReviews.category,
-    rating: averageRating,
-    ratings_count: ratings.length,
-    created_at: courseWithReviews.created_at,
-    updated_at: courseWithReviews.updated_at,
-  };
+    if (error) {
+      throw error;
+    }
 
-  return result;
-}; 
+    return data;
+  } catch (error) {
+    console.error('Error fetching course:', error);
+    throw error;
+  }
+}
+
+export async function isUserEnrolled(userId: string, courseId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('course_id', courseId)
+      .eq('status', 'SUCCEEDED')
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') { // no rows returned
+        return false;
+      }
+      throw error;
+    }
+
+    return !!data;
+  } catch (error) {
+    console.error('Error checking enrollment:', error);
+    return false;
+  }
+} 

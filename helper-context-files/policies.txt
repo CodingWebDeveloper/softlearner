@@ -1,11 +1,30 @@
 We should have the following policies:
+
 Categories:
 -only admin can add, update and delete records
 -all users can view them
+
 Tags:
 -only admin can add, update and delete records
 -all users can view them
-Courses
+
+Courses:
 -admin/creator can add, update and delete records
 -all users can view them
+
+Users:
+-all users can view them
+
+Resources:
+-all users can view them
+
+Reviews:
+-all users can view them
+-authenticated users can create reviews only for courses they have purchased
+-users can update their own reviews
+-users can delete their own reviews
+
+Orders:
+-authenticated users can view their own orders
+-authenticated users can create orders
 

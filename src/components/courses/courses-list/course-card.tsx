@@ -43,7 +43,6 @@ const CourseCard = ({ course, handleBookmark, handleBookmarkKeyDown }: CourseCar
     }
   };
 
-  console.log(course);
   return (
     <StyledCourseCard
       tabIndex={0}

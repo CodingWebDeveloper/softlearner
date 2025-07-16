@@ -26,4 +26,45 @@ export async function createClientServer() {
       },
     }
   )
+}
+
+export function createWebhookClient() {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return []
+        },
+        setAll() {
+          // No-op for webhooks
+        },
+      },
+    }
+  )
+}
+
+// Special client for payment operations that bypasses RLS
+export function createPaymentClient() {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+        // Disable session persistence for payment operations
+      },
+      cookies: {
+        getAll() {
+          return []
+        },
+        setAll() {
+          // No-op as this client is only for database operations
+        },
+      },
+    }
+  )
 } 

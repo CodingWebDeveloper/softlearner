@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Card, CardContent, LinearProgress, Rating, Stack, Typography } from '@mui/material';
+import { LinearProgress, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { trpc } from '@/lib/trpc/trpc';
 import LoadingFallback from '@/components/loading-fallback';

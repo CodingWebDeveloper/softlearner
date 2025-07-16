@@ -1,5 +1,5 @@
 import { Fragment, useState, useMemo, ChangeEvent } from 'react';
-import { Typography, InputAdornment, Divider, Grid, Skeleton } from '@mui/material';
+import { InputAdornment, Divider, Grid, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';

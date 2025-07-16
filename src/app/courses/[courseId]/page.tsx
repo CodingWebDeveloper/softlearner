@@ -12,7 +12,6 @@ import CourseSidebar from '@/components/courses/course-details/course-sidebar';
 import { SidebarContainer } from '@/components/styles/courses/courses.styles';
 import { trpc } from '@/lib/trpc/trpc';
 import { useParams } from 'next/navigation';
-import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
 
@@ -23,11 +22,11 @@ const CourseDetailsPage: FC = () => {
   const params = useParams();
   const courseId = typeof params?.courseId === 'string' ? params.courseId : Array.isArray(params?.courseId) ? params.courseId[0] : '';
 
-  const { data: course, isLoading, error } = trpc.courses.getCourseById.useQuery(courseId, {
+  const { data: course, isLoading: isCourseLoading, error: courseError } = trpc.courses.getCourseById.useQuery(courseId, {
     enabled: !!courseId,
   });
 
-  if (isLoading) {
+  if (isCourseLoading) {
     return (
       <CourseDetailsContainer>
         <Grid container spacing={6} alignItems="start">
@@ -47,7 +46,7 @@ const CourseDetailsPage: FC = () => {
     );
   }
 
-  if (error || !course) {
+  if (courseError || !course) {
     return (
       <CourseDetailsContainer>
         <Alert severity="error">Failed to load course details.</Alert>

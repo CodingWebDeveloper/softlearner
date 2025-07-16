@@ -12,7 +12,6 @@ interface ResourceListProps {
 }
 
 const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
-  console.log(courseId);
   const { data: resources, isLoading, error } = trpc.resources.getResourcesByCourseId.useQuery(
     { courseId: courseId || '' },
     { enabled: !!courseId }
@@ -47,7 +46,6 @@ const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
   const videos = resources.filter(r => r.type === 'video');
   const downloads = resources.filter(r => r.type === 'downloadable file');
 
-  console.log(resources);
   return (
     <>
 

@@ -10,7 +10,6 @@ import {
   OldPrice, 
   MetaItem, 
   CardStyled,
-  AddToCartButton,
   MetaItemText,
   PreviewIcon,
   DialogContentStyled,
@@ -27,9 +26,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import { BasicCourse } from '@/services/interfaces/service.interfaces';
 import { PreviewResource } from '@/lib/database/database.types';
 import { trpc } from '@/lib/trpc/trpc';
+import { BuyNowButton } from './buy-now-button';
 
 interface CourseSidebarProps {
-  course: BasicCourse
+  course: BasicCourse;
 }
 
 const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
@@ -37,9 +37,16 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const { data: resourcesData, isLoading: isResourcesLoading} = trpc.resources.getResourcesByCourseId.useQuery(
     { courseId: course?.id},
-    {enabled: !!course?.id});
+    {enabled: !!course?.id}
+  );
+
+  const { data: isEnrolled, isLoading: isEnrollmentLoading } = trpc.courses.isEnrolled.useQuery(
+    course.id,
+    { enabled: !!course?.id }
+  );
 
   // Variables/State
   const hasDiscount = course?.new_price !== null && course?.new_price !== undefined;
@@ -84,11 +91,12 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
     }
   };
 
-  if (isResourcesLoading) {
+  if (isResourcesLoading || isEnrollmentLoading) {
     return (
       <Skeleton variant="rectangular" width="100%" height={320} sx={{ borderRadius: 2 }} />
     )
   }
+
   return (
     <CardStyled>
       <ClickablePreviewBox
@@ -166,17 +174,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
         )}
       </PriceContainer>
 
-      <AddToCartButton
-        variant="contained"
-        color="primary"
-        fullWidth
-        aria-label="Add to Cart"
-        tabIndex={0}
-        onClick={() => {}}
-        onKeyDown={(e: KeyboardEvent) => { if (e.key === 'Enter') {/* handle add to cart */} }}
-      >
-        ADD TO CART
-      </AddToCartButton>
+      <BuyNowButton courseId={course.id} isEnrolled={isEnrolled} />
 
       <DividerStyled />
       <Stack spacing={1.5}>

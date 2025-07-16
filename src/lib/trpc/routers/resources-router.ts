@@ -1,11 +1,10 @@
-import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
 import { getResourcesByCourseId } from '@/services/resources-service';
+import { router, procedure } from '../server';
 
-const t = initTRPC.create();
 
-export const resourcesRouter = t.router({
-  getResourcesByCourseId: t.procedure
+export const resourcesRouter =  router({
+  getResourcesByCourseId: procedure
     .input(z.object({ courseId: z.string() }))
     .query(async ({ input }) => {
       try {
