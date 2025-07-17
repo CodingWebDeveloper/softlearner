@@ -34,7 +34,7 @@ export const paymentsRouter = router({
       }
 
       // Check if user already purchased this course
-      const { data: existingOrder, error: orderError } = await ctx.supabase
+      const { data: existinSuccessOrder } = await ctx.supabase
         .from('orders')
         .select('*')
         .eq('user_id', userId)
@@ -42,7 +42,7 @@ export const paymentsRouter = router({
         .eq('status', ORDER_STATUS.SUCCEEDED)
         .single();
 
-      if (existingOrder) {
+      if (existinSuccessOrder) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message: PAYMENT_ERRORS.ALREADY_PURCHASED,
@@ -54,18 +54,18 @@ export const paymentsRouter = router({
       try {
         // Use payment client for order operations
         const paymentClient = createPaymentClient();
+
         // Check if order already exists
-        const { data: tempOrder, error: orderError } = await paymentClient
+        const { data: existingOrder } = await paymentClient
           .from('orders')
           .select('*')
           .eq('user_id', userId)
           .eq('course_id', courseId)
           .maybeSingle();
 
-        let orderId = tempOrder?.id as string;
+        let orderId = existingOrder?.id as string;
 
-        console.log("tempOrder", tempOrder);
-        if (tempOrder === null || tempOrder === undefined) {
+        if (existingOrder === null || existingOrder === undefined) {
           // Create a new order record
           const { data: order, error: createOrderError } = await paymentClient
             .from('orders')

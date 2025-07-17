@@ -33,10 +33,10 @@ export async function POST(req: Request) {
   switch (event.type) {
     case STRIPE_WEBHOOK_EVENTS.CHECKOUT_SESSION_COMPLETED: {
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log("session", session);
+
       if (!session.metadata?.orderId || !session.metadata?.courseId || !session.metadata?.userId) {
         console.error('Missing required metadata in session');
-        console.log("in error");
+
         return NextResponse.json(
           { message: PAYMENT_ERRORS.WEBHOOK_MISSING_METADATA },
           { status: 400 }
@@ -50,8 +50,8 @@ export async function POST(req: Request) {
         .eq('id', session.metadata.orderId);
 
       if (updateError) {
-        console.log("in error 2", updateError);
         console.error('Failed to update order status:', updateError);
+        
         return NextResponse.json(
           { message: PAYMENT_ERRORS.UPDATE_ORDER_STATUS_FAILED },
           { status: 500 }
