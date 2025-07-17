@@ -1,6 +1,17 @@
-import { getCategories as getCategoriesDb } from '@/lib/database/database';
-import type { Category } from '@/lib/database/database';
+import { createClient } from '../lib/supabase/client';
+import type { Category } from '@/lib/database/database.types';
 
 export const getCategories = async (): Promise<Category[]> => {
-  return getCategoriesDb();
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('name');
+
+  if (error) {
+    // Optionally log error here
+    throw new Error(error.message);
+  }
+
+  return data;
 }; 

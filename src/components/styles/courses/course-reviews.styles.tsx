@@ -41,11 +41,11 @@ export const RatingRow = styled(Box)(({ theme }) => ({
   gap: theme.spacing(1),
 }));
 
-export const ReviewsList = styled(List)(({ theme }) => ({
+export const ReviewsList = styled(List)({
   width: '100%',
   background: 'none',
   padding: 0,
-}));
+});
 
 export const ReviewItem = styled(ListItem)(({ theme }) => ({
   alignItems: 'flex-start',
@@ -80,10 +80,10 @@ export const ReviewHeader = styled(Box)(({ theme }) => ({
   gap: theme.spacing(1),
 }));
 
-export const ReviewName = styled(Typography)(({ theme }) => ({
+export const ReviewName = styled(Typography)({
   fontWeight: 600,
   fontSize: 16,
-}));
+});  
 
 export const ReviewDate = styled(Typography)(({ theme }) => ({
   color: theme.palette.custom.text.light,

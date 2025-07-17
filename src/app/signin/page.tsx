@@ -25,16 +25,12 @@ const SignInPage = () => {
   const router = useRouter();
   const theme = useTheme();
 
-  const handleRedirect = useCallback(() => {
+  // Redirect if already authenticated
+  useEffect(() => {
     if (!loading && user) {
       router.push("/");
     }
-  }, [loading, user, router]);
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    handleRedirect();
-  }, [handleRedirect]);
+  }, [loading, user]);
 
   // Show loading while checking authentication
   if (loading) {

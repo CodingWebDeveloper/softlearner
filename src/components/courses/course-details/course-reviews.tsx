@@ -1,102 +1,56 @@
-import { Fragment, useEffect, useState, useMemo, ChangeEvent } from 'react';
-import { Typography, InputAdornment, Divider, Grid, Skeleton } from '@mui/material';
+import { Fragment, useState, useMemo, ChangeEvent } from 'react';
+import { InputAdornment, Divider, Grid, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
-import { RatingValue, RatingCount, RatingBar, RatingRow, ReviewsList, ReviewItem, ReviewAvatar, ReviewContent, ReviewHeader, ReviewName, ReviewDate, ReviewText, HelpfulActions, SearchBarContainer, NoReviewsBox, SearchInput, HelpfulText, HelpfulButton, ShowMoreButton, ShowMoreContainer, ReviewStarsContainer, StarIconStyled, ReviewStarsWrapper } from '@/components/styles/courses/course-reviews.styles';
+import { ReviewsList, ReviewItem, ReviewAvatar, ReviewContent, ReviewHeader, ReviewName, ReviewDate, ReviewText, HelpfulActions, SearchBarContainer, NoReviewsBox, SearchInput, HelpfulText, HelpfulButton, ShowMoreButton, ShowMoreContainer, ReviewStarsContainer, StarIconStyled } from '@/components/styles/courses/course-reviews.styles';
+import { trpc } from '@/lib/trpc/trpc';
+import { BasicReview } from '@/services/interfaces/service.interfaces';
+import { RatingStatsCard } from './rating-stats-card';
 
-// Review type
-type Review = {
-  id: string;
-  name: string;
-  initials: string;
-  rating: number;
-  date: string;
-  text: string;
-  helpful: number;
-  notHelpful: number;
-};
-
-const reviewsMock: Review[] = [
-  {
-    id: '1',
-    name: 'Bruno Z.',
-    initials: 'BZ',
-    rating: 5,
-    date: 'a month ago',
-    text: 'terceiro curso que eu consumo desse professor, todos muito completos e didáticos',
-    helpful: 0,
-    notHelpful: 0,
-  },
-];
-
-const ratingSummary = {
-  average: 4.7,
-  total: 23000,
-  breakdown: [70, 24, 4, 1, 1], // percentages for 5,4,3,2,1 stars
-};
+interface CourseReviewsProps {
+  courseId: string;
+}
 
 const REVIEWS_PER_PAGE = 15;
 
-const CourseReviews = () => {
+const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [page, setPage] = useState(1);
-  // Simulate loading
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
+
+  const { data: reviewsData, isLoading, error } = trpc.reviews.getCourseReviews.useQuery({
+    courseId,
+    page,
+    pageSize: REVIEWS_PER_PAGE,
+    search: search || undefined,
+  }, {
+    enabled: !!courseId,
+  });
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
+    setPage(1); // Reset to first page when searching
   };
 
   const filteredReviews = useMemo(() => {
-    if (!search) return reviewsMock;
-    return reviewsMock.filter(r =>
-      r.text.toLowerCase().includes(search.toLowerCase()) ||
-      r.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [search]);
+    return reviewsData?.reviews || [];
+  }, [reviewsData]);
 
-  const paginatedReviews = useMemo(() => {
-    return filteredReviews.slice(0, page * REVIEWS_PER_PAGE);
-  }, [filteredReviews, page]);
-
-  const hasMore = paginatedReviews.length < filteredReviews.length;
+  const hasMore = reviewsData ? (page * REVIEWS_PER_PAGE) < reviewsData.totalRecord : false;
 
   const handleShowMore = () => {
     setPage(p => p + 1);
   };
 
   if (error) {
-    return <NoReviewsBox>Error loading reviews.</NoReviewsBox>;
+    return <NoReviewsBox>Error loading reviews: {error.message}</NoReviewsBox>;
   }
 
   return (
     <Grid container spacing={4}>
       {/* Ratings Summary */}
       <Grid size={5}>
-        <RatingValue>
-          <StarIconStyled filled style={{ fontSize: 32 }} />
-          {ratingSummary.average} course rating
-        </RatingValue>
-        <RatingCount>
-          {ratingSummary.total.toLocaleString()} ratings
-        </RatingCount>
-        <ReviewStarsWrapper>
-          {[5, 4, 3, 2, 1].map((star, idx) => (
-            <RatingRow key={star}>
-              <Typography variant="body2" >{star}</Typography>
-              <StarIconStyled filled />
-              <RatingBar variant="determinate" value={ratingSummary.breakdown[idx]} />
-              <Typography variant="body2" >{ratingSummary.breakdown[idx]}%</Typography>
-            </RatingRow>
-          ))}
-        </ReviewStarsWrapper>
+        <RatingStatsCard courseId={courseId} />
       </Grid>
 
       {/* Reviews List */}
@@ -120,24 +74,28 @@ const CourseReviews = () => {
             tabIndex={0}
           />
         </SearchBarContainer>
-        {loading ? (
+        {isLoading ? (
           <>
             {[1, 2].map(i => (
               <Skeleton key={i} variant="rectangular" height={80} />
             ))}
           </>
         ) : filteredReviews.length === 0 ? (
-          <NoReviewsBox>No reviews matched your search. Try searching with another term.</NoReviewsBox>
+          <NoReviewsBox>
+            {search ? 'No reviews matched your search. Try searching with another term.' : 'No reviews yet for this course.'}
+          </NoReviewsBox>
         ) : (
           <>
             <ReviewsList>
-              {paginatedReviews.map(review => (
+              {filteredReviews.map((review: BasicReview) => (
                 <Fragment key={review.id}>
-                  <ReviewItem tabIndex={0} aria-label={`Review by ${review.name}`} alignItems="flex-start" disableGutters>
-                    <ReviewAvatar>{review.initials}</ReviewAvatar>
+                  <ReviewItem tabIndex={0} aria-label={`Review by ${review.user?.full_name || 'Anonymous'}`} alignItems="flex-start" disableGutters>
+                    <ReviewAvatar>
+                      {review.user?.full_name ? review.user.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'A'}
+                    </ReviewAvatar>
                     <ReviewContent>
                       <ReviewHeader>
-                        <ReviewName>{review.name}</ReviewName>
+                        <ReviewName>{review.user?.full_name || 'Anonymous'}</ReviewName>
                         <ReviewStarsContainer>
                           {Array.from({ length: 5 }).map((_, i) => (
                             <StarIconStyled
@@ -147,9 +105,15 @@ const CourseReviews = () => {
                             />
                           ))}
                         </ReviewStarsContainer>
-                        <ReviewDate>{review.date}</ReviewDate>
+                        <ReviewDate>
+                          {new Date(review.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </ReviewDate>
                       </ReviewHeader>
-                      <ReviewText>{review.text}</ReviewText>
+                      <ReviewText>{review.content}</ReviewText>
                       <HelpfulActions>
                         <HelpfulText>Helpful?</HelpfulText>
                         <HelpfulButton aria-label="Thumbs up" size="small" tabIndex={0}>

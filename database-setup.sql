@@ -29,6 +29,12 @@ AFTER INSERT ON auth.users
 FOR EACH ROW
 EXECUTE FUNCTION public.handle_new_auth_user();
 
+-- Add Category table
+CREATE TABLE IF NOT EXISTS categories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
+
 -- Create Course table
 CREATE TABLE IF NOT EXISTS courses (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -36,6 +42,8 @@ CREATE TABLE IF NOT EXISTS courses (
   description TEXT,
   video_url TEXT,
   price DECIMAL(10,2) NOT NULL,
+  new_price DECIMAL(10,2),
+  currency TEXT NOT NULL DEFAULT 'USD',
   thumbnail_image_url TEXT,
   creator_id UUID REFERENCES users(id) ON DELETE SET NULL,
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
@@ -48,9 +56,13 @@ CREATE TABLE IF NOT EXISTS orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  status TEXT CHECK (status IN ('ACTIVE', 'PENDING', 'CANCELLED')) DEFAULT 'PENDING',
+  total_amount DECIMAL(10,2) NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'USD',
+  status TEXT CHECK (status IN ('PENDING', 'SUCCEEDED', 'FAILED')) DEFAULT 'PENDING',
+  stripe_payment_intent_id TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, course_id)
 );
 
 -- Create Resource table
@@ -59,9 +71,8 @@ CREATE TABLE IF NOT EXISTS resources (
   url TEXT NOT NULL,
   name TEXT NOT NULL,
   short_summary TEXT,
-  predefined TEXT CHECK (predefined IN ('video', 'downloadable file')),
+  type TEXT CHECK (type IN ('video', 'downloadable file')),
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  section_id UUID REFERENCES sections(id) ON DELETE SET NULL,
   order_index INTEGER,
   duration INTERVAL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -72,6 +83,7 @@ CREATE TABLE IF NOT EXISTS resources (
 CREATE TABLE IF NOT EXISTS reviews (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   content TEXT NOT NULL,
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5) NOT NULL,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -163,28 +175,12 @@ CREATE TABLE IF NOT EXISTS course_tags (
   PRIMARY KEY (course_id, tag_id)
 );
 
--- Add Section table
-CREATE TABLE IF NOT EXISTS sections (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  order_index INTEGER,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- Add UserResource table
 CREATE TABLE IF NOT EXISTS user_resources (
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   resource_id UUID REFERENCES resources(id) ON DELETE CASCADE,
   completed BOOLEAN DEFAULT FALSE,
   PRIMARY KEY (user_id, resource_id)
-);
-
--- Add Category table
-CREATE TABLE IF NOT EXISTS categories (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE
 );
 
 -- Enable Row Level Security on all custom tables (NOT auth.users)
@@ -202,7 +198,6 @@ ALTER TABLE user_tests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_answers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_tags ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
@@ -230,8 +225,6 @@ CREATE INDEX IF NOT EXISTS idx_user_answers_question_id ON user_answers(question
 CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name);
 CREATE INDEX IF NOT EXISTS idx_course_tags_course_id ON course_tags(course_id);
 CREATE INDEX IF NOT EXISTS idx_course_tags_tag_id ON course_tags(tag_id);
-CREATE INDEX IF NOT EXISTS idx_sections_course_id ON sections(course_id);
-CREATE INDEX IF NOT EXISTS idx_sections_order_index ON sections(order_index);
 CREATE INDEX IF NOT EXISTS idx_user_resources_user_id ON user_resources(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_resources_resource_id ON user_resources(resource_id);
 CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
@@ -285,37 +278,6 @@ CREATE TRIGGER update_user_answers_updated_at BEFORE UPDATE ON user_answers
 DROP TRIGGER IF EXISTS update_tags_updated_at ON tags;
 CREATE TRIGGER update_tags_updated_at BEFORE UPDATE ON tags
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_sections_updated_at ON sections;
-CREATE TRIGGER update_sections_updated_at BEFORE UPDATE ON sections
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- =====================
--- RLS POLICIES (Categories, Tags, Courses)
--- =====================
-
--- Categories Policies
--- Allow all users to view categories
-CREATE POLICY "Allow all users to view categories" ON categories
-FOR SELECT USING (true);
--- Allow only admin to add, update, delete categories
-CREATE POLICY "Allow only admin to modify categories" ON categories
-FOR ALL USING (auth.role() = 'admin') WITH CHECK (auth.role() = 'admin');
-
--- Tags Policies
--- Allow all users to view tags
-CREATE POLICY "Allow all users to view tags" ON tags
-FOR SELECT USING (true);
--- Allow only admin to add, update, delete tags
-CREATE POLICY "Allow only admin to modify tags" ON tags
-FOR ALL USING (auth.role() = 'admin') WITH CHECK (auth.role() = 'admin');
-
--- Courses Policies
--- Allow all users to view courses
-CREATE POLICY "Allow all users to view courses" ON courses
-FOR SELECT USING (true);
--- Allow only admin or creator to add, update, delete courses
-CREATE POLICY "Allow admin or creator to modify courses" ON courses
-FOR ALL USING (auth.role() = 'admin' OR auth.uid() = creator_id) WITH CHECK (auth.role() = 'admin' OR auth.uid() = creator_id);

@@ -1,8 +1,6 @@
-import { initTRPC } from '@trpc/server';
 import { z } from 'zod';
 import { getTags, createTag, updateTag, deleteTag } from '../../../services/tags-service';
-
-const t = initTRPC.create();
+import { router, procedure } from '../server';
 
 const getTagsInput = z.object({
   search: z.string().optional(),
@@ -22,8 +20,8 @@ const deleteTagInput = z.object({
   id: z.string(),
 });
 
-export const tagsRouter = t.router({
-  getTags: t.procedure
+export const tagsRouter = router({
+  getTags: procedure
     .input(getTagsInput.optional())
     .query(async ({ input }) => {
       try {
@@ -34,7 +32,7 @@ export const tagsRouter = t.router({
       }
     }),
 
-  createTag: t.procedure
+  createTag: procedure
     .input(createTagInput)
     .mutation(async ({ input }) => {
       try {
@@ -45,7 +43,7 @@ export const tagsRouter = t.router({
       }
     }),
 
-  updateTag: t.procedure
+  updateTag: procedure
     .input(updateTagInput)
     .mutation(async ({ input }) => {
       try {
@@ -56,7 +54,7 @@ export const tagsRouter = t.router({
       }
     }),
 
-  deleteTag: t.procedure
+  deleteTag: procedure
     .input(deleteTagInput)
     .mutation(async ({ input }) => {
       try {

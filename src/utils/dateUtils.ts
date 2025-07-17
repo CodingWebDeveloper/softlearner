@@ -9,4 +9,22 @@ export const formatDate = (dateString: string): string => {
   } catch {
     return 'Invalid date';
   }
+};
+
+export const formatDuration = (duration: string): string => {
+  if (!duration) return '';
+
+  const [hours, minutes] = duration.split(':').map(Number);
+  
+  if (isNaN(hours) || isNaN(minutes)) return '';
+  
+  if (hours === 0) {
+    return `${minutes}min`;
+  }
+  
+  if (minutes === 0) {
+    return `${hours}hr`;
+  }
+  
+  return `${hours}hr ${minutes}min`;
 }; 

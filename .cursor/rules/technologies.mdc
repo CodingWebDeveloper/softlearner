@@ -66,4 +66,8 @@ Technical preferences:
 - When you implement something similar as a feature, make sure to stay consistent and apply the approaches you had already implemented in the project
 - Make the components reusable and avoid implementing all the business logic in the pages
 - Use constants instead of magic strings/numbers
+
+Database:
+- When setting up the database or adding a new table, ensure that the table is created before any references to it are made (e.g., foreign keys or joins).
+- When setting up policies or adding new ones, add them in file special to policies
     

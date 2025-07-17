@@ -1,13 +1,12 @@
 'use client';
 
 import { FC, SyntheticEvent } from 'react';
-import { Tabs, useTheme } from '@mui/material';
+import { Box, Tabs, useTheme } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/store/index';
 import { setTab, setCurrentVideo, selectCurrentVideoId } from '@/lib/store/features/courseMaterialsSlice';
 import {
   VideoListSection,
-  TabPanel,
   StyledTab,
   SectionTitle,
 } from '@/components/styles/courses/materials.styles';
@@ -55,6 +54,20 @@ const MOCK_QUIZZES: Quiz[] = [
   { id: 2, title: 'Quiz 2: CSS Selectors', progress: 60 },
   { id: 3, title: 'Quiz 3: JavaScript Variables', progress: 0 },
 ];
+
+export const TabPanel = ({ children, value, index, ...other }: any) => {
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`tabpanel-${index}`}
+      aria-labelledby={`tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box pt={2}>{children}</Box>}
+    </div>
+  );
+};
 
 const CourseMaterialsTabs: FC<CourseMaterialsTabsProps> = ({ videoList }) => {
   const theme = useTheme();
