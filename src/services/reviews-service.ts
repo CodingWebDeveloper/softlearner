@@ -49,7 +49,7 @@ export const getCourseRatingStats = async (courseId: string): Promise<RatingStat
 
 export const getCourseReviews = async (params: GetReviewsParams): Promise<Omit<GetReviewsResult, 'ratingStats'>> => {
   const supabase = createClient();
-  const { courseId, page, pageSize, search } = params;
+  const { courseId, page, pageSize, search, rating } = params;
   const offset = (page - 1) * pageSize;
 
   let query = supabase
@@ -68,6 +68,10 @@ export const getCourseReviews = async (params: GetReviewsParams): Promise<Omit<G
 
   if (search) {
     query = query.ilike('content', `%${search}%`);
+  }
+
+  if (rating !== undefined && rating !== null) {
+    query = query.eq('rating', rating);
   }
 
   // Apply pagination

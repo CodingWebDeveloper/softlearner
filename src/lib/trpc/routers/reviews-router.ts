@@ -8,6 +8,7 @@ const getReviewsInput = z.object({
   page: z.number().min(1).default(1),
   pageSize: z.number().min(1).max(100).default(15),
   search: z.string().optional(),
+  rating: z.number().optional(),
 });
 
 export const reviewsRouter = router({

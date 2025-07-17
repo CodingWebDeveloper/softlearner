@@ -1,6 +1,7 @@
 import { styled } from '@mui/material/styles';
 import { Box, Typography, Avatar, LinearProgress, TextField, IconButton, List, ListItem, Divider, Button, Grid, Skeleton } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 
 export const ReviewsContainer = styled(Grid)(({ theme }) => ({
   gap: theme.spacing(4),
@@ -35,10 +36,20 @@ export const RatingBar = styled(LinearProgress)(({ theme }) => ({
   },
 }));
 
-export const RatingRow = styled(Box)(({ theme }) => ({
+export const RatingRow = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'isActive'
+})<{ isActive?: boolean }>(({ theme, isActive }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1),
+  padding: theme.spacing(0.5, 1),
+  borderRadius: theme.shape.borderRadius,
+  cursor: 'pointer',
+  transition: 'background-color 0.2s ease',
+  backgroundColor: isActive ? theme.palette.action.selected : 'transparent',
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover,
+  },
 }));
 
 export const ReviewsList = styled(List)({
@@ -184,8 +195,14 @@ export const StarRatingRow = styled(Box)(({ theme }) => ({
   marginLeft: theme.spacing(1),
 }));
 
-export const StarIconStyled = styled(StarIcon)<{ filled?: boolean }>(({ theme, filled }) => ({
-  color: filled ? theme.palette.custom.accent.yellow : theme.palette.custom.text.light,
+
+export const FilledStarIcon = styled(StarIcon)(({ theme }) => ({
+  color: theme.palette.custom.accent.yellow,
+  fontSize: 18,
+}));
+
+export const OutlinedStarIcon = styled(StarBorderIcon)(({ theme }) => ({
+  color: theme.palette.custom.accent.yellow,
   fontSize: 18,
 }));
 

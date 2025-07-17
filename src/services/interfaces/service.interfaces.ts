@@ -34,10 +34,11 @@ export interface RatingStats {
 }
 
 export interface GetReviewsParams {
-    courseId: string;
-    page: number;
-    pageSize: number;
-    search?: string;
+  courseId: string;
+  page: number;
+  pageSize: number;
+  search?: string;
+  rating?: number | null;
 }
 
 export interface GetReviewsResult {
