@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 
 -- Create Vote table
-CREATE TABLE IF NOT EXISTS votes (
+CREATE TABLE IF NOT EXISTS review_votes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   review_id UUID REFERENCES reviews(id) ON DELETE CASCADE,
@@ -189,7 +189,7 @@ ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE votes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE review_votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookmarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
@@ -211,8 +211,8 @@ CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_resources_course_id ON resources(course_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_course_id ON reviews(course_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON reviews(user_id);
-CREATE INDEX IF NOT EXISTS idx_votes_review_id ON votes(review_id);
-CREATE INDEX IF NOT EXISTS idx_votes_user_id ON votes(user_id);
+CREATE INDEX IF NOT EXISTS idx_review_votes_review_id ON review_votes(review_id);
+CREATE INDEX IF NOT EXISTS idx_review_votes_user_id ON review_votes(user_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON bookmarks(user_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_course_id ON bookmarks(course_id);
 CREATE INDEX IF NOT EXISTS idx_tests_course_id ON tests(course_id);
@@ -254,8 +254,8 @@ CREATE TRIGGER update_resources_updated_at BEFORE UPDATE ON resources
 DROP TRIGGER IF EXISTS update_reviews_updated_at ON reviews;
 CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_votes_updated_at ON votes;
-CREATE TRIGGER update_votes_updated_at BEFORE UPDATE ON votes
+DROP TRIGGER IF EXISTS update_review_votes_updated_at ON review_votes;
+CREATE TRIGGER update_review_votes_updated_at BEFORE UPDATE ON review_votes
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS update_bookmarks_updated_at ON bookmarks;
 CREATE TRIGGER update_bookmarks_updated_at BEFORE UPDATE ON bookmarks

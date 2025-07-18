@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/client';
-import type { PreviewResource } from '@/lib/database/database.types';
+import { createClient } from "@/lib/supabase/server";
+import type { PreviewResource } from "@/lib/database/database.types";
 
 function formatIntervalToDuration(interval: string | null): string | undefined {
   if (!interval) return undefined;
@@ -13,23 +13,31 @@ function formatIntervalToDuration(interval: string | null): string | undefined {
 
   // If for some reason it's not in the correct format, try to parse and format it
   const totalSeconds = Math.floor(new Date(interval).getTime() / 1000);
-  const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-  const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-  
+  const hours = Math.floor(totalSeconds / 3600)
+    .toString()
+    .padStart(2, "0");
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+
   return `${hours}:${minutes}:${seconds}`;
 }
 
-export const getResourcesByCourseId = async (courseId: string): Promise<PreviewResource[]> => {
+export const getResourcesByCourseId = async (
+  courseId: string
+): Promise<PreviewResource[]> => {
   if (!courseId) return [];
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('resources')
-    .select('id, name, short_summary, type, course_id, order_index, duration, created_at, updated_at')
-    .eq('course_id', courseId)
-    .order('created_at', { ascending: true });
+    .from("resources")
+    .select(
+      "id, name, short_summary, type, course_id, order_index, duration, created_at, updated_at"
+    )
+    .eq("course_id", courseId)
+    .order("created_at", { ascending: true });
 
   if (error) {
     // Optionally log error
@@ -37,9 +45,9 @@ export const getResourcesByCourseId = async (courseId: string): Promise<PreviewR
   }
 
   if (!data) return [];
-  
-  return data.map((resource: any) => ({
+
+  return data.map((resource: PreviewResource) => ({
     ...resource,
-    duration: formatIntervalToDuration(resource.duration)
+    duration: formatIntervalToDuration(resource.duration || null),
   })) as PreviewResource[];
-}; 
+};

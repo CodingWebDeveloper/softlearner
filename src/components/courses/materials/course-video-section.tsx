@@ -1,13 +1,19 @@
-'use client';
+"use client";
 
-import { FC } from 'react';
-import { Box, Typography, Avatar, useTheme } from '@mui/material';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/lib/store/index';
-import { toggleBookmark } from '@/lib/store/features/courseMaterialsSlice';
-import { VideoSection, VideoEmbed, BookmarkButton, InstructorBox } from '@/components/styles/courses/materials.styles';
+import { FC } from "react";
+import { Box, Typography, Avatar, useTheme } from "@mui/material";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/store/index";
+import { toggleBookmark } from "@/lib/store/features/courseMaterialsSlice";
+import {
+  VideoSection,
+  VideoEmbed,
+  BookmarkButton,
+  InstructorBox,
+} from "@/components/styles/courses/materials.styles";
+import { useAppDispatch } from "@/lib/store/hooks";
 
 interface Instructor {
   name: string;
@@ -36,12 +42,17 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({
   instructor,
   videoList,
 }) => {
+  const dispatch = useAppDispatch();
   const theme = useTheme();
-  const dispatch = useDispatch();
-  const bookmarked = useSelector((state: RootState) => state.courseMaterials.bookmarked);
-  const currentVideoId = useSelector((state: RootState) => state.courseMaterials.currentVideoId);
+  const bookmarked = useSelector(
+    (state: RootState) => state.courseMaterials.bookmarked
+  );
+  const currentVideoId = useSelector(
+    (state: RootState) => state.courseMaterials.currentVideoId
+  );
 
-  const currentVideo = videoList.find((v) => v.id === currentVideoId) || videoList[0];
+  const currentVideo =
+    videoList.find((v) => v.id === currentVideoId) || videoList[0];
 
   const handleBookmark = () => {
     dispatch(toggleBookmark());
@@ -60,26 +71,57 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({
           allowFullScreen
         />
       </VideoEmbed>
-      <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
-        <Typography variant="h5" fontWeight={600} style={{ color: theme.palette.custom.text.white }}>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mt={2}
+      >
+        <Typography
+          variant="h5"
+          fontWeight={600}
+          style={{ color: theme.palette.custom.text.white }}
+        >
           {courseTitle}
         </Typography>
         <BookmarkButton
-          aria-label={bookmarked ? 'Remove Bookmark' : 'Add Bookmark'}
+          aria-label={bookmarked ? "Remove Bookmark" : "Add Bookmark"}
           onClick={handleBookmark}
         >
-          {bookmarked ? <BookmarkIcon color="primary" /> : <BookmarkBorderIcon color="action" />}
+          {bookmarked ? (
+            <BookmarkIcon color="primary" />
+          ) : (
+            <BookmarkBorderIcon color="action" />
+          )}
         </BookmarkButton>
       </Box>
-      <Typography variant="body1" style={{ color: theme.palette.custom.text.light }} mt={2}>
+      <Typography
+        variant="body1"
+        style={{ color: theme.palette.custom.text.light }}
+        mt={2}
+      >
         {courseDescription}
       </Typography>
       <InstructorBox>
         <Avatar src={instructor.avatar} alt={instructor.name} />
         <Box ml={2}>
-          <Typography variant="subtitle1" fontWeight={500} style={{ color: theme.palette.custom.text.white }}>{instructor.name}</Typography>
-          <Typography variant="body2" style={{ color: theme.palette.custom.text.light }}>{instructor.bio}</Typography>
-          <Typography variant="caption" style={{ color: theme.palette.custom.text.light }}>
+          <Typography
+            variant="subtitle1"
+            fontWeight={500}
+            style={{ color: theme.palette.custom.text.white }}
+          >
+            {instructor.name}
+          </Typography>
+          <Typography
+            variant="body2"
+            style={{ color: theme.palette.custom.text.light }}
+          >
+            {instructor.bio}
+          </Typography>
+          <Typography
+            variant="caption"
+            style={{ color: theme.palette.custom.text.light }}
+          >
             {instructor.rating} ★ ({instructor.reviews} reviews)
           </Typography>
         </Box>
@@ -88,4 +130,4 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({
   );
 };
 
-export default CourseVideoSection; 
+export default CourseVideoSection;

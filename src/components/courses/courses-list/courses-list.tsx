@@ -1,10 +1,29 @@
-import { ChangeEvent, KeyboardEvent, useState } from 'react';
-import { Box, CircularProgress, Grid, Pagination, Typography, useTheme } from '@mui/material';
-import CourseCard from './course-card';
-import { CoursesListContainer, CourseGridItem, AlertStyled, CoursesPageContainer, TextLightText, StyledPagination, PaginationWrapper } from '@/components/styles/courses/courses.styles';
-import { trpc } from '@/lib/trpc/trpc';
-import { COURSES_PER_PAGE } from '@/utils/course-list.utils';
-import { useAppSelector } from '@/lib/store/hooks';
+import { ChangeEvent, KeyboardEvent, useState } from "react";
+import {
+  Box,
+  CircularProgress,
+  Grid,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import CourseCard from "./course-card";
+import {
+  CoursesListContainer,
+  CourseGridItem,
+  AlertStyled,
+  CoursesPageContainer,
+  TextLightText,
+  StyledPagination,
+  PaginationWrapper,
+} from "@/components/styles/courses/courses.styles";
+import { trpc } from "@/lib/trpc/trpc";
+import { COURSES_PER_PAGE } from "@/utils/course-list.utils";
+import { useAppSelector } from "@/lib/store/hooks";
+import {
+  selectSearch,
+  selectCategoryId,
+  selectTags,
+} from "@/lib/store/features/filterSlice";
 
 interface CoursesListProps {
   handleBookmark: (id: string) => void;
@@ -12,22 +31,32 @@ interface CoursesListProps {
   MAX_ENROLLED_DISPLAY: number;
 }
 
-const CoursesList = ({ handleBookmark, handleBookmarkKeyDown, MAX_ENROLLED_DISPLAY }: CoursesListProps) => {
+const CoursesList = ({
+  handleBookmark,
+  handleBookmarkKeyDown,
+  MAX_ENROLLED_DISPLAY,
+}: CoursesListProps) => {
   // General Hooks
   const theme = useTheme();
 
   // Selectors
-  const { search, category, tags } = useAppSelector((state) => state.filter);
-  
+  const search = useAppSelector(selectSearch);
+  const categoryId = useAppSelector(selectCategoryId);
+  const tags = useAppSelector(selectTags);
+
   // States
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: coursesData, isLoading, error } = trpc.courses.getCourses.useQuery({
+  const {
+    data: coursesData,
+    isLoading,
+    error,
+  } = trpc.courses.getCourses.useQuery({
     page: currentPage,
     pageSize: COURSES_PER_PAGE,
     search: search || undefined,
-    category: category || undefined,
-    tags: tags.length > 0 ? tags : undefined,
+    categoryId: categoryId || undefined,
+    tags: tags.length > 0 ? tags.map((tag) => tag.id) : undefined,
   });
 
   // Pagination
@@ -57,8 +86,8 @@ const CoursesList = ({ handleBookmark, handleBookmarkKeyDown, MAX_ENROLLED_DISPL
 
   if (error) {
     return (
-      <CoursesPageContainer >
-        <AlertStyled severity="error" >
+      <CoursesPageContainer>
+        <AlertStyled severity="error">
           <Typography variant="body1">
             Failed to load courses. Please try again later.
           </Typography>
@@ -101,7 +130,7 @@ const CoursesList = ({ handleBookmark, handleBookmarkKeyDown, MAX_ENROLLED_DISPL
       </Grid>
       <PaginationWrapper>
         <StyledPagination
-          sx={{color: theme.palette.custom.text.white}}
+          sx={{ color: theme.palette.custom.text.white }}
           count={totalPages}
           page={currentPage}
           onChange={handlePageChange}
@@ -111,4 +140,4 @@ const CoursesList = ({ handleBookmark, handleBookmarkKeyDown, MAX_ENROLLED_DISPL
   );
 };
 
-export default CoursesList; 
+export default CoursesList;

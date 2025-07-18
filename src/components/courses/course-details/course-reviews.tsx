@@ -1,12 +1,22 @@
-import { Fragment, useState, useMemo, ChangeEvent } from 'react';
-import { InputAdornment, Divider, Grid, Skeleton } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
-import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
-import { ReviewsList, ReviewItem, ReviewAvatar, ReviewContent, ReviewHeader, ReviewName, ReviewDate, ReviewText, HelpfulActions, SearchBarContainer, NoReviewsBox, SearchInput, HelpfulText, HelpfulButton, ShowMoreButton, ShowMoreContainer, ReviewStarsContainer, StarIconStyled } from '@/components/styles/courses/course-reviews.styles';
-import { trpc } from '@/lib/trpc/trpc';
-import { BasicReview } from '@/services/interfaces/service.interfaces';
-import { RatingStatsCard } from './rating-stats-card';
+"use client";
+
+import { useState, useMemo, ChangeEvent } from "react";
+import { InputAdornment, Grid, Skeleton } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import {
+  ReviewsList,
+  NoReviewsBox,
+  SearchBarContainer,
+  SearchInput,
+  ShowMoreButton,
+  ShowMoreContainer,
+} from "@/components/styles/courses/course-reviews.styles";
+import { trpc } from "@/lib/trpc/trpc";
+import { BasicReview } from "@/services/interfaces/service.interfaces";
+import { RatingStatsCard } from "./rating-stats-card";
+import { ReviewCard } from "./review-card";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { setSearchTerm } from "@/lib/store/features/reviewFiltersSlice";
 
 interface CourseReviewsProps {
   courseId: string;
@@ -15,20 +25,31 @@ interface CourseReviewsProps {
 const REVIEWS_PER_PAGE = 15;
 
 const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
-  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const dispatch = useAppDispatch();
+  const { searchTerm, selectedRating } = useAppSelector(
+    (state) => state.reviewFilters
+  );
 
-  const { data: reviewsData, isLoading, error } = trpc.reviews.getCourseReviews.useQuery({
-    courseId,
-    page,
-    pageSize: REVIEWS_PER_PAGE,
-    search: search || undefined,
-  }, {
-    enabled: !!courseId,
-  });
+  const {
+    data: reviewsData,
+    isLoading,
+    error,
+  } = trpc.reviews.getCourseReviews.useQuery(
+    {
+      courseId,
+      page,
+      pageSize: REVIEWS_PER_PAGE,
+      search: searchTerm || undefined,
+      rating: selectedRating || undefined,
+    },
+    {
+      enabled: !!courseId,
+    }
+  );
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
+    dispatch(setSearchTerm(e.target.value));
     setPage(1); // Reset to first page when searching
   };
 
@@ -36,10 +57,12 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
     return reviewsData?.reviews || [];
   }, [reviewsData]);
 
-  const hasMore = reviewsData ? (page * REVIEWS_PER_PAGE) < reviewsData.totalRecord : false;
+  const hasMore = reviewsData
+    ? page * REVIEWS_PER_PAGE < reviewsData.totalRecord
+    : false;
 
   const handleShowMore = () => {
-    setPage(p => p + 1);
+    setPage((p) => p + 1);
   };
 
   if (error) {
@@ -49,15 +72,15 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
   return (
     <Grid container spacing={4}>
       {/* Ratings Summary */}
-      <Grid size={5}>
+      <Grid size={{ xs: 12, md: 5 }}>
         <RatingStatsCard courseId={courseId} />
       </Grid>
 
       {/* Reviews List */}
-      <Grid size={7}>
+      <Grid size={{ xs: 12, md: 7 }}>
         <SearchBarContainer>
           <SearchInput
-            value={search}
+            value={searchTerm}
             onChange={handleSearchChange}
             placeholder="Search reviews"
             size="small"
@@ -68,7 +91,7 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
                   <SearchIcon />
                 </InputAdornment>
               ),
-              'aria-label': 'Search reviews',
+              "aria-label": "Search reviews",
             }}
             variant="outlined"
             tabIndex={0}
@@ -76,62 +99,31 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
         </SearchBarContainer>
         {isLoading ? (
           <>
-            {[1, 2].map(i => (
+            {[1, 2].map((i) => (
               <Skeleton key={i} variant="rectangular" height={80} />
             ))}
           </>
         ) : filteredReviews.length === 0 ? (
           <NoReviewsBox>
-            {search ? 'No reviews matched your search. Try searching with another term.' : 'No reviews yet for this course.'}
+            {searchTerm || selectedRating
+              ? `No reviews matched your ${searchTerm ? "search" : ""}${
+                  searchTerm && selectedRating ? " and " : ""
+                }${selectedRating ? `${selectedRating}-star filter` : ""}.`
+              : "No reviews yet for this course."}
           </NoReviewsBox>
         ) : (
           <>
             <ReviewsList>
               {filteredReviews.map((review: BasicReview) => (
-                <Fragment key={review.id}>
-                  <ReviewItem tabIndex={0} aria-label={`Review by ${review.user?.full_name || 'Anonymous'}`} alignItems="flex-start" disableGutters>
-                    <ReviewAvatar>
-                      {review.user?.full_name ? review.user.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'A'}
-                    </ReviewAvatar>
-                    <ReviewContent>
-                      <ReviewHeader>
-                        <ReviewName>{review.user?.full_name || 'Anonymous'}</ReviewName>
-                        <ReviewStarsContainer>
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <StarIconStyled
-                              key={i}
-                              filled={i < review.rating}
-                              aria-label={i < review.rating ? 'Filled star' : 'Empty star'}
-                            />
-                          ))}
-                        </ReviewStarsContainer>
-                        <ReviewDate>
-                          {new Date(review.created_at).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </ReviewDate>
-                      </ReviewHeader>
-                      <ReviewText>{review.content}</ReviewText>
-                      <HelpfulActions>
-                        <HelpfulText>Helpful?</HelpfulText>
-                        <HelpfulButton aria-label="Thumbs up" size="small" tabIndex={0}>
-                          <ThumbUpAltOutlinedIcon fontSize="small" />
-                        </HelpfulButton>
-                        <HelpfulButton aria-label="Thumbs down" size="small" tabIndex={0}>
-                          <ThumbDownAltOutlinedIcon fontSize="small" />
-                        </HelpfulButton>
-                      </HelpfulActions>
-                    </ReviewContent>
-                  </ReviewItem>
-                  <Divider component="li" />
-                </Fragment>
+                <ReviewCard key={review.id} review={review} />
               ))}
             </ReviewsList>
             {hasMore && (
               <ShowMoreContainer>
-                <ShowMoreButton onClick={handleShowMore} aria-label="Show more reviews">
+                <ShowMoreButton
+                  onClick={handleShowMore}
+                  aria-label="Show more reviews"
+                >
                   Show more reviews
                 </ShowMoreButton>
               </ShowMoreContainer>
@@ -143,4 +135,4 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
   );
 };
 
-export default CourseReviews; 
+export default CourseReviews;
