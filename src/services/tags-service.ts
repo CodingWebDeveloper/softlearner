@@ -1,10 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Tag } from "@/lib/database/database.types";
-
-export interface GetTagsParams {
-  search?: string;
-  limit?: number;
-}
+import { GetTagsParams } from "./interfaces/service.interfaces";
 
 export const getTags = async (params: GetTagsParams = {}): Promise<Tag[]> => {
   const supabase = await createClient();
@@ -43,29 +39,23 @@ export const getTagsByCourseId = async (courseId: string): Promise<Tag[]> => {
     .select("tag_id")
     .eq("course_id", courseId);
 
-  console.log("Course tags check:", { courseId, courseTagsCheck, checkError });
-
   if (checkError) {
     console.error("Error checking course tags:", checkError);
     throw new Error(`Failed to check course tags: ${checkError.message}`);
   }
 
   if (!courseTagsCheck || courseTagsCheck.length === 0) {
-    console.log("No tags found for course:", courseId);
     return [];
   }
 
   // Get the tag IDs
   const tagIds = courseTagsCheck.map((ct) => ct.tag_id);
-  console.log("Found tag IDs:", tagIds);
 
   // Now fetch the actual tags
   const { data: tags, error } = await supabase
     .from("tags")
     .select("id, name")
     .in("id", tagIds);
-
-  console.log("Tags query result:", { tags, error });
 
   if (error) {
     console.error("Error fetching tags:", error);

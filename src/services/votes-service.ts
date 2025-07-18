@@ -1,26 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-
-export type VoteType = "Up" | "Down";
-
-export interface Vote {
-  id: string;
-  user_id: string;
-  review_id: string;
-  vote_type: VoteType;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface VoteCounts {
-  upvotes: number;
-  downvotes: number;
-}
-
-export interface ReviewWithVotes {
-  id: string;
-  vote_counts: VoteCounts;
-  user_vote?: VoteType;
-}
+import {
+  Vote,
+  VoteType,
+  ReviewWithVotes,
+} from "./interfaces/service.interfaces";
 
 export class VotesService {
   async upsertVote(

@@ -1,5 +1,32 @@
 import { Category, User } from "@/lib/database/database.types";
 
+export type VoteType = "Up" | "Down";
+
+export interface Vote {
+  id: string;
+  user_id: string;
+  review_id: string;
+  vote_type: VoteType;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VoteCounts {
+  upvotes: number;
+  downvotes: number;
+}
+
+export interface ReviewWithVotes {
+  id: string;
+  vote_counts: VoteCounts;
+  user_vote?: VoteType;
+}
+
+export interface GetTagsParams {
+  search?: string;
+  limit?: number;
+}
+
 export interface BasicCourse {
   id: string;
   name: string;
