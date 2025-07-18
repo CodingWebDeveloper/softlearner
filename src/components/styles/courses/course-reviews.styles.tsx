@@ -1,12 +1,25 @@
-import { styled } from '@mui/material/styles';
-import { Box, Typography, Avatar, LinearProgress, TextField, IconButton, List, ListItem, Divider, Button, Grid, Skeleton } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
+import { styled } from "@mui/material/styles";
+import {
+  Box,
+  Typography,
+  Avatar,
+  LinearProgress,
+  TextField,
+  IconButton,
+  List,
+  ListItem,
+  Divider,
+  Button,
+  Grid,
+  Skeleton,
+} from "@mui/material";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 export const ReviewsContainer = styled(Grid)(({ theme }) => ({
   gap: theme.spacing(4),
-  width: '100%',
-  [theme.breakpoints.down('md')]: {
+  width: "100%",
+  [theme.breakpoints.down("md")]: {
     gap: theme.spacing(2),
   },
 }));
@@ -14,8 +27,8 @@ export const ReviewsContainer = styled(Grid)(({ theme }) => ({
 export const RatingValue = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   fontSize: 28,
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: theme.spacing(1),
 }));
 
@@ -29,42 +42,45 @@ export const RatingBar = styled(LinearProgress)(({ theme }) => ({
   height: 8,
   borderRadius: 4,
   flex: 1,
-  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
-  '& .MuiLinearProgress-bar': {
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? theme.palette.grey[800]
+      : theme.palette.grey[200],
+  "& .MuiLinearProgress-bar": {
     borderRadius: 4,
     backgroundColor: theme.palette.custom.accent.blue,
   },
 }));
 
 export const RatingRow = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'isActive'
+  shouldForwardProp: (prop) => prop !== "isActive",
 })<{ isActive?: boolean }>(({ theme, isActive }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: theme.spacing(1),
   padding: theme.spacing(0.5, 1),
   borderRadius: theme.shape.borderRadius,
-  cursor: 'pointer',
-  transition: 'background-color 0.2s ease',
-  backgroundColor: isActive ? theme.palette.action.selected : 'transparent',
-  '&:hover': {
+  cursor: "pointer",
+  transition: "background-color 0.2s ease",
+  backgroundColor: isActive ? theme.palette.action.selected : "transparent",
+  "&:hover": {
     backgroundColor: theme.palette.action.hover,
   },
 }));
 
 export const ReviewsList = styled(List)({
-  width: '100%',
-  background: 'none',
+  width: "100%",
+  background: "none",
   padding: 0,
 });
 
 export const ReviewItem = styled(ListItem)(({ theme }) => ({
-  alignItems: 'flex-start',
+  alignItems: "flex-start",
   padding: theme.spacing(2, 0),
   gap: theme.spacing(2),
-  [theme.breakpoints.down('sm')]: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
+  [theme.breakpoints.down("sm")]: {
+    flexDirection: "column",
+    alignItems: "flex-start",
     gap: theme.spacing(1),
   },
 }));
@@ -80,26 +96,26 @@ export const ReviewAvatar = styled(Avatar)(({ theme }) => ({
 
 export const ReviewContent = styled(Box)(({ theme }) => ({
   flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
+  display: "flex",
+  flexDirection: "column",
   gap: theme.spacing(1),
 }));
 
 export const ReviewHeader = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: theme.spacing(1),
 }));
 
 export const ReviewName = styled(Typography)({
   fontWeight: 600,
   fontSize: 16,
-});  
+});
 
 export const ReviewDate = styled(Typography)(({ theme }) => ({
   color: theme.palette.custom.text.light,
   fontSize: 14,
-  marginLeft: theme.spacing(2)
+  marginLeft: theme.spacing(2),
 }));
 
 export const ReviewText = styled(Typography)(({ theme }) => ({
@@ -108,45 +124,45 @@ export const ReviewText = styled(Typography)(({ theme }) => ({
 }));
 
 export const HelpfulActions = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: theme.spacing(1),
   marginTop: theme.spacing(1),
 }));
 
 export const SearchBarContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: theme.spacing(1),
   marginBottom: theme.spacing(2),
-  width: '100%',
+  width: "100%",
   maxWidth: 320,
 }));
 
 export const NoReviewsBox = styled(Box)(({ theme }) => ({
-  width: '100%',
-  textAlign: 'center',
+  width: "100%",
+  textAlign: "center",
   color: theme.palette.custom.text.light,
   padding: theme.spacing(4, 0),
 }));
 
 export const SearchInput = styled(TextField)(({ theme }) => ({
-  '& .MuiInputBase-root': {
+  "& .MuiInputBase-root": {
     backgroundColor: theme.palette.custom.background.tertiary,
     color: theme.palette.custom.text.white,
     borderRadius: 8,
     border: `1px solid ${theme.palette.custom.background.filter}`,
   },
-  '& .MuiInputBase-input': {
+  "& .MuiInputBase-input": {
     color: theme.palette.custom.text.white,
   },
-  '& .MuiOutlinedInput-notchedOutline': {
+  "& .MuiOutlinedInput-notchedOutline": {
     borderColor: theme.palette.custom.background.filter,
   },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
+  "&:hover .MuiOutlinedInput-notchedOutline": {
     borderColor: theme.palette.custom.accent.blue,
   },
-  '& .MuiSvgIcon-root': {
+  "& .MuiSvgIcon-root": {
     color: theme.palette.custom.text.light,
   },
 }));
@@ -159,7 +175,7 @@ export const HelpfulText = styled(Typography)(({ theme }) => ({
 
 export const HelpfulButton = styled(IconButton)(({ theme }) => ({
   color: theme.palette.custom.text.light,
-  '&:hover': {
+  "&:hover": {
     color: theme.palette.custom.accent.blue,
     backgroundColor: theme.palette.action.hover,
   },
@@ -168,8 +184,8 @@ export const HelpfulButton = styled(IconButton)(({ theme }) => ({
 }));
 
 export const ShowMoreContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
+  display: "flex",
+  justifyContent: "center",
   marginTop: theme.spacing(3),
   marginBottom: theme.spacing(2),
 }));
@@ -180,21 +196,20 @@ export const ShowMoreButton = styled(Button)(({ theme }) => ({
   fontWeight: 600,
   borderRadius: 8,
   padding: theme.spacing(1.2, 4),
-  textTransform: 'none',
+  textTransform: "none",
   fontSize: 16,
-  boxShadow: 'none',
-  '&:hover': {
+  boxShadow: "none",
+  "&:hover": {
     backgroundColor: theme.palette.custom.accent.tealDark,
     color: theme.palette.custom.text.white,
   },
 }));
 
 export const StarRatingRow = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   marginLeft: theme.spacing(1),
 }));
-
 
 export const FilledStarIcon = styled(StarIcon)(({ theme }) => ({
   color: theme.palette.custom.accent.yellow,
@@ -207,18 +222,22 @@ export const OutlinedStarIcon = styled(StarBorderIcon)(({ theme }) => ({
 }));
 
 export const ReviewStarsContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   marginLeft: theme.spacing(1),
-})); 
+}));
 
 export const ReviewStarsWrapper = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(2),
-  width: '100%'
-})); 
-
+  width: "100%",
+}));
 
 export const ReviewSkeleton = styled(Skeleton)(({ theme }) => ({
   marginBottom: theme.spacing(2),
-  borderRadius: 2
+  borderRadius: 2,
+}));
+
+export const VoteCount = styled(Typography)(({ theme }) => ({
+  fontSize: "0.875rem",
+  marginLeft: theme.spacing(0.5),
 }));

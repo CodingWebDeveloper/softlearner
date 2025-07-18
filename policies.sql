@@ -22,6 +22,12 @@ DROP POLICY IF EXISTS "Allow only admin to modify tags" ON tags;
 CREATE POLICY "Allow only admin to modify tags" ON tags
 FOR ALL USING (auth.role() = 'admin') WITH CHECK (auth.role() = 'admin');
 
+-- Course Tags Policies
+-- Allow all users to view course tags
+DROP POLICY IF EXISTS "Allow all users to view course tags" ON course_tags;
+CREATE POLICY "Allow all users to view course tags" ON course_tags
+FOR SELECT USING (true);
+
 -- Courses Policies
 -- Allow all users to view courses
 DROP POLICY IF EXISTS "Allow all users to view courses" ON courses;
@@ -68,6 +74,27 @@ FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 -- Allow users to delete their own reviews
 DROP POLICY IF EXISTS "Allow users to delete their own reviews" ON reviews;
 CREATE POLICY "Allow users to delete their own reviews" ON reviews
+FOR DELETE USING (auth.uid() = user_id);
+
+-- Review Votes Policies
+-- Allow all users to view review votes
+DROP POLICY IF EXISTS "Allow all users to view review votes" ON review_votes;
+CREATE POLICY "Allow all users to view review votes" ON review_votes
+FOR SELECT USING (true);
+
+-- Allow authenticated users to create review votes
+DROP POLICY IF EXISTS "Allow authenticated users to create review votes" ON review_votes;
+CREATE POLICY "Allow authenticated users to create review votes" ON review_votes
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Allow users to update their own review votes
+DROP POLICY IF EXISTS "Allow users to update their own review votes" ON review_votes;
+CREATE POLICY "Allow users to update their own review votes" ON review_votes
+FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Allow users to delete their own review votes
+DROP POLICY IF EXISTS "Allow users to delete their own review votes" ON review_votes;
+CREATE POLICY "Allow users to delete their own review votes" ON review_votes
 FOR DELETE USING (auth.uid() = user_id);
 
 -- Orders Policies

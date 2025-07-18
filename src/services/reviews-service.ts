@@ -1,7 +1,13 @@
-import { createClient } from '@/lib/supabase/client';
-import { BasicReview, GetReviewsParams, GetReviewsResult, RatingStats } from './interfaces/service.interfaces';
+import { createClient } from "@/lib/supabase/server";
+import {
+  BasicReview,
+  GetReviewsParams,
+  GetReviewsResult,
+  RatingStats,
+  Review,
+} from "./interfaces/service.interfaces";
 
-const calculateRatingStats = (reviews: any[]): RatingStats => {
+const calculateRatingStats = (reviews: Review[]): RatingStats => {
   if (!reviews.length) {
     return {
       average: 0,
@@ -16,14 +22,14 @@ const calculateRatingStats = (reviews: any[]): RatingStats => {
 
   // Calculate breakdown
   const ratingCounts = Array(5).fill(0);
-  reviews.forEach(review => {
+  reviews.forEach((review) => {
     ratingCounts[review.rating - 1]++;
   });
 
   // Convert counts to percentages
-  const breakdown = ratingCounts.map(count => 
-    Math.round((count / reviews.length) * 100)
-  ).reverse(); // Reverse to get [5,4,3,2,1] order
+  const breakdown = ratingCounts
+    .map((count) => Math.round((count / reviews.length) * 100))
+    .reverse(); // Reverse to get [5,4,3,2,1] order
 
   return {
     average,
@@ -32,13 +38,15 @@ const calculateRatingStats = (reviews: any[]): RatingStats => {
   };
 };
 
-export const getCourseRatingStats = async (courseId: string): Promise<RatingStats> => {
-  const supabase = createClient();
+export const getCourseRatingStats = async (
+  courseId: string
+): Promise<RatingStats> => {
+  const supabase = await createClient();
 
   const { data: reviews, error } = await supabase
-    .from('reviews')
-    .select('rating')
-    .eq('course_id', courseId);
+    .from("reviews")
+    .select("rating")
+    .eq("course_id", courseId);
 
   if (error) {
     throw new Error(`Failed to fetch review stats: ${error.message}`);
@@ -47,14 +55,17 @@ export const getCourseRatingStats = async (courseId: string): Promise<RatingStat
   return calculateRatingStats(reviews || []);
 };
 
-export const getCourseReviews = async (params: GetReviewsParams): Promise<Omit<GetReviewsResult, 'ratingStats'>> => {
-  const supabase = createClient();
+export const getCourseReviews = async (
+  params: GetReviewsParams
+): Promise<Omit<GetReviewsResult, "ratingStats">> => {
+  const supabase = await createClient();
   const { courseId, page, pageSize, search, rating } = params;
   const offset = (page - 1) * pageSize;
 
   let query = supabase
-    .from('reviews')
-    .select(`
+    .from("reviews")
+    .select(
+      `
       *,
       user:users!reviews_user_id_fkey(
         id,
@@ -63,28 +74,34 @@ export const getCourseReviews = async (params: GetReviewsParams): Promise<Omit<G
         created_at,
         updated_at
       )
-    `, { count: 'exact' })
-    .eq('course_id', courseId);
+    `,
+      { count: "exact" }
+    )
+    .eq("course_id", courseId);
 
   if (search) {
-    query = query.ilike('content', `%${search}%`);
+    query = query.ilike("content", `%${search}%`);
   }
 
   if (rating !== undefined && rating !== null) {
-    query = query.eq('rating', rating);
+    query = query.eq("rating", rating);
   }
 
   // Apply pagination
-  const { data: reviews, count, error } = await query
+  const {
+    data: reviews,
+    count,
+    error,
+  } = await query
     .range(offset, offset + pageSize - 1)
-    .order('created_at', { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch reviews: ${error.message}`);
   }
 
   // Transform the data to match BasicReview interface
-  const transformedReviews: BasicReview[] = (reviews || []).map(review => ({
+  const transformedReviews: BasicReview[] = (reviews || []).map((review) => ({
     id: review.id,
     content: review.content,
     rating: review.rating,
@@ -101,12 +118,15 @@ export const getCourseReviews = async (params: GetReviewsParams): Promise<Omit<G
   };
 };
 
-export const getReviewById = async (id: string): Promise<BasicReview | null> => {
-  const supabase = createClient();
+export const getReviewById = async (
+  id: string
+): Promise<BasicReview | null> => {
+  const supabase = await createClient();
 
   const { data: review, error } = await supabase
-    .from('reviews')
-    .select(`
+    .from("reviews")
+    .select(
+      `
       *,
       user:users!reviews_user_id_fkey(
         id,
@@ -115,8 +135,9 @@ export const getReviewById = async (id: string): Promise<BasicReview | null> => 
         created_at,
         updated_at
       )
-    `)
-    .eq('id', id)
+    `
+    )
+    .eq("id", id)
     .single();
 
   if (error || !review) {
@@ -135,4 +156,4 @@ export const getReviewById = async (id: string): Promise<BasicReview | null> => 
   };
 
   return result;
-}; 
+};

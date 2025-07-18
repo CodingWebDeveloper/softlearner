@@ -1,30 +1,30 @@
 import { Category, User } from "@/lib/database/database.types";
 
 export interface BasicCourse {
-    id: string;
-    name: string;
-    description: string;
-    video_url: string;
-    price: number;
-    new_price: number | null;
-    thumbnail_image_url: string;
-    creator: User;
-    category: Category;
-    rating: number | null;
-    ratings_count: number;
-    created_at: string;
-    updated_at: string;
+  id: string;
+  name: string;
+  description: string;
+  video_url: string;
+  price: number;
+  new_price: number | null;
+  thumbnail_image_url: string;
+  creator: User;
+  category: Category;
+  rating: number | null;
+  ratings_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface BasicReview {
-    id: string;
-    content: string;
-    rating: number;
-    user_id: string;
-    course_id: string;
-    user?: User;
-    created_at: string;
-    updated_at: string;
+  id: string;
+  content: string;
+  rating: number;
+  user_id: string;
+  course_id: string;
+  user?: User;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface RatingStats {
@@ -42,30 +42,30 @@ export interface GetReviewsParams {
 }
 
 export interface GetReviewsResult {
-    reviews: BasicReview[];
-    totalRecord: number;
+  reviews: BasicReview[];
+  totalRecord: number;
 }
 
 export interface GetCoursesParams {
-    page: number;
-    pageSize: number;
-    search?: string;
-    category?: string;
-    tags?: string[];
+  page: number;
+  pageSize: number;
+  search?: string;
+  category?: string;
+  tags?: string[];
 }
 
 export interface GetCoursesResult {
-    courses: BasicCourse[];
-    totalRecord: number;
+  courses: BasicCourse[];
+  totalRecord: number;
 }
 
 export interface BasicSection {
-    id: string;
-    course_id: string;
-    name: string;
-    order_index?: number;
-    created_at: string;
-    updated_at: string;
+  id: string;
+  course_id: string;
+  name: string;
+  order_index?: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Review {

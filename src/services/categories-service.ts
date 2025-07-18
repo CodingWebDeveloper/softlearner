@@ -1,12 +1,12 @@
-import { createClient } from '../lib/supabase/client';
-import type { Category } from '@/lib/database/database.types';
+import { createClient } from "../lib/supabase/server";
+import type { Category } from "@/lib/database/database.types";
 
 export const getCategories = async (): Promise<Category[]> => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name');
+    .from("categories")
+    .select("*")
+    .order("name");
 
   if (error) {
     // Optionally log error here
@@ -14,4 +14,4 @@ export const getCategories = async (): Promise<Category[]> => {
   }
 
   return data;
-}; 
+};
