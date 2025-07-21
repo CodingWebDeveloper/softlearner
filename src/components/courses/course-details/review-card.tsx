@@ -22,15 +22,17 @@ import {
   OutlinedStarIcon,
   VoteCount,
 } from "@/components/styles/courses/course-reviews.styles";
-import { BasicReview } from "@/services/interfaces/service.interfaces";
+import {
+  BasicReview,
+  VoteType,
+} from "@/services/interfaces/service.interfaces";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   optimisticallyUpdateVote,
   revertVoteUpdate,
   setVotes,
 } from "@/lib/store/features/reviewVotesSlice";
-import { trpc } from "@/lib/trpc/trpc";
-import { VoteType } from "@/services/votes-service";
+import { trpc } from "@/lib/trpc/client";
 
 interface ReviewCardProps {
   review: BasicReview;

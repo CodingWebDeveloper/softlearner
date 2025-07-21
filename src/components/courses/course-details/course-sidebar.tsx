@@ -1,14 +1,14 @@
-import { FC, useState, KeyboardEvent } from 'react';
-import { Skeleton, Stack } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
-import { 
-  DiscountedPrice, 
-  OldPrice, 
-  MetaItem, 
+import { FC, useState, KeyboardEvent } from "react";
+import { Skeleton, Stack } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
+import {
+  DiscountedPrice,
+  OldPrice,
+  MetaItem,
   CardStyled,
   MetaItemText,
   PreviewIcon,
@@ -19,14 +19,14 @@ import {
   CloseButtonStyled,
   PriceContainer,
   DividerStyled,
-  ClickablePreviewBox
-} from '@/components/styles/courses/course-details.styles';
-import Dialog from '@mui/material/Dialog';
-import CloseIcon from '@mui/icons-material/Close';
-import { BasicCourse } from '@/services/interfaces/service.interfaces';
-import { PreviewResource } from '@/lib/database/database.types';
-import { trpc } from '@/lib/trpc/trpc';
-import { BuyNowButton } from './buy-now-button';
+  ClickablePreviewBox,
+} from "@/components/styles/courses/course-details.styles";
+import Dialog from "@mui/material/Dialog";
+import CloseIcon from "@mui/icons-material/Close";
+import { BasicCourse } from "@/services/interfaces/service.interfaces";
+import { PreviewResource } from "@/lib/database/database.types";
+import { trpc } from "@/lib/trpc/client";
+import { BuyNowButton } from "./buy-now-button";
 
 interface CourseSidebarProps {
   course: BasicCourse;
@@ -36,44 +36,54 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
   // Hooks
   const theme = useTheme();
   const [open, setOpen] = useState(false);
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  const { data: resourcesData, isLoading: isResourcesLoading} = trpc.resources.getResourcesByCourseId.useQuery(
-    { courseId: course?.id},
-    {enabled: !!course?.id}
-  );
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const { data: isEnrolled, isLoading: isEnrollmentLoading } = trpc.courses.isEnrolled.useQuery(
-    course.id,
-    { enabled: !!course?.id }
-  );
+  const { data: resourcesData, isLoading: isResourcesLoading } =
+    trpc.resources.getResourcesByCourseId.useQuery(
+      { courseId: course?.id },
+      { enabled: !!course?.id }
+    );
+
+  const { data: isEnrolled, isLoading: isEnrollmentLoading } =
+    trpc.courses.isEnrolled.useQuery(course.id, { enabled: !!course?.id });
 
   // Variables/State
-  const hasDiscount = course?.new_price !== null && course?.new_price !== undefined;
-  const displayPrice = hasDiscount ? course?.new_price?.toFixed(2) : course?.price.toFixed(2);
+  const hasDiscount =
+    course?.new_price !== null && course?.new_price !== undefined;
+  const displayPrice = hasDiscount
+    ? course?.new_price?.toFixed(2)
+    : course?.price.toFixed(2);
   const resources = resourcesData || [];
-  
-  const totalMinutes = resourcesData?.reduce((total: number, resource: PreviewResource) => {
-    if (resource.duration) {
-      // Parse PostgreSQL interval format (HH:MM:SS)
-      const parts = resource.duration.split(':');
-      if (parts.length === 3) {
-        const hours = parseInt(parts[0], 10);
-        const minutes = parseInt(parts[1], 10);
-        return total + (hours * 60) + minutes;
+
+  const totalMinutes =
+    resourcesData?.reduce((total: number, resource: PreviewResource) => {
+      if (resource.duration) {
+        // Parse PostgreSQL interval format (HH:MM:SS)
+        const parts = resource.duration.split(":");
+        if (parts.length === 3) {
+          const hours = parseInt(parts[0], 10);
+          const minutes = parseInt(parts[1], 10);
+          return total + hours * 60 + minutes;
+        }
       }
-    }
-    return total;
-  }, 0) || 0;
+      return total;
+    }, 0) || 0;
 
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-  const durationDisplay = hours > 0 
-    ? `${hours} hr${hours > 1 ? 's' : ''} ${minutes > 0 ? `${minutes} min` : ''}`
-    : `${minutes} min`;
+  const durationDisplay =
+    hours > 0
+      ? `${hours} hr${hours > 1 ? "s" : ""} ${
+          minutes > 0 ? `${minutes} min` : ""
+        }`
+      : `${minutes} min`;
 
-  const totalVideos = resources.filter((r: PreviewResource) => r.type === 'video').length;
-  const totalFiles = resources.filter((r: PreviewResource) => r.type === 'downloadable file').length;
+  const totalVideos = resources.filter(
+    (r: PreviewResource) => r.type === "video"
+  ).length;
+  const totalFiles = resources.filter(
+    (r: PreviewResource) => r.type === "downloadable file"
+  ).length;
 
   // Handlers
   const handleOpenDialog = () => {
@@ -85,7 +95,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
   };
 
   const handlePreviewBoxKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleOpenDialog();
     }
@@ -93,8 +103,13 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
 
   if (isResourcesLoading || isEnrollmentLoading) {
     return (
-      <Skeleton variant="rectangular" width="100%" height={320} sx={{ borderRadius: 2 }} />
-    )
+      <Skeleton
+        variant="rectangular"
+        width="100%"
+        height={320}
+        sx={{ borderRadius: 2 }}
+      />
+    );
   }
 
   return (
@@ -119,10 +134,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
         {isMobile ? (
           <DialogContentStyled $isMobile>
             <CloseButtonContainer>
-              <CloseButtonStyled
-                aria-label="close"
-                onClick={handleCloseDialog}
-              >
+              <CloseButtonStyled aria-label="close" onClick={handleCloseDialog}>
                 <CloseIcon />
               </CloseButtonStyled>
             </CloseButtonContainer>
@@ -138,10 +150,7 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
         ) : (
           <DialogContentStyled $isMobile={false}>
             <CloseButtonContainer>
-              <CloseButtonStyled
-                aria-label="close"
-                onClick={handleCloseDialog}
-              >
+              <CloseButtonStyled aria-label="close" onClick={handleCloseDialog}>
                 <CloseIcon />
               </CloseButtonStyled>
             </CloseButtonContainer>
@@ -160,15 +169,27 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
       <PriceContainer>
         {hasDiscount ? (
           <>
-            <DiscountedPrice component="span" tabIndex={0} aria-label={`Discounted Price: $${displayPrice} USD`}>
+            <DiscountedPrice
+              component="span"
+              tabIndex={0}
+              aria-label={`Discounted Price: $${displayPrice} USD`}
+            >
               ${displayPrice} USD
             </DiscountedPrice>
-            <OldPrice component="span" tabIndex={0} aria-label={`Original Price: $${course.price.toFixed(2)} USD`}>
+            <OldPrice
+              component="span"
+              tabIndex={0}
+              aria-label={`Original Price: $${course.price.toFixed(2)} USD`}
+            >
               ${course.price.toFixed(2)} USD
             </OldPrice>
           </>
         ) : (
-          <DiscountedPrice component="span" tabIndex={0} aria-label={`Price: $${displayPrice} USD`}>
+          <DiscountedPrice
+            component="span"
+            tabIndex={0}
+            aria-label={`Price: $${displayPrice} USD`}
+          >
             ${displayPrice} USD
           </DiscountedPrice>
         )}
@@ -201,4 +222,4 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
   );
 };
 
-export default CourseSidebar; 
+export default CourseSidebar;

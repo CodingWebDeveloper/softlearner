@@ -18,12 +18,8 @@ import {
   EmptyStateTitle,
   EmptyStateText,
 } from "@/components/styles/home-page/home-page.styles";
-import {
-  getUserCoursesWithProgress,
-} from "@/services/courseService";
 import type { Course, Resource } from "@/lib/database/database.types";
 import CourseProgressCard from "@/components/courses/course-progress-card";
-
 
 // Extended course interface for the transformed data
 interface ExtendedCourse extends Course {
@@ -39,7 +35,7 @@ interface CustomCourseProgress {
   completed_resources: number;
   progress_percentage: number;
   last_accessed: string;
-  status: 'not_started' | 'in_progress' | 'completed';
+  status: "not_started" | "in_progress" | "completed";
   next_resource?: Resource;
 }
 
@@ -51,7 +47,8 @@ const MOCK_COURSES: CustomCourseProgress[] = [
       name: "react-fundamentals",
       title: "React Fundamentals",
       instructor_name: "Jane Doe",
-      description: "Learn the basics of React, including components, hooks, and state management.",
+      description:
+        "Learn the basics of React, including components, hooks, and state management.",
       total_resources: 10,
       price: 49.99,
       created_at: new Date(Date.now() - 100000000).toISOString(),
@@ -96,7 +93,8 @@ const MOCK_COURSES: CustomCourseProgress[] = [
       name: "ui-ux-design-principles",
       title: "UI/UX Design Principles",
       instructor_name: "Emily Clark",
-      description: "Understand the fundamentals of UI/UX design for web applications.",
+      description:
+        "Understand the fundamentals of UI/UX design for web applications.",
       total_resources: 5,
       price: 39.99,
       created_at: new Date(Date.now() - 300000000).toISOString(),
@@ -157,35 +155,35 @@ const Home = () => {
   }
 
   return (
-      <ContentContainer maxWidth="xl">
-        {user && (
-          <DashboardContainer>
-            <DashboardHeader>
-              <DashboardTitle>My Courses</DashboardTitle>
-              <DashboardSubtitle>
-                Track your progress and continue learning
-              </DashboardSubtitle>
-            </DashboardHeader>
-            <DashboardContent>
-              {courses.length === 0 ? (
-                <EmptyState>
-                  <EmptyStateTitle>No Courses Yet</EmptyStateTitle>
-                  <EmptyStateText>
-                    You haven&apos;t purchased any courses. Browse our catalog
-                    to get started!
-                  </EmptyStateText>
-                </EmptyState>
-              ) : (
-                <CourseGrid>
-                  {courses.map((course) => (
-                    <CourseProgressCard key={course.course.id} course={course} />
-                  ))}
-                </CourseGrid>
-              )}
-            </DashboardContent>
-          </DashboardContainer>
-        )}
-      </ContentContainer>
+    <ContentContainer maxWidth="xl">
+      {user && (
+        <DashboardContainer>
+          <DashboardHeader>
+            <DashboardTitle>My Courses</DashboardTitle>
+            <DashboardSubtitle>
+              Track your progress and continue learning
+            </DashboardSubtitle>
+          </DashboardHeader>
+          <DashboardContent>
+            {courses.length === 0 ? (
+              <EmptyState>
+                <EmptyStateTitle>No Courses Yet</EmptyStateTitle>
+                <EmptyStateText>
+                  You haven&apos;t purchased any courses. Browse our catalog to
+                  get started!
+                </EmptyStateText>
+              </EmptyState>
+            ) : (
+              <CourseGrid>
+                {courses.map((course) => (
+                  <CourseProgressCard key={course.course.id} course={course} />
+                ))}
+              </CourseGrid>
+            )}
+          </DashboardContent>
+        </DashboardContainer>
+      )}
+    </ContentContainer>
   );
 };
 

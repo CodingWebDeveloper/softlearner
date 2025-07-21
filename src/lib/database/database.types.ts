@@ -141,10 +141,11 @@ export interface Course {
   description?: string;
   video_url?: string;
   price: number;
-  newPrice?: number;
+  new_price?: number;
   thumbnail_image_url?: string;
-  creator_id?: string;
-  category?: string;
+  creator_id: string;
+  category: string;
+  currency: string;
   tags?: Tag[];
   created_at: string;
   updated_at: string;

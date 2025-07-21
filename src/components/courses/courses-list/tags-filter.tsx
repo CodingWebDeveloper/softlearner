@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { CircularProgress, Autocomplete } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { trpc } from "@/lib/trpc/trpc";
+import { trpc } from "@/lib/trpc/client";
 import {
   TagsTextField,
   TagsAutocompleteContainer,

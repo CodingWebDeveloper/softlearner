@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { Button, CircularProgress } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { trpc } from '@/lib/trpc/trpc';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { Button, CircularProgress } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { trpc } from "@/lib/trpc/client";
+import { useRouter } from "next/navigation";
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  width: '100%',
+  width: "100%",
   padding: theme.spacing(1.5),
-  fontSize: '1.1rem',
+  fontSize: "1.1rem",
   fontWeight: 600,
 }));
 
@@ -19,7 +19,8 @@ interface BuyNowButtonProps {
 export const BuyNowButton = ({ courseId, isEnrolled }: BuyNowButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const createCheckoutSession = trpc.payments.createCheckoutSession.useMutation();
+  const createCheckoutSession =
+    trpc.payments.createCheckoutSession.useMutation();
 
   const handlePurchase = async () => {
     try {
@@ -31,17 +32,17 @@ export const BuyNowButton = ({ courseId, isEnrolled }: BuyNowButtonProps) => {
       });
 
       // Redirect to Stripe Checkout
-      const stripe = await import('@stripe/stripe-js').then((mod) => mod.loadStripe(
-        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-      ));
-      
+      const stripe = await import("@stripe/stripe-js").then((mod) =>
+        mod.loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+      );
+
       if (!stripe) {
-        throw new Error('Failed to load Stripe');
+        throw new Error("Failed to load Stripe");
       }
 
       await stripe.redirectToCheckout({ sessionId });
     } catch (error) {
-      console.error('Purchase error:', error);
+      console.error("Purchase error:", error);
       // You might want to show an error message to the user here
     } finally {
       setIsLoading(false);
@@ -67,11 +68,7 @@ export const BuyNowButton = ({ courseId, isEnrolled }: BuyNowButtonProps) => {
       onClick={handlePurchase}
       disabled={isLoading}
     >
-      {isLoading ? (
-        <CircularProgress size={24} color="inherit" />
-      ) : (
-        'Buy Now'
-      )}
+      {isLoading ? <CircularProgress size={24} color="inherit" /> : "Buy Now"}
     </StyledButton>
   );
-}; 
+};

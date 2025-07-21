@@ -5,7 +5,7 @@ import {
   TagsAutocompleteContainer,
   TagsTextField,
 } from "@/components/styles/courses/courses.styles";
-import { trpc } from "@/lib/trpc/trpc";
+import { trpc } from "@/lib/trpc/client";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   selectCategoryId,

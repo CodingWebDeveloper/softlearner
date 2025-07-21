@@ -11,7 +11,7 @@ import CourseTabs from "@/components/courses/course-details/course-tabs";
 import CourseSidebar from "@/components/courses/course-details/course-sidebar";
 import CourseTags from "@/components/courses/course-details/course-tags";
 import { SidebarContainer } from "@/components/styles/courses/courses.styles";
-import { trpc } from "@/lib/trpc/trpc";
+import { trpc } from "@/lib/trpc/client";
 import { useParams } from "next/navigation";
 import Alert from "@mui/material/Alert";
 import Skeleton from "@mui/material/Skeleton";

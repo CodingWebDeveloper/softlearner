@@ -1,7 +1,7 @@
 "use client";
 
 import { Typography } from "@mui/material";
-import { trpc } from "@/lib/trpc/trpc";
+import { trpc } from "@/lib/trpc/client";
 import LoadingFallback from "@/components/loading-fallback";
 import {
   FilledStarIcon,

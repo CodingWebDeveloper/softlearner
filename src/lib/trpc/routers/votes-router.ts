@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { VotesService, VoteType } from "../../../services/votes-service";
-import { router, procedure } from "../server";
+import { router, protectedProcedure, publicProcedure } from "../trpc";
+import { IVotesService } from "@/services/interfaces/service.interfaces";
+import { DI_TOKENS } from "@/lib/di/registry";
 
 const upsertVoteInput = z.object({
   reviewId: z.string(),
@@ -11,23 +12,20 @@ const getReviewVotesInput = z.object({
   reviewId: z.string(),
 });
 
-const votesService = new VotesService();
-
 export const votesRouter = router({
-  upsertVote: procedure
+  upsertVote: protectedProcedure
     .input(upsertVoteInput)
     .mutation(async ({ input, ctx }) => {
       try {
-        if (!ctx.user?.id) {
-          throw new Error("User must be authenticated to vote");
-        }
+        const votesService = ctx.container.resolve<IVotesService>(
+          DI_TOKENS.VOTES_SERVICE
+        );
 
-        const vote = await votesService.upsertVote(
+        return await votesService.upsertVote(
           ctx.user.id,
           input.reviewId,
-          input.voteType as VoteType
+          input.voteType
         );
-        return vote;
       } catch (error) {
         throw new Error(
           `Failed to update vote: ${
@@ -37,15 +35,15 @@ export const votesRouter = router({
       }
     }),
 
-  getReviewVotes: procedure
+  getReviewVotes: publicProcedure
     .input(getReviewVotesInput)
     .query(async ({ input, ctx }) => {
       try {
-        const votes = await votesService.getReviewVotes(
-          input.reviewId,
-          ctx.user?.id
+        const votesService = ctx.container.resolve<IVotesService>(
+          DI_TOKENS.VOTES_SERVICE
         );
-        return votes;
+
+        return await votesService.getReviewVotes(input.reviewId, ctx.user?.id);
       } catch (error) {
         throw new Error(
           `Failed to fetch votes: ${

@@ -1,22 +1,32 @@
-import { FC } from 'react';
-import List from '@mui/material/List';
-import Skeleton from '@mui/material/Skeleton';
-import { ListItemStyled, ListItemIconStyled, ListItemTextStyled, SectionTitle, DurationText, ResourcesDivider } from '@/components/styles/courses/course-details.styles';
-import { trpc } from '@/lib/trpc/trpc';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
-import { formatDuration } from '@/utils/dateUtils';
+import { FC } from "react";
+import List from "@mui/material/List";
+import Skeleton from "@mui/material/Skeleton";
+import {
+  ListItemStyled,
+  ListItemIconStyled,
+  ListItemTextStyled,
+  SectionTitle,
+  DurationText,
+  ResourcesDivider,
+} from "@/components/styles/courses/course-details.styles";
+import { trpc } from "@/lib/trpc/client";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import { formatDuration } from "@/utils/dateUtils";
 
 interface ResourceListProps {
   courseId?: string;
 }
 
 const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
-  const { data: resources, isLoading, error } = trpc.resources.getResourcesByCourseId.useQuery(
-    { courseId: courseId || '' },
+  const {
+    data: resources,
+    isLoading,
+    error,
+  } = trpc.resources.getResourcesByCourseId.useQuery(
+    { courseId: courseId || "" },
     { enabled: !!courseId }
   );
-
 
   if (isLoading) {
     return (
@@ -43,26 +53,23 @@ const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
     return <ListItemTextStyled primary="No resources found." />;
   }
 
-  const videos = resources.filter(r => r.type === 'video');
-  const downloads = resources.filter(r => r.type === 'downloadable file');
+  const videos = resources.filter((r) => r.type === "video");
+  const downloads = resources.filter((r) => r.type === "downloadable file");
 
   return (
     <>
-
       {downloads.length > 0 && (
         <>
-          <SectionTitle variant="subtitle2">Downloadable Resources</SectionTitle>
+          <SectionTitle variant="subtitle2">
+            Downloadable Resources
+          </SectionTitle>
           <List>
             {downloads.map((resource) => (
-              <ListItemStyled key={resource.id}
-
-              >
+              <ListItemStyled key={resource.id}>
                 <ListItemIconStyled>
                   <InsertDriveFileIcon />
                 </ListItemIconStyled>
-                <ListItemTextStyled
-                  primary={resource.name}
-                />
+                <ListItemTextStyled primary={resource.name} />
               </ListItemStyled>
             ))}
           </List>
@@ -74,10 +81,16 @@ const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
           <SectionTitle variant="subtitle2">Lectures</SectionTitle>
           <List>
             {videos.map((resource, idx) => (
-              <ListItemStyled key={resource.id}
-                secondaryAction={resource.duration ? (
-                  <DurationText>{formatDuration(resource.duration)}</DurationText>
-                ) : undefined}>
+              <ListItemStyled
+                key={resource.id}
+                secondaryAction={
+                  resource.duration ? (
+                    <DurationText>
+                      {formatDuration(resource.duration)}
+                    </DurationText>
+                  ) : undefined
+                }
+              >
                 <ListItemIconStyled>
                   <PlayArrowRoundedIcon />
                 </ListItemIconStyled>
@@ -93,4 +106,4 @@ const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
   );
 };
 
-export default PreviewResourceList; 
+export default PreviewResourceList;

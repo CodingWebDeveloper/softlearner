@@ -16,7 +16,6 @@ import {
   StyledPagination,
   PaginationWrapper,
 } from "@/components/styles/courses/courses.styles";
-import { trpc } from "@/lib/trpc/trpc";
 import { COURSES_PER_PAGE } from "@/utils/course-list.utils";
 import { useAppSelector } from "@/lib/store/hooks";
 import {
@@ -24,6 +23,7 @@ import {
   selectCategoryId,
   selectTags,
 } from "@/lib/store/features/filterSlice";
+import { trpc } from "@/lib/trpc/client";
 
 interface CoursesListProps {
   handleBookmark: (id: string) => void;
@@ -60,8 +60,8 @@ const CoursesList = ({
   });
 
   // Pagination
-  const courses = coursesData?.courses || [];
-  const totalRecord = coursesData?.totalRecord || 0;
+  const courses = coursesData?.data || [];
+  const totalRecord = coursesData?.totalRecords || 0;
   const totalPages = Math.ceil(totalRecord / COURSES_PER_PAGE);
 
   // Handlers

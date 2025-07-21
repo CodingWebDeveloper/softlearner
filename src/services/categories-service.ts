@@ -1,17 +1,11 @@
-import { createClient } from "../lib/supabase/server";
-import type { Category } from "@/lib/database/database.types";
+import { ICategoriesDAL } from "@/lib/di/interfaces/dal.interfaces";
+import { ICategoriesService } from "./interfaces/service.interfaces";
+import { Category } from "@/lib/database/database.types";
 
-export const getCategories = async (): Promise<Category[]> => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name");
+export class CategoriesService implements ICategoriesService {
+  constructor(private categoriesDAL: ICategoriesDAL) {}
 
-  if (error) {
-    // Optionally log error here
-    throw new Error(error.message);
+  async getCategories(): Promise<Category[]> {
+    return this.categoriesDAL.getCategories();
   }
-
-  return data;
-};
+}

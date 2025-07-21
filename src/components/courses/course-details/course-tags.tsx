@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 import { Skeleton } from "@mui/material";
-import { trpc } from "@/lib/trpc/trpc";
+import { trpc } from "@/lib/trpc/client";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import {
   TagsContainer,

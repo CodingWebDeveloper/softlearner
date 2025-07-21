@@ -11,7 +11,7 @@ import {
   ShowMoreButton,
   ShowMoreContainer,
 } from "@/components/styles/courses/course-reviews.styles";
-import { trpc } from "@/lib/trpc/trpc";
+import { trpc } from "@/lib/trpc/client";
 import { BasicReview } from "@/services/interfaces/service.interfaces";
 import { RatingStatsCard } from "./rating-stats-card";
 import { ReviewCard } from "./review-card";

@@ -1,12 +1,7 @@
 import { z } from "zod";
-import {
-  getTags,
-  createTag,
-  updateTag,
-  deleteTag,
-  getTagsByCourseId,
-} from "../../../services/tags-service";
-import { router, procedure } from "../server";
+import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { ITagsService } from "@/services/interfaces/service.interfaces";
+import { DI_TOKENS } from "@/lib/di/registry";
 
 const getTagsInput = z.object({
   search: z.string().optional(),
@@ -31,25 +26,31 @@ const deleteTagInput = z.object({
 });
 
 export const tagsRouter = router({
-  getTags: procedure.input(getTagsInput.optional()).query(async ({ input }) => {
-    try {
-      const tags = await getTags(input);
-      return tags;
-    } catch (error) {
-      throw new Error(
-        `Failed to fetch tags: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }),
-
-  getTagsByCourseId: procedure
-    .input(getTagsByCourseIdInput)
-    .query(async ({ input }) => {
+  getTags: publicProcedure
+    .input(getTagsInput.optional())
+    .query(async ({ ctx, input }) => {
       try {
-        const tags = await getTagsByCourseId(input.courseId);
-        return tags;
+        const tagsService = ctx.container.resolve<ITagsService>(
+          DI_TOKENS.TAGS_SERVICE
+        );
+        return await tagsService.getTags(input);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch tags: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  getTagsByCourseId: publicProcedure
+    .input(getTagsByCourseIdInput)
+    .query(async ({ ctx, input }) => {
+      try {
+        const tagsService = ctx.container.resolve<ITagsService>(
+          DI_TOKENS.TAGS_SERVICE
+        );
+        return await tagsService.getTagsByCourseId(input.courseId);
       } catch (error) {
         throw new Error(
           `Failed to fetch course tags: ${
@@ -59,42 +60,55 @@ export const tagsRouter = router({
       }
     }),
 
-  createTag: procedure.input(createTagInput).mutation(async ({ input }) => {
-    try {
-      const tag = await createTag(input.name);
-      return tag;
-    } catch (error) {
-      throw new Error(
-        `Failed to create tag: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }),
+  createTag: protectedProcedure
+    .input(createTagInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const tagsService = ctx.container.resolve<ITagsService>(
+          DI_TOKENS.TAGS_SERVICE
+        );
+        return await tagsService.createTag(input.name);
+      } catch (error) {
+        throw new Error(
+          `Failed to create tag: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 
-  updateTag: procedure.input(updateTagInput).mutation(async ({ input }) => {
-    try {
-      const tag = await updateTag(input.id, input.name);
-      return tag;
-    } catch (error) {
-      throw new Error(
-        `Failed to update tag: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }),
+  updateTag: protectedProcedure
+    .input(updateTagInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const tagsService = ctx.container.resolve<ITagsService>(
+          DI_TOKENS.TAGS_SERVICE
+        );
+        return await tagsService.updateTag(input.id, input.name);
+      } catch (error) {
+        throw new Error(
+          `Failed to update tag: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 
-  deleteTag: procedure.input(deleteTagInput).mutation(async ({ input }) => {
-    try {
-      await deleteTag(input.id);
-      return { success: true };
-    } catch (error) {
-      throw new Error(
-        `Failed to delete tag: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }),
+  deleteTag: protectedProcedure
+    .input(deleteTagInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const tagsService = ctx.container.resolve<ITagsService>(
+          DI_TOKENS.TAGS_SERVICE
+        );
+        await tagsService.deleteTag(input.id);
+        return { success: true };
+      } catch (error) {
+        throw new Error(
+          `Failed to delete tag: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 });

@@ -1,10 +1,7 @@
 import { z } from "zod";
-import {
-  getCourseReviews,
-  getReviewById,
-  getCourseRatingStats,
-} from "../../../services/reviews-service";
-import { router, procedure } from "../server";
+import { router, publicProcedure } from "../trpc";
+import { IReviewsService } from "@/services/interfaces/service.interfaces";
+import { DI_TOKENS } from "@/lib/di/registry";
 
 const getReviewsInput = z.object({
   courseId: z.string(),
@@ -15,12 +12,14 @@ const getReviewsInput = z.object({
 });
 
 export const reviewsRouter = router({
-  getCourseReviews: procedure
+  getCourseReviews: publicProcedure
     .input(getReviewsInput)
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       try {
-        const result = await getCourseReviews(input);
-        return result;
+        const reviewsService = ctx.container.resolve<IReviewsService>(
+          DI_TOKENS.REVIEWS_SERVICE
+        );
+        return await reviewsService.getCourseReviews(input);
       } catch (error) {
         throw new Error(
           `Failed to fetch reviews: ${
@@ -30,27 +29,37 @@ export const reviewsRouter = router({
       }
     }),
 
-  getCourseRatingStats: procedure.input(z.string()).query(async ({ input }) => {
-    try {
-      return await getCourseRatingStats(input);
-    } catch (error) {
-      throw new Error(
-        `Failed to fetch rating stats: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }),
+  getCourseRatingStats: publicProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      try {
+        const reviewsService = ctx.container.resolve<IReviewsService>(
+          DI_TOKENS.REVIEWS_SERVICE
+        );
+        return await reviewsService.getCourseRatingStats(input);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch rating stats: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 
-  getReviewById: procedure.input(z.string()).query(async ({ input }) => {
-    try {
-      return await getReviewById(input);
-    } catch (error) {
-      throw new Error(
-        `Failed to fetch review: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }),
+  getReviewById: publicProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      try {
+        const reviewsService = ctx.container.resolve<IReviewsService>(
+          DI_TOKENS.REVIEWS_SERVICE
+        );
+        return await reviewsService.getReviewById(input);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch review: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 });
