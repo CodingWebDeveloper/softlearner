@@ -10,6 +10,7 @@ import { ReviewsDAL } from "../dal/reviews.dal";
 import { VotesDAL } from "../dal/votes.dal";
 import { ResourcesDAL } from "../dal/resources.dal";
 import { PaymentsDAL } from "../dal/payments.dal";
+import { BookmarksDAL } from "../dal/bookmarks.dal";
 
 // Service imports
 import { CategoriesService } from "@/services/categories.service";
@@ -19,6 +20,7 @@ import { ResourcesService } from "@/services/resources.service";
 import { ReviewsService } from "@/services/reviews.service";
 import { VotesService } from "@/services/votes.service";
 import { PaymentsService } from "@/services/payments.service";
+import { BookmarksService } from "@/services/bookmarks.service";
 
 // Interface imports
 import {
@@ -29,6 +31,7 @@ import {
   IVotesDAL,
   IResourcesDAL,
   IPaymentsDAL,
+  IBookmarksDAL,
 } from "./interfaces/dal.interfaces";
 
 import {
@@ -39,6 +42,7 @@ import {
   IReviewsService,
   IVotesService,
   IPaymentsService,
+  IBookmarksService,
 } from "@/services/interfaces/service.interfaces";
 
 // Token constants for dependency injection
@@ -52,6 +56,7 @@ export const DI_TOKENS = {
   RESOURCES_DAL: "RESOURCES_DAL",
   ORDERS_DAL: "ORDERS_DAL",
   PAYMENTS_DAL: "PAYMENTS_DAL",
+  BOOKMARKS_DAL: "BOOKMARKS_DAL",
 
   // Service tokens
   CATEGORIES_SERVICE: "CATEGORIES_SERVICE",
@@ -61,6 +66,7 @@ export const DI_TOKENS = {
   REVIEWS_SERVICE: "REVIEWS_SERVICE",
   VOTES_SERVICE: "VOTES_SERVICE",
   PAYMENTS_SERVICE: "PAYMENTS_SERVICE",
+  BOOKMARKS_SERVICE: "BOOKMARKS_SERVICE",
 
   // Core dependencies
   SUPABASE: "SUPABASE",
@@ -111,6 +117,11 @@ export function registerDALs(
     DI_TOKENS.PAYMENTS_DAL,
     (c) => new PaymentsDAL(c.resolve(DI_TOKENS.SUPABASE))
   );
+
+  container.register<IBookmarksDAL>(
+    DI_TOKENS.BOOKMARKS_DAL,
+    (c) => new BookmarksDAL(c.resolve(DI_TOKENS.SUPABASE))
+  );
 }
 
 /**
@@ -157,5 +168,10 @@ export function registerServices(
   container.register<IPaymentsService>(
     DI_TOKENS.PAYMENTS_SERVICE,
     (c) => new PaymentsService(c.resolve(DI_TOKENS.PAYMENTS_DAL))
+  );
+
+  container.register<IBookmarksService>(
+    DI_TOKENS.BOOKMARKS_SERVICE,
+    (c) => new BookmarksService(c.resolve(DI_TOKENS.BOOKMARKS_DAL))
   );
 }

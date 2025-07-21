@@ -13,20 +13,34 @@ type CourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {
   creator: CourseCreator;
   category: Database["public"]["Tables"]["categories"]["Row"];
   reviews: { rating: number }[] | null;
+  bookmarks?: { id: string }[] | null;
 };
 
 export class CoursesDAL implements ICoursesDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   async getCourses(params: GetCoursesParams): Promise<GetCoursesResult> {
-    const { page = 1, pageSize = 15, search, categoryId, tags } = params;
+    const {
+      page = 1,
+      pageSize = 15,
+      search,
+      categoryId,
+      tags,
+      userId,
+    } = params;
 
-    let query = this.supabase
-      .from("courses")
-      .select(
-        "*, creator:creator_id(*), category:category_id(*), reviews!course_id(rating)",
-        { count: "exact" }
-      );
+    let query = this.supabase.from("courses").select(
+      `*, 
+        creator:creator_id(*), 
+        category:category_id(*), 
+        reviews!course_id(rating),
+        bookmarks!course_id(id)`,
+      { count: "exact" }
+    );
+
+    if (userId) {
+      query = query.eq("bookmarks.user_id", userId);
+    }
 
     // Apply search filter if provided
     if (search) {
@@ -83,7 +97,7 @@ export class CoursesDAL implements ICoursesDAL {
           description: course.description || "",
           video_url: course.video_url || "",
           price: course.price,
-          new_price: course.newPrice || null,
+          new_price: course.new_price || null,
           thumbnail_image_url: course.thumbnail_image_url || "",
           creator: course.creator,
           category: course.category,
@@ -91,6 +105,7 @@ export class CoursesDAL implements ICoursesDAL {
           ratings_count: ratingsCount,
           created_at: course.created_at,
           updated_at: course.updated_at,
+          isBookmarked: (course.bookmarks?.length ?? 0) > 0,
         };
 
         return basicCourse;
@@ -103,19 +118,28 @@ export class CoursesDAL implements ICoursesDAL {
     };
   }
 
-  async getCourseById(id: string): Promise<BasicCourse | null> {
-    const { data, error } = await this.supabase
+  async getCourseById(
+    id: string,
+    userId?: string
+  ): Promise<BasicCourse | null> {
+    const query = this.supabase
       .from("courses")
       .select(
         `
         *,
         creator:creator_id(*),
         category:category_id(*),
-        reviews!course_id(rating)
+        reviews!course_id(rating),
+        bookmarks!course_id(id)
       `
       )
-      .eq("id", id)
-      .single();
+      .eq("id", id);
+
+    if (userId) {
+      query.eq("bookmarks.user_id", userId);
+    }
+
+    const { data, error } = await query.single();
 
     if (error) {
       throw new Error(`Error fetching course: ${error.message}`);
@@ -140,7 +164,7 @@ export class CoursesDAL implements ICoursesDAL {
       description: course.description || "",
       video_url: course.video_url || "",
       price: course.price,
-      new_price: course.newPrice || null,
+      new_price: course.new_price || null,
       thumbnail_image_url: course.thumbnail_image_url || "",
       creator: course.creator,
       category: course.category,
@@ -148,6 +172,7 @@ export class CoursesDAL implements ICoursesDAL {
       ratings_count: ratingsCount,
       created_at: course.created_at,
       updated_at: course.updated_at,
+      isBookmarked: (course.bookmarks?.length ?? 0) > 0,
     };
 
     return basicCourse;

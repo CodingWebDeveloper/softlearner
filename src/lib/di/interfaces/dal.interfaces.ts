@@ -1,28 +1,29 @@
 import {
-  Course,
   Category,
   Tag,
   PreviewResource,
-} from "../../database/database.types";
+  Course,
+} from "@/lib/database/database.types";
 import {
-  GetCoursesParams,
-  GetCoursesResult,
-  BasicCourse,
-  GetTagsParams,
-  BasicReview,
-  GetReviewsParams,
-  GetReviewsResult,
-  RatingStats,
   Vote,
   VoteType,
   ReviewWithVotes,
+  Bookmark,
+  GetCoursesParams,
+  GetCoursesResult,
+  GetReviewsParams,
+  GetReviewsResult,
+  RatingStats,
   CreateCheckoutSessionInput,
   CheckoutSessionResponse,
+  BasicCourse,
+  GetTagsParams,
+  BasicReview,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
-  getCourseById(id: string): Promise<BasicCourse | null>;
+  getCourseById(id: string, userId?: string): Promise<BasicCourse | null>;
   isEnrolled(userId: string, courseId: string): Promise<boolean>;
 }
 
@@ -83,4 +84,9 @@ export interface IPaymentsDAL {
     userId: string,
     courseId: string
   ): Promise<boolean>;
+}
+
+export interface IBookmarksDAL {
+  createBookmark(userId: string, courseId: string): Promise<Bookmark>;
+  deleteBookmark(userId: string, courseId: string): Promise<void>;
 }

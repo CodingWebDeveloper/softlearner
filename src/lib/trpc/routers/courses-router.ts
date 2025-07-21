@@ -20,7 +20,10 @@ export const coursesRouter = router({
           DI_TOKENS.COURSES_SERVICE
         );
 
-        return await coursesService.getCourses(input);
+        return await coursesService.getCourses({
+          ...input,
+          userId: ctx.user?.id,
+        });
       } catch (error) {
         throw new Error(
           `Failed to fetch courses: ${
