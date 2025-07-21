@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { VoteType } from "@/services/votes-service";
+import { VoteType } from "@/services/votes.service";
 
 interface VoteState {
   upvotes: number;

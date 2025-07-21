@@ -9,17 +9,16 @@ import { TagsDAL } from "../dal/tags.dal";
 import { ReviewsDAL } from "../dal/reviews.dal";
 import { VotesDAL } from "../dal/votes.dal";
 import { ResourcesDAL } from "../dal/resources.dal";
-import { OrdersDAL } from "../dal/orders.dal";
 import { PaymentsDAL } from "../dal/payments.dal";
 
 // Service imports
-import { CategoriesService } from "@/services/categories-service";
-import { CoursesService } from "@/services/courses-service";
-import { TagsService } from "@/services/tags-service";
-import { ResourcesService } from "@/services/resources-service";
-import { ReviewsService } from "@/services/reviews-service";
-import { VotesService } from "@/services/votes-service";
-import { PaymentsService } from "@/services/payments-service";
+import { CategoriesService } from "@/services/categories.service";
+import { CoursesService } from "@/services/courses.service";
+import { TagsService } from "@/services/tags.service";
+import { ResourcesService } from "@/services/resources.service";
+import { ReviewsService } from "@/services/reviews.service";
+import { VotesService } from "@/services/votes.service";
+import { PaymentsService } from "@/services/payments.service";
 
 // Interface imports
 import {
@@ -29,7 +28,6 @@ import {
   IReviewsDAL,
   IVotesDAL,
   IResourcesDAL,
-  IOrdersDAL,
   IPaymentsDAL,
 } from "./interfaces/dal.interfaces";
 
@@ -107,11 +105,6 @@ export function registerDALs(
   container.register<IResourcesDAL>(
     DI_TOKENS.RESOURCES_DAL,
     (c) => new ResourcesDAL(c.resolve(DI_TOKENS.SUPABASE))
-  );
-
-  container.register<IOrdersDAL>(
-    DI_TOKENS.ORDERS_DAL,
-    (c) => new OrdersDAL(c.resolve(DI_TOKENS.SUPABASE))
   );
 
   container.register<IPaymentsDAL>(

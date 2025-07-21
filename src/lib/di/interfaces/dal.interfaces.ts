@@ -84,7 +84,3 @@ export interface IPaymentsDAL {
     courseId: string
   ): Promise<boolean>;
 }
-
-export interface IOrdersDAL {
-  // Methods will be added as needed
-}
