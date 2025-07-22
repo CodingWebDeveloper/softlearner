@@ -126,6 +126,11 @@ export interface ICoursesService {
     page?: number,
     pageSize?: number
   ): Promise<GetCoursesResult>;
+  getPurchasedCourses(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<GetPurchasedCoursesResult>;
 }
 
 export interface ITagsService {
@@ -175,3 +180,21 @@ export interface Bookmark {
   created_at: string;
   updated_at: string;
 }
+
+export type PurchasedCourseResource = {
+  id: string;
+  completed: boolean;
+};
+
+export type PurchasedCourse = {
+  id: string;
+  name: string;
+  creator: CourseCreator;
+  resources: PurchasedCourseResource[];
+  orderCreatedAt: string;
+};
+
+export type GetPurchasedCoursesResult = {
+  data: PurchasedCourse[];
+  totalRecords: number;
+};

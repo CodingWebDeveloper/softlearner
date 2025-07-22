@@ -16,6 +16,11 @@ const getBookmarkedCoursesInput = z.object({
   pageSize: z.number().min(1).max(100).default(15),
 });
 
+const getPurchasedCoursesInput = z.object({
+  page: z.number().min(1).default(1),
+  pageSize: z.number().min(1).max(100).default(15),
+});
+
 export const coursesRouter = router({
   getCourses: publicProcedure
     .input(getCoursesInput)
@@ -90,6 +95,28 @@ export const coursesRouter = router({
       } catch (error) {
         throw new Error(
           `Failed to fetch bookmarked courses: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  getPurchasedCourses: protectedProcedure
+    .input(getPurchasedCoursesInput)
+    .query(async ({ ctx, input }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+
+        return await coursesService.getPurchasedCourses(
+          ctx.user.id,
+          input.page,
+          input.pageSize
+        );
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch purchased courses: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );

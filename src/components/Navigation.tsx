@@ -11,6 +11,7 @@ import {
   Settings as SettingsIcon,
   Menu as MenuIcon,
   Close as CloseIcon,
+  LocalLibrary as MyCoursesIcon,
 } from "@mui/icons-material";
 import { useRouter, usePathname } from "next/navigation";
 import { useSupabase } from "@/contexts/supabase-context";
@@ -88,6 +89,13 @@ const NavigationContent = ({
       label: "Home",
       icon: <HomeIcon />,
       path: "/",
+      showWhenAuthenticated: true,
+      showWhenUnauthenticated: false,
+    },
+    {
+      label: "My Courses",
+      icon: <MyCoursesIcon />,
+      path: "/my-courses",
       showWhenAuthenticated: true,
       showWhenUnauthenticated: false,
     },
@@ -233,9 +241,9 @@ const NavigationContent = ({
               showLabel
             />
             <BottomNavAction
-              label="Bookmarks"
-              value="/bookmarks"
-              icon={<BookmarkIcon />}
+              label="My Courses"
+              value="/my-courses"
+              icon={<MyCoursesIcon />}
               showLabel
             />
             <BottomNavAction

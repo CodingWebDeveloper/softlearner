@@ -20,6 +20,39 @@ type BookmarkWithCourse = Database["public"]["Tables"]["bookmarks"]["Row"] & {
   course: CourseWithRelations;
 };
 
+type PurchasedCourseResource = {
+  id: string;
+  completed: boolean;
+};
+
+type PurchasedCourse = {
+  id: string;
+  name: string;
+  creator: CourseCreator;
+  resources: PurchasedCourseResource[];
+  orderCreatedAt: string;
+};
+
+type GetPurchasedCoursesResult = {
+  data: PurchasedCourse[];
+  totalRecords: number;
+};
+
+type OrderWithCourse = Database["public"]["Tables"]["orders"]["Row"] & {
+  course: {
+    id: string;
+    name: string;
+    creator: CourseCreator;
+    resources: Array<{
+      id: string;
+      user_resources: Array<{
+        user_id: string;
+        completed: boolean;
+      }> | null;
+    }>;
+  };
+};
+
 export class CoursesDAL implements ICoursesDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
 
@@ -259,6 +292,69 @@ export class CoursesDAL implements ICoursesDAL {
         };
 
         return basicCourse;
+      }) || [];
+
+    return {
+      data: transformedData,
+      totalRecords: count || 0,
+    };
+  }
+
+  async getPurchasedCourses(
+    userId: string,
+    page: number = 1,
+    pageSize: number = 15
+  ): Promise<GetPurchasedCoursesResult> {
+    // Calculate pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await this.supabase
+      .from("orders")
+      .select(
+        `
+        created_at,
+        course:course_id (
+          id,
+          name,
+          creator:creator_id (*),
+          resources (
+            id,
+            user_resources (
+              completed,
+              user_id
+            )
+          )
+        )
+        `,
+        { count: "exact" }
+      )
+      .eq("user_id", userId)
+      .eq("status", ORDER_STATUS.SUCCEEDED)
+      .range(from, to)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(`Error fetching purchased courses: ${error.message}`);
+    }
+
+    const transformedData =
+      (data as unknown as OrderWithCourse[])?.map((order) => {
+        const course = order.course;
+
+        return {
+          id: course.id,
+          name: course.name,
+          creator: course.creator,
+          resources: course.resources.map((resource) => ({
+            id: resource.id,
+            completed:
+              resource.user_resources?.some(
+                (ur) => ur.user_id === userId && ur.completed
+              ) ?? false,
+          })),
+          orderCreatedAt: order.created_at,
+        };
       }) || [];
 
     return {

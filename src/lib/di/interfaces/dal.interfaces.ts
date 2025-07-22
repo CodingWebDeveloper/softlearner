@@ -19,6 +19,7 @@ import {
   BasicCourse,
   GetTagsParams,
   BasicReview,
+  GetPurchasedCoursesResult,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -30,6 +31,11 @@ export interface ICoursesDAL {
     page?: number,
     pageSize?: number
   ): Promise<GetCoursesResult>;
+  getPurchasedCourses(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<GetPurchasedCoursesResult>;
 }
 
 export interface ICategoriesDAL {
