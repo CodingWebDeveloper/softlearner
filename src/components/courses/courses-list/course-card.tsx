@@ -1,6 +1,5 @@
 import { KeyboardEvent } from "react";
 import Typography from "@mui/material/Typography";
-import { useRouter } from "next/navigation";
 import { useTheme } from "@mui/material/styles";
 import {
   CourseCard as StyledCourseCard,
@@ -23,17 +22,14 @@ import BookmarkCard from "./bookmark-card";
 
 interface CourseCardProps {
   course: BasicCourse;
+  handleNavigate: () => void;
 }
 
-const CourseCard = ({ course }: CourseCardProps) => {
+const CourseCard = ({ course, handleNavigate }: CourseCardProps) => {
   // General hooks
-  const router = useRouter();
   const theme = useTheme();
 
   // Handlers
-  const handleNavigate = () => {
-    router.push(`/courses/${course.id}`);
-  };
 
   const handleCardKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -86,9 +82,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
               precision={0.1}
               readOnly
               size="small"
-              aria-label={`Rating: ${course.rating || 0} out of 5 (${
-                course.ratings_count
-              } ratings)`}
+              aria-label={`Rating: ${course.rating || 0}`}
             />
             <Typography
               variant="body1"

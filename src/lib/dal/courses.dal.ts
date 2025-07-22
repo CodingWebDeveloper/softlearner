@@ -16,6 +16,10 @@ type CourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {
   bookmarks?: { id: string }[] | null;
 };
 
+type BookmarkWithCourse = Database["public"]["Tables"]["bookmarks"]["Row"] & {
+  course: CourseWithRelations;
+};
+
 export class CoursesDAL implements ICoursesDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
 
@@ -80,7 +84,6 @@ export class CoursesDAL implements ICoursesDAL {
       throw new Error(`Error fetching courses: ${error.message}`);
     }
 
-    // Transform the data to calculate rating and ratings_count
     const transformedData = (data as CourseWithRelations[] | null)?.map(
       (course) => {
         const ratings = course.reviews || [];
@@ -102,7 +105,6 @@ export class CoursesDAL implements ICoursesDAL {
           creator: course.creator,
           category: course.category,
           rating: Number(averageRating.toFixed(1)),
-          ratings_count: ratingsCount,
           created_at: course.created_at,
           updated_at: course.updated_at,
           isBookmarked: (course.bookmarks?.length ?? 0) > 0,
@@ -169,7 +171,6 @@ export class CoursesDAL implements ICoursesDAL {
       creator: course.creator,
       category: course.category,
       rating: Number(averageRating.toFixed(1)),
-      ratings_count: ratingsCount,
       created_at: course.created_at,
       updated_at: course.updated_at,
       isBookmarked: (course.bookmarks?.length ?? 0) > 0,
@@ -192,5 +193,77 @@ export class CoursesDAL implements ICoursesDAL {
     }
 
     return !!order;
+  }
+
+  async getBookmarkedCourses(
+    userId: string,
+    page: number = 1,
+    pageSize: number = 15
+  ): Promise<GetCoursesResult> {
+    // Calculate pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    // Query courses through bookmarks join
+    const { data, error, count } = await this.supabase
+      .from("bookmarks")
+      .select(
+        `
+        id,
+        user_id,
+        course_id,
+        created_at,
+        course:course_id(
+          *,
+          creator:creator_id(*),
+          category:category_id(*),
+          reviews!course_id(rating)
+        )
+      `,
+        { count: "exact" }
+      )
+      .eq("user_id", userId)
+      .range(from, to)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(`Error fetching bookmarked courses: ${error.message}`);
+    }
+
+    // Transform the data to match the BasicCourse structure
+    const transformedData =
+      (data as unknown as BookmarkWithCourse[] | null)?.map((bookmark) => {
+        const course = bookmark.course;
+        const ratings = course.reviews || [];
+        const ratingsCount = ratings.length;
+        const averageRating =
+          ratingsCount > 0
+            ? ratings.reduce((sum, review) => sum + (review.rating || 0), 0) /
+              ratingsCount
+            : 0;
+
+        const basicCourse: BasicCourse = {
+          id: course.id,
+          name: course.name,
+          description: course.description || "",
+          video_url: course.video_url || "",
+          price: course.price,
+          new_price: course.new_price || null,
+          thumbnail_image_url: course.thumbnail_image_url || "",
+          creator: course.creator,
+          category: course.category,
+          rating: Number(averageRating.toFixed(1)),
+          created_at: course.created_at,
+          updated_at: course.updated_at,
+          isBookmarked: true,
+        };
+
+        return basicCourse;
+      }) || [];
+
+    return {
+      data: transformedData,
+      totalRecords: count || 0,
+    };
   }
 }

@@ -1,7 +1,7 @@
 import { useCallback, FC, KeyboardEvent } from "react";
 import { Box, Stack } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   InstructorBox,
   HeaderContainer,
@@ -27,10 +27,14 @@ interface CourseHeaderProps {
 
 const CourseHeader: FC<CourseHeaderProps> = ({ course, instructor }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const previousPage = searchParams.get("previousPage") || "courses";
 
   const handleBack = useCallback(() => {
-    router.push("/courses");
-  }, [router]);
+    router.push(`/${previousPage}`);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "Enter" || event.key === " ") {

@@ -20,4 +20,12 @@ export class CoursesService implements ICoursesService {
   async isEnrolled(userId: string, courseId: string): Promise<boolean> {
     return this.coursesDAL.isEnrolled(userId, courseId);
   }
+
+  async getBookmarkedCourses(
+    userId: string,
+    page: number = 1,
+    pageSize: number = 15
+  ): Promise<GetCoursesResult> {
+    return this.coursesDAL.getBookmarkedCourses(userId, page, pageSize);
+  }
 }

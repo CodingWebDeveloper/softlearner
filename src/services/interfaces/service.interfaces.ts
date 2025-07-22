@@ -64,7 +64,6 @@ export interface BasicCourse {
   creator: CourseCreator;
   category: Category;
   rating: number | null;
-  ratings_count: number;
   created_at: string;
   updated_at: string;
   isBookmarked: boolean;
@@ -122,6 +121,11 @@ export interface ICoursesService {
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string): Promise<BasicCourse | null>;
   isEnrolled(userId: string, courseId: string): Promise<boolean>;
+  getBookmarkedCourses(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<GetCoursesResult>;
 }
 
 export interface ITagsService {

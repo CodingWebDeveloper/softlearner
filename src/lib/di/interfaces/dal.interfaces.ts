@@ -25,6 +25,11 @@ export interface ICoursesDAL {
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string, userId?: string): Promise<BasicCourse | null>;
   isEnrolled(userId: string, courseId: string): Promise<boolean>;
+  getBookmarkedCourses(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<GetCoursesResult>;
 }
 
 export interface ICategoriesDAL {
