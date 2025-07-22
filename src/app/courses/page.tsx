@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, ChangeEvent, KeyboardEvent } from "react";
+import { useEffect, useState, ChangeEvent } from "react";
 import CoursesList from "@/components/courses/courses-list/courses-list";
 import {
   CoursesPageContainer,
@@ -26,8 +26,6 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-const MAX_ENROLLED_DISPLAY = 999;
-
 const CoursesPage = () => {
   // General Hooks
   const dispatch = useAppDispatch();
@@ -43,21 +41,8 @@ const CoursesPage = () => {
     dispatch(setSearch(debouncedSearch));
   }, [debouncedSearch, dispatch]);
 
-  // Handlers
-  const handleBookmark = (id: string) => {
-    // TODO: Implement bookmark functionality with tRPC mutation
-    console.log("Bookmark course:", id);
-  };
-
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
-  };
-
-  // Accessibility: handle Enter/Space for bookmark
-  const handleBookmarkKeyDown = (e: KeyboardEvent, id: string) => {
-    if (e.key === "Enter" || e.key === " ") {
-      handleBookmark(id);
-    }
   };
 
   return (
@@ -75,11 +60,7 @@ const CoursesPage = () => {
       <Filter />
       <TagsList />
       {/* Courses List */}
-      <CoursesList
-        handleBookmark={handleBookmark}
-        handleBookmarkKeyDown={handleBookmarkKeyDown}
-        MAX_ENROLLED_DISPLAY={MAX_ENROLLED_DISPLAY}
-      />
+      <CoursesList />
     </CoursesPageContainer>
   );
 };

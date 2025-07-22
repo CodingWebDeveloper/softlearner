@@ -112,3 +112,19 @@ FOR INSERT WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Allow users to update their own orders" ON orders;
 CREATE POLICY "Allow users to update their own orders" ON orders
 FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Bookmarks Policies
+-- Allow authenticated users to view their own bookmarks
+DROP POLICY IF EXISTS "Allow users to view their own bookmarks" ON bookmarks;
+CREATE POLICY "Allow users to view their own bookmarks" ON bookmarks
+FOR SELECT USING (auth.uid() = user_id);
+
+-- Allow authenticated users to create bookmarks for themselves only
+DROP POLICY IF EXISTS "Allow authenticated users to create bookmarks" ON bookmarks;
+CREATE POLICY "Allow authenticated users to create bookmarks" ON bookmarks
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Allow authenticated users to delete their own bookmarks
+DROP POLICY IF EXISTS "Allow users to delete their own bookmarks" ON bookmarks;
+CREATE POLICY "Allow users to delete their own bookmarks" ON bookmarks
+FOR DELETE USING (auth.uid() = user_id);

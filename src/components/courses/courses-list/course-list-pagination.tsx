@@ -1,5 +1,8 @@
-import { ChangeEvent } from 'react';
-import { PaginationContainer, StyledPagination } from '@/components/styles/courses/courses.styles';
+import { ChangeEvent } from "react";
+import {
+  PaginationContainer,
+  StyledPagination,
+} from "@/components/styles/courses/courses.styles";
 
 interface PaginationProps {
   currentPage: number;
@@ -8,7 +11,6 @@ interface PaginationProps {
 }
 
 const Pagination = ({ currentPage, totalPages, onChange }: PaginationProps) => {
-  
   if (totalPages <= 1) return null;
   return (
     <PaginationContainer>
@@ -22,4 +24,4 @@ const Pagination = ({ currentPage, totalPages, onChange }: PaginationProps) => {
   );
 };
 
-export default Pagination; 
+export default Pagination;

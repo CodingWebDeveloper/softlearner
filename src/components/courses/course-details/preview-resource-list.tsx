@@ -12,7 +12,7 @@ import {
 import { trpc } from "@/lib/trpc/client";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
-import { formatDuration } from "@/utils/dateUtils";
+import { formatDuration } from "@/utils/date.utils";
 
 interface ResourceListProps {
   courseId?: string;

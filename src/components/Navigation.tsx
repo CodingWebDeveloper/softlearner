@@ -14,6 +14,8 @@ import {
 } from "@mui/icons-material";
 import { useRouter, usePathname } from "next/navigation";
 import { useSupabase } from "@/contexts/supabase-context";
+import { User } from "@supabase/supabase-js";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import ClientOnly from "./client-only";
 import {
   SidebarContainer,
@@ -74,9 +76,9 @@ const NavigationContent = ({
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   pathname: string;
-  user: any;
+  user: User | null;
   signOut: () => Promise<void>;
-  router: any;
+  router: AppRouterInstance;
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -92,7 +94,7 @@ const NavigationContent = ({
     {
       label: "Bookmarks",
       icon: <BookmarkIcon />,
-      path: "/my-courses",
+      path: "/bookmarks",
       showWhenAuthenticated: true,
       showWhenUnauthenticated: false,
     },
@@ -232,7 +234,7 @@ const NavigationContent = ({
             />
             <BottomNavAction
               label="Bookmarks"
-              value="/my-courses"
+              value="/bookmarks"
               icon={<BookmarkIcon />}
               showLabel
             />

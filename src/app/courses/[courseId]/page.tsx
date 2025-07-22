@@ -95,7 +95,7 @@ const CourseDetailsPage: FC = () => {
     <CourseDetailsContainer>
       <Grid container spacing={6} alignItems="start">
         <Grid size={{ xs: 12, md: 8 }}>
-          <CourseHeader title={course.name} instructor={instructor} />
+          <CourseHeader course={course} instructor={instructor} />
           <CourseTags courseId={courseId} />
           {mobileMatches && (
             <SidebarContainer>

@@ -64,9 +64,9 @@ export interface BasicCourse {
   creator: CourseCreator;
   category: Category;
   rating: number | null;
-  ratings_count: number;
   created_at: string;
   updated_at: string;
+  isBookmarked: boolean;
 }
 
 export interface GetCoursesParams {
@@ -75,6 +75,7 @@ export interface GetCoursesParams {
   search?: string;
   categoryId?: string;
   tags?: string[];
+  userId?: string;
 }
 
 export interface GetCoursesResult {
@@ -120,6 +121,11 @@ export interface ICoursesService {
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string): Promise<BasicCourse | null>;
   isEnrolled(userId: string, courseId: string): Promise<boolean>;
+  getBookmarkedCourses(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<GetCoursesResult>;
 }
 
 export interface ITagsService {
@@ -155,4 +161,17 @@ export interface IPaymentsService {
   createCheckoutSession(
     input: CreateCheckoutSessionInput
   ): Promise<CheckoutSessionResponse>;
+}
+
+export interface IBookmarksService {
+  createBookmark(userId: string, courseId: string): Promise<Bookmark>;
+  deleteBookmark(userId: string, courseId: string): Promise<void>;
+}
+
+export interface Bookmark {
+  id: string;
+  user_id: string;
+  course_id: string;
+  created_at: string;
+  updated_at: string;
 }

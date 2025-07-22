@@ -1,24 +1,40 @@
-import { styled } from '@mui/material/styles';
-import { Box, Card, CardMedia, Chip, Typography, Divider, IconButton, TextField, CardContent, Select, InputLabel, Autocomplete, Alert, FormControl, Grid } from '@mui/material';
-import MuiPagination from '@mui/material/Pagination';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import PersonIcon from '@mui/icons-material/Person';
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { styled } from "@mui/material/styles";
+import {
+  Box,
+  Card,
+  CardMedia,
+  Chip,
+  Typography,
+  Divider,
+  IconButton,
+  TextField,
+  CardContent,
+  Select,
+  InputLabel,
+  Alert,
+  FormControl,
+  Grid,
+  Rating,
+} from "@mui/material";
+import MuiPagination from "@mui/material/Pagination";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import PersonIcon from "@mui/icons-material/Person";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 export const FilterBar = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: theme.spacing(2),
-  flexWrap: 'wrap',
+  flexWrap: "wrap",
   marginBottom: theme.spacing(3),
 }));
 
 export const FilterLabel = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
   marginRight: theme.spacing(1),
-  color: theme.palette.custom.text.white
+  color: theme.palette.custom.text.white,
 }));
 
 export const TagChip = styled(Chip)(({ theme }) => ({
@@ -30,23 +46,23 @@ export const TagChip = styled(Chip)(({ theme }) => ({
   paddingRight: theme.spacing(2),
   paddingTop: 2,
   paddingBottom: 2,
-  borderRadius: '20px',
+  borderRadius: "20px",
   marginRight: theme.spacing(1),
 }));
 
 export const CourseCard = styled(Card)(({ theme }) => ({
   background: theme.palette.custom.background.card,
-  border: '1.5px solid rgba(255,255,255,0.08)',
+  border: "1.5px solid rgba(255,255,255,0.08)",
   color: theme.palette.custom.text.white,
-  borderRadius: '16px',
+  borderRadius: "16px",
   padding: theme.spacing(3),
-  boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
-  width: '100%',
-  maxWidth: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  position: 'relative',
-  cursor: 'pointer',
+  boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
+  width: "100%",
+  maxWidth: "100%",
+  display: "flex",
+  flexDirection: "column",
+  position: "relative",
+  cursor: "pointer",
   "&:hover": {
     backgroundColor: theme.palette.custom.background.tertiary,
     transform: "translateY(-2px)",
@@ -54,58 +70,60 @@ export const CourseCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-export const CardImage = styled(CardMedia, {
-})(({ theme }) => ({
+export const CardImage = styled(
+  CardMedia,
+  {}
+)(({ theme }) => ({
   width: "100%",
   height: "160px",
   borderRadius: 2,
-  objectFit: 'cover',
+  objectFit: "cover",
   marginBottom: theme.spacing(2),
   marginRight: theme.spacing(3),
 }));
 
 export const BottomRow = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   marginTop: theme.spacing(3),
 }));
 
 export const BookmarkButton = styled(IconButton)(({ theme }) => ({
   color: theme.palette.custom.accent.teal,
-  background: 'rgba(36,37,44,0.7)',
-  borderRadius: '50%',
+  background: "rgba(36,37,44,0.7)",
+  borderRadius: "50%",
   padding: theme.spacing(1),
   marginRight: theme.spacing(2),
 }));
 
 export const EnrolledBox = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   marginLeft: theme.spacing(2),
 }));
 
 export const VerticalDivider = styled(Divider)(({ theme }) => ({
-  borderColor: 'rgba(255,255,255,0.12)',
+  borderColor: "rgba(255,255,255,0.12)",
   marginLeft: theme.spacing(2),
   marginRight: theme.spacing(2),
   height: 28,
 }));
 
 export const CoursesPageContainer = styled(Box)(({ theme }) => ({
-  width: '100%',
-  margin: '0 auto',
+  width: "100%",
+  margin: "0 auto",
   marginTop: theme.spacing(4),
   padding: theme.spacing(2),
   background: theme.palette.custom.background.dark,
-  minHeight: '100vh',
-  overflowX: 'hidden',
+  minHeight: "100vh",
+  overflowX: "hidden",
 }));
 
 export const SearchTextField = styled(TextField)(({ theme }) => ({
   marginBottom: theme.spacing(3),
-  '& input': { color: theme.palette.custom.text.white },
-  '& label': { color: theme.palette.custom.text.white },
-  '& .MuiOutlinedInput-root': {
+  "& input": { color: theme.palette.custom.text.white },
+  "& label": { color: theme.palette.custom.text.white },
+  "& .MuiOutlinedInput-root": {
     background: theme.palette.custom.background.secondary,
     color: theme.palette.custom.text.white,
   },
@@ -115,9 +133,9 @@ export const StyledCardContent = styled(CardContent)({
   flex: 1,
   minWidth: 0,
   padding: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
 });
 
 export const CardContentTop = styled(Box)({
@@ -125,23 +143,23 @@ export const CardContentTop = styled(Box)({
 });
 
 export const CoursesListContainer = styled(Box)({
-  width: '100%',
+  width: "100%",
 });
 
 export const CourseGridItem = styled(Grid)({
-  width: '100%',
+  width: "100%",
 });
 
 export const TagsContainer = styled(Box)({
   marginBottom: 16,
-  display: 'flex',
+  display: "flex",
   gap: 8,
-  flexWrap: 'wrap',
+  flexWrap: "wrap",
 });
 
 export const RatingContainer = styled(Box)({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: 8,
   marginTop: 8,
 });
@@ -157,16 +175,16 @@ export const PersonIconStyled = styled(PersonIcon)(({ theme }) => ({
 
 export const NoCoursesMessage = styled(Typography)(({ theme }) => ({
   marginTop: theme.spacing(4),
-  textAlign: 'center',
+  textAlign: "center",
 }));
 
 export const CategorySelect = styled(Select)(({ theme }) => ({
   color: theme.palette.custom.text.white,
   background: theme.palette.custom.background.secondary,
-  '& .MuiSelect-icon': {
-    color: theme.palette.custom.accent.teal
+  "& .MuiSelect-icon": {
+    color: theme.palette.custom.accent.teal,
   },
-  height: "100%"
+  height: "100%",
 }));
 
 export const CategoryInputLabel = styled(InputLabel)(({ theme }) => ({
@@ -177,8 +195,8 @@ export const TagsAutocompleteContainer = styled(Box)(({ theme }) => ({
   minWidth: 160,
   background: theme.palette.custom.background.secondary,
   color: theme.palette.custom.text.white,
-  '& .MuiAutocomplete-endAdornment': {
-    color: theme.palette.custom.accent.teal
+  "& .MuiAutocomplete-endAdornment": {
+    color: theme.palette.custom.accent.teal,
   },
 }));
 
@@ -186,14 +204,14 @@ export const TagsTextField = styled(TextField)(({ theme }) => ({
   color: theme.palette.custom.text.white,
   background: theme.palette.custom.background.secondary,
   minWidth: 160,
-  '& .MuiAutocomplete-endAdornment': {
-    color: theme.palette.custom.accent.teal
+  "& .MuiAutocomplete-endAdornment": {
+    color: theme.palette.custom.accent.teal,
   },
-  '& .MuiInputBase-input': {
-    color: theme.palette.custom.text.white
+  "& .MuiInputBase-input": {
+    color: theme.palette.custom.text.white,
   },
-  '& .MuiInputLabel-root': {
-    color: theme.palette.custom.text.white
+  "& .MuiInputLabel-root": {
+    color: theme.palette.custom.text.white,
   },
 }));
 
@@ -206,7 +224,7 @@ export const TagChipStyled = styled(Chip)(({ theme }) => ({
   paddingRight: theme.spacing(2),
   paddingTop: 2,
   paddingBottom: 2,
-  borderRadius: '20px',
+  borderRadius: "20px",
 }));
 
 export const CloseIconStyled = styled(CloseRoundedIcon)(({ theme }) => ({
@@ -223,31 +241,31 @@ export const ExtraTagChip = styled(Chip)(({ theme }) => ({
   paddingRight: theme.spacing(2),
   paddingTop: 2,
   paddingBottom: 2,
-  borderRadius: '20px',
+  borderRadius: "20px",
 }));
 
 export const PaginationContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
+  display: "flex",
+  justifyContent: "center",
   marginTop: theme.spacing(4),
 }));
 
 export const StyledPagination = styled(MuiPagination)(({ theme }) => ({
-  '& .MuiPaginationItem-root': {
+  "& .MuiPaginationItem-root": {
     color: theme.palette.custom.text.white,
     borderColor: theme.palette.custom.accent.teal,
-    '&:hover': {
+    "&:hover": {
       backgroundColor: theme.palette.custom.background.secondary,
       color: theme.palette.custom.accent.teal,
     },
-    '&.Mui-selected': {
+    "&.Mui-selected": {
       backgroundColor: theme.palette.custom.accent.teal,
       color: theme.palette.custom.background.card,
-      '&:hover': {
+      "&:hover": {
         backgroundColor: theme.palette.custom.accent.tealDark,
         color: theme.palette.custom.background.card,
       },
-      '&.Mui-focusVisible': {
+      "&.Mui-focusVisible": {
         backgroundColor: theme.palette.custom.accent.tealDark,
         color: theme.palette.custom.background.card,
       },
@@ -260,27 +278,67 @@ export const SidebarContainer = styled(Box)(({ theme }) => ({
 }));
 
 export const AlertStyled = styled(Alert)({
-  marginBottom: "16px"
-})
+  marginBottom: "16px",
+});
 
 export const TextLightText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.custom.text.light
+  color: theme.palette.custom.text.light,
 }));
 
-export const BookmarkBorderIconStyled = styled(BookmarkBorderIcon)(({ theme }) => ({
-  color: theme.palette.custom.accent.teal,
-}));
+export const BookmarkBorderIconStyled = styled(BookmarkBorderIcon)(
+  ({ theme }) => ({
+    color: theme.palette.custom.accent.teal,
+  })
+);
 
 export const FormControlStyled = styled(FormControl)({
   minWidth: 120,
 });
 
-export const ArrowDropDownIconStyled = styled(ArrowDropDownIcon)(({ theme }) => ({
-  color: `${theme.palette.custom.accent.teal} !important`,
-}));
+export const ArrowDropDownIconStyled = styled(ArrowDropDownIcon)(
+  ({ theme }) => ({
+    color: `${theme.palette.custom.accent.teal} !important`,
+  })
+);
 
 export const PaginationWrapper = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
+  display: "flex",
+  justifyContent: "center",
   marginTop: theme.spacing(2),
+}));
+
+export const PriceBox = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+}));
+
+export const DiscountTag = styled(Box)(({ theme }) => ({
+  background: theme.palette.custom.accent.teal,
+  color: theme.palette.custom.text.white,
+  padding: theme.spacing(0.5, 1),
+  borderRadius: theme.spacing(0.5),
+  fontSize: "0.75rem",
+  fontWeight: 600,
+  display: "flex",
+  alignItems: "center",
+  marginLeft: theme.spacing(1),
+}));
+
+export const Price = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.accent.teal,
+  fontWeight: 700,
+  fontSize: "1rem",
+}));
+
+export const OldPrice = styled(Typography)(({ theme }) => ({
+  textDecoration: "line-through",
+  color: theme.palette.custom.text.light,
+  fontSize: "0.875rem",
+}));
+
+export const CourseCardRating = styled(Rating)(({ theme }) => ({
+  "& .MuiRating-icon": {
+    color: theme.palette.custom.accent.yellow,
+  },
 }));

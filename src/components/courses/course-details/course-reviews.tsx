@@ -17,12 +17,11 @@ import { RatingStatsCard } from "./rating-stats-card";
 import { ReviewCard } from "./review-card";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { setSearchTerm } from "@/lib/store/features/reviewFiltersSlice";
+import { REVIEWS_PER_PAGE } from "@/utils/constants";
 
 interface CourseReviewsProps {
   courseId: string;
 }
-
-const REVIEWS_PER_PAGE = 15;
 
 const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
   const [page, setPage] = useState(1);
