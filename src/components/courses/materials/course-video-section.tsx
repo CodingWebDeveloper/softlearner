@@ -11,6 +11,9 @@ import BookmarkCard from "../courses-list/bookmark-card";
 import { FullCourse } from "@/services/interfaces/service.interfaces";
 import { useAppSelector } from "@/lib/store/hooks";
 import { selectResource } from "@/lib/store/features/resourceSlice";
+import CourseTags from "../course-details/course-tags";
+import CategoryIcon from "@mui/icons-material/Category";
+import { CategoryChip } from "@/components/styles/courses/course-details.styles";
 
 interface CourseVideoSectionProps {
   course: FullCourse;
@@ -54,6 +57,9 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
           initialIsBookmarked={course.isBookmarked}
         />
       </Box>
+      <Box mt={1}>
+        <CategoryChip label={course.category.name} icon={<CategoryIcon />} />
+      </Box>
       <Typography
         variant="body1"
         style={{ color: theme.palette.custom.text.light }}
@@ -61,6 +67,8 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
       >
         {course.description}
       </Typography>
+      <CourseTags courseId={course.id} />
+
       <InstructorBox>
         <Avatar
           src={course.creator.avatar_url || undefined}

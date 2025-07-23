@@ -1,7 +1,7 @@
 import { styled } from "@mui/material/styles";
 import { Box, Typography } from "@mui/material";
 
-export const LayoutContainer = styled(Box)(({ theme }) => ({
+export const LayoutContainer = styled(Box)(() => ({
   display: "flex",
   minHeight: "100vh",
 }));
@@ -11,23 +11,24 @@ export const MainContent = styled(Box, {
 })<{
   isMobile?: boolean;
   hasUser?: boolean;
-}>(({ isMobile, hasUser, theme }) => ({
+}>(({ isMobile, hasUser }) => ({
   flexGrow: 1,
   backgroundColor: "#1a1b23",
   minHeight: "100vh",
-  // Add margin for mobile bottom navigation
+  // Add margin for mobile navigation
   ...(isMobile &&
     hasUser && {
       paddingBottom: "80px", // Height of bottom navigation
+      paddingTop: "56px", // Height of top AppBar
     }),
 }));
 
-export const FallbackContainer = styled(Box)(({ theme }) => ({
+export const FallbackContainer = styled(Box)(() => ({
   display: "flex",
   minHeight: "100vh",
 }));
 
-export const FallbackMain = styled(Box)(({ theme }) => ({
+export const FallbackMain = styled(Box)(() => ({
   flexGrow: 1,
   backgroundColor: "#1a1b23",
   minHeight: "100vh",

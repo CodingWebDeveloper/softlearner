@@ -1,14 +1,11 @@
-import { useCallback, FC, KeyboardEvent } from "react";
+import { FC } from "react";
 import { Box, Stack } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useRouter, useSearchParams } from "next/navigation";
 import {
   InstructorBox,
   HeaderContainer,
   CourseTitle,
   InstructorName,
   InstructorRole,
-  BackIconButton,
   InstructorAvatar,
 } from "@/components/styles/courses/course-details.styles";
 import BookmarkCard from "../courses-list/bookmark-card";
@@ -26,23 +23,6 @@ interface CourseHeaderProps {
 }
 
 const CourseHeader: FC<CourseHeaderProps> = ({ course, instructor }) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const previousPage = searchParams.get("previousPage") || "courses";
-
-  const handleBack = useCallback(() => {
-    router.push(`/${previousPage}`);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      handleBack();
-    }
-  };
-
   return (
     <HeaderContainer>
       <Stack
