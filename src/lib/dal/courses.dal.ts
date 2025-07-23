@@ -8,6 +8,7 @@ import {
   CourseCreator,
 } from "@/services/interfaces/service.interfaces";
 import { ORDER_STATUS } from "@/constants/stripe-constants";
+import { FullCourse } from "@/services/interfaces/service.interfaces";
 
 type CourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {
   creator: CourseCreator;
@@ -361,5 +362,63 @@ export class CoursesDAL implements ICoursesDAL {
       data: transformedData,
       totalRecords: count || 0,
     };
+  }
+
+  async getCourseMaterialsById(
+    id: string,
+    userId?: string
+  ): Promise<FullCourse | null> {
+    let query = this.supabase
+      .from("courses")
+      .select(
+        `
+       *,
+        creator:creator_id(*),
+        category:category_id(*),
+        bookmarks!course_id(id)
+      `
+      )
+      .eq("id", id);
+
+    if (userId) {
+      query = query.eq("bookmarks.user_id", userId);
+    }
+
+    const { data, error } = await query.single();
+
+    if (error) {
+      throw new Error(`Error fetching course materials: ${error.message}`);
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    // Type assertion to unknown first, then to the expected type
+    const course = data as unknown as {
+      id: string;
+      name: string;
+      description: string | null;
+      created_at: string;
+      updated_at: string;
+      creator: CourseCreator;
+      category: Database["public"]["Tables"]["categories"]["Row"];
+      bookmarks: { id: string }[] | null;
+      video_url: string;
+    };
+
+    const courseData: FullCourse = {
+      id: course.id,
+      name: course.name,
+      description: course.description || "",
+      creator: course.creator,
+      category: course.category,
+      created_at: course.created_at,
+      updated_at: course.updated_at,
+      isBookmarked: (course.bookmarks?.length ?? 0) > 0,
+      video_url: course.video_url || "",
+    };
+
+    return courseData;
   }
 }

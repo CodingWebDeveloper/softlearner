@@ -1,16 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
-import courseMaterialsReducer from "./features/courseMaterialsSlice";
 import filterReducer from "./features/filterSlice";
 import reviewFiltersReducer from "./features/reviewFiltersSlice";
 import reviewVotesReducer from "./features/reviewVotesSlice";
+import resourceReducer from "./features/resourceSlice";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
-      courseMaterials: courseMaterialsReducer,
       filter: filterReducer,
       reviewFilters: reviewFiltersReducer,
       reviewVotes: reviewVotesReducer,
+      resource: resourceReducer,
     },
   });
 };

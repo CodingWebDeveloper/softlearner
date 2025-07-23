@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { router, protectedProcedure, publicProcedure } from "../trpc";
+import { router, protectedProcedure } from "../trpc";
 import { IVotesService } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
 
@@ -35,7 +35,7 @@ export const votesRouter = router({
       }
     }),
 
-  getReviewVotes: publicProcedure
+  getReviewVotes: protectedProcedure
     .input(getReviewVotesInput)
     .query(async ({ input, ctx }) => {
       try {

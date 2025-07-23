@@ -10,7 +10,7 @@ INSERT INTO courses (
 ) VALUES
 (
   'Introduction to Mathematics',
-  '**A foundational course covering:**\n- Basic mathematical concepts\n- Problem-solving strategies\n- Real-world applications\n\n_This course is perfect for beginners looking to build a strong math foundation._',
+  'A foundational course covering basic mathematical concepts, problem-solving strategies, and real-world applications. This course is perfect for beginners looking to build a strong math foundation.',
   'https://www.youtube.com/embed/VKlcZCc5uQQ?si=99qTsSATXKoc4fCD',
   49.99,
   39.99,
@@ -20,7 +20,7 @@ INSERT INTO courses (
 ),
 (
   'Web Development Bootcamp',
-  '**Learn to build modern web applications from scratch:**\n- HTML, CSS, and JavaScript essentials\n- Hands-on projects\n- Responsive design techniques\n\n_Join this bootcamp to kickstart your web development career!_',
+  'Learn to build modern web applications from scratch. The course covers HTML, CSS, and JavaScript essentials, hands-on projects, and responsive design techniques. Join this bootcamp to kickstart your web development career!',
   'https://www.youtube.com/embed/TG6XSFeOT3g?si=2gikLYtZ43KHTncW',
   99.99,
   79.99,
@@ -30,7 +30,7 @@ INSERT INTO courses (
 ),
 (
   'Business Analytics Essentials',
-  '**Master the basics of business analytics and data-driven decision making:**\n- Data analysis fundamentals\n- Excel for business insights\n- Real-world case studies\n\n_Unlock the power of analytics for your business success._',
+  'Master the basics of business analytics and data-driven decision making. The course includes data analysis fundamentals, Excel for business insights, and real-world case studies. Unlock the power of analytics for your business success.',
   'https://www.youtube.com/embed/diaZdX1s5L4?si=GcivOv98ZeaOpLQ8',
   79.99,
   59.99,

@@ -1,5 +1,18 @@
 import { Category, Tag, PreviewResource } from "@/lib/database/database.types";
 
+export type BasicResource = {
+  id: string;
+  url: string;
+  name: string;
+  short_summary?: string;
+  type?: "video" | "downloadable file";
+  course_id: string;
+  order_index?: number;
+  duration?: string;
+  created_at: string;
+  updated_at: string;
+};
+
 type User = {
   id: string;
   email: string | null;
@@ -69,6 +82,18 @@ export interface BasicCourse {
   isBookmarked: boolean;
 }
 
+export interface FullCourse {
+  id: string;
+  name: string;
+  description: string;
+  creator: CourseCreator;
+  category: Category;
+  created_at: string;
+  updated_at: string;
+  isBookmarked: boolean;
+  video_url: string;
+}
+
 export interface GetCoursesParams {
   page: number;
   pageSize: number;
@@ -131,6 +156,10 @@ export interface ICoursesService {
     page?: number,
     pageSize?: number
   ): Promise<GetPurchasedCoursesResult>;
+  getCourseMaterialsById(
+    id: string,
+    userId?: string
+  ): Promise<FullCourse | null>;
 }
 
 export interface ITagsService {
@@ -143,6 +172,7 @@ export interface ITagsService {
 
 export interface IResourcesService {
   getResourcesByCourseId(courseId: string): Promise<PreviewResource[]>;
+  getResourceMaterialsByCourseId(courseId: string): Promise<BasicResource[]>;
 }
 
 export interface IReviewsService {

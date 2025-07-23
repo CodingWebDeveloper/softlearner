@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { router, publicProcedure } from "../trpc";
+import { router, protectedProcedure } from "../trpc";
 import { IReviewsService } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
 
@@ -12,7 +12,7 @@ const getReviewsInput = z.object({
 });
 
 export const reviewsRouter = router({
-  getCourseReviews: publicProcedure
+  getCourseReviews: protectedProcedure
     .input(getReviewsInput)
     .query(async ({ ctx, input }) => {
       try {
@@ -29,7 +29,7 @@ export const reviewsRouter = router({
       }
     }),
 
-  getCourseRatingStats: publicProcedure
+  getCourseRatingStats: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
       try {
@@ -46,7 +46,7 @@ export const reviewsRouter = router({
       }
     }),
 
-  getReviewById: publicProcedure
+  getReviewById: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
       try {

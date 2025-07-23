@@ -45,32 +45,27 @@ const CourseHeader: FC<CourseHeaderProps> = ({ course, instructor }) => {
 
   return (
     <HeaderContainer>
-      <Stack direction="row" justifyContent="space-between" spacing={2}>
-        <BackIconButton
-          onClick={handleBack}
-          onKeyDown={handleKeyDown}
-          aria-label="Go back to courses"
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        spacing={2}
+      >
+        <CourseTitle
+          variant="h3"
+          fontWeight={700}
+          gutterBottom
           tabIndex={0}
-          edge="start"
-          size="large"
+          aria-label="Course Title"
         >
-          <ArrowBackIcon fontSize="large" />
-        </BackIconButton>
+          {course.name}
+        </CourseTitle>
         <BookmarkCard
           courseId={course.id}
           initialIsBookmarked={course.isBookmarked}
         />
       </Stack>
 
-      <CourseTitle
-        variant="h3"
-        fontWeight={700}
-        gutterBottom
-        tabIndex={0}
-        aria-label="Course Title"
-      >
-        {course.name}
-      </CourseTitle>
       <InstructorBox>
         <InstructorAvatar src={instructor.avatar} alt={instructor.name} />
         <Box>
