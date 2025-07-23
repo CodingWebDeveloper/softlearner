@@ -1,5 +1,5 @@
-'use client';
-import { FC, useState } from 'react';
+"use client";
+import { FC, useState, KeyboardEvent } from "react";
 import {
   QuizzesListContainer,
   QuizListItem,
@@ -7,41 +7,52 @@ import {
   QuizProgressBar,
   QuizProgressContainer,
   QuizProgressText,
-} from '@/components/styles/courses/materials.styles';
-import QuizDialog from './quiz-dialog';
+} from "@/components/styles/courses/materials.styles";
+import QuizDialog from "./quiz-dialog";
+import { Box } from "@mui/material";
+
+interface QuizQuestion {
+  id: number;
+  question: string;
+  options: string[];
+  correct: number;
+}
 
 interface Quiz {
   id: number;
   title: string;
-  progress: number; // percent
+  progress: number;
+  questions?: QuizQuestion[];
 }
 
 interface QuizListProps {
   quizzes: Quiz[];
 }
 
-const mockQuestions = [
+const mockQuestions: QuizQuestion[] = [
   {
     id: 1,
-    question: 'A 62-year-old man presents with nocturia, hesitancy and terminal dribbling. Prostate examination reveals a moderately enlarged prostate with no irregular features and a well defined median sulcus. Blood tests show; PSA1.3 ng/ml. What is the most appropriate management?',
+    question:
+      "A 62-year-old man presents with nocturia, hesitancy and terminal dribbling. Prostate examination reveals a moderately enlarged prostate with no irregular features and a well defined median sulcus. Blood tests show; PSA1.3 ng/ml. What is the most appropriate management?",
     options: [
-      'Alpha-1 antagonist',
-      '5 alpha-reductase inhibitor',
-      'Non-urgent referral for transurethral resection of prostate',
-      'Empirical treatment with ciprofloxacin for 2 weeks',
-      'Urgent referral to urology',
+      "Alpha-1 antagonist",
+      "5 alpha-reductase inhibitor",
+      "Non-urgent referral for transurethral resection of prostate",
+      "Empirical treatment with ciprofloxacin for 2 weeks",
+      "Urgent referral to urology",
     ],
     correct: 0,
   },
   {
     id: 2,
-    question: 'Which of the following is the most common cause of myocardial infarction?',
+    question:
+      "Which of the following is the most common cause of myocardial infarction?",
     options: [
-      'Coronary artery spasm',
-      'Atherosclerotic plaque rupture',
-      'Coronary artery embolism',
-      'Coronary artery dissection',
-      'Vasculitis',
+      "Coronary artery spasm",
+      "Atherosclerotic plaque rupture",
+      "Coronary artery embolism",
+      "Coronary artery dissection",
+      "Vasculitis",
     ],
     correct: 1,
   },
@@ -63,26 +74,26 @@ const QuizList: FC<QuizListProps> = ({ quizzes }) => {
   };
 
   return (
-    <>
+    <Box sx={{ width: "100%", maxWidth: "800px", margin: "0 auto" }}>
       <QuizzesListContainer>
         {quizzes.map((quiz) => (
           <QuizListItem
             key={quiz.id}
             onClick={() => handleQuizClick(quiz)}
             tabIndex={0}
-            aria-label={`Open quiz ${quiz.title}`}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') handleQuizClick(quiz);
+            role="button"
+            aria-label={`Open quiz ${quiz.title}, current progress: ${quiz.progress}%`}
+            onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleQuizClick(quiz);
+              }
             }}
           >
-            <QuizTitle>{quiz.title}</QuizTitle>
+            <QuizTitle variant="h6">{quiz.title}</QuizTitle>
             <QuizProgressContainer>
               <QuizProgressBar variant="determinate" value={quiz.progress} />
-              <QuizProgressText
-                variant="body2"
-              >
-                {quiz.progress}%
-              </QuizProgressText>
+              <QuizProgressText>{quiz.progress}%</QuizProgressText>
             </QuizProgressContainer>
           </QuizListItem>
         ))}
@@ -95,8 +106,8 @@ const QuizList: FC<QuizListProps> = ({ quizzes }) => {
           maxWidth="md"
         />
       )}
-    </>
+    </Box>
   );
 };
 
-export default QuizList; 
+export default QuizList;

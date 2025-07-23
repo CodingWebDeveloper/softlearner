@@ -9,6 +9,7 @@ import {
   LinearProgress,
   Card,
   Button,
+  Paper,
 } from "@mui/material";
 import type { ButtonProps } from "@mui/material/Button";
 
@@ -184,220 +185,232 @@ export const ResourceSummary = styled(Typography)(({ theme }) => ({
 }));
 
 export const QuizzesListContainer = styled(Box)(({ theme }) => ({
-  background: theme.palette.custom.background.card,
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(2, 0),
-  overflowY: "auto",
-  maxHeight: "500px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "16px",
+  width: "100%",
+  padding: "16px",
 }));
 
-export const QuizListItem = styled(ListItem)(({ theme }) => ({
+export const QuizListItem = styled(Paper)(({ theme }) => ({
   display: "flex",
-  padding: theme.spacing(1, 0),
-  cursor: "pointer",
-  "&:hover": {
-    background: theme.palette.custom.background.secondary,
-  },
   flexDirection: "column",
-  alignItems: "flex-start",
-  gap: theme.spacing(1),
+  padding: "16px",
+  backgroundColor: theme.palette.custom.background.card,
+  borderRadius: "8px",
+  cursor: "pointer",
+  transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    backgroundColor: theme.palette.custom.background.tertiary,
+  },
+
+  "&:focus": {
+    outline: `2px solid ${theme.palette.custom.accent.teal}`,
+    outlineOffset: "2px",
+  },
 }));
 
 export const QuizTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.custom.text.white,
+  fontSize: "1rem",
   fontWeight: 500,
-  fontSize: 16,
-  flex: 1,
+  marginBottom: "12px",
 }));
 
 export const QuizProgressBar = styled(LinearProgress)(({ theme }) => ({
-  height: 8,
-  borderRadius: 4,
-  backgroundColor: theme.palette.custom.background.secondary,
-  border: `1px solid ${theme.palette.custom.accent.blue}`,
+  flexGrow: 1,
+  height: "8px",
+  borderRadius: "4px",
+  backgroundColor: theme.palette.custom.background.tertiary,
+
   "& .MuiLinearProgress-bar": {
-    backgroundColor: theme.palette.custom.accent.blue,
+    backgroundColor: theme.palette.custom.accent.teal,
+    borderRadius: "4px",
   },
-  flex: 1,
-  marginLeft: theme.spacing(2),
-  marginRight: theme.spacing(2),
 }));
 
-export const QuizDialogCard = styled(Card)(({ theme }) => ({
+// Quiz Dialog Styles
+export const QuizDialogCard = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: "24px",
+  padding: "24px",
   width: "100%",
-  maxWidth: 600,
-  background:
-    theme.palette.custom.background.card || theme.palette.background.paper,
-  boxShadow: theme.shadows[3],
-  borderRadius: (theme.shape.borderRadius as number) * 2,
-  padding: theme.spacing(4, 2),
-  color: theme.palette.custom.text.light,
-  position: "relative",
+  maxWidth: "800px",
+  margin: "0 auto",
+  height: "100%",
+  backgroundColor: theme.palette.custom.background.card,
+  borderRadius: "12px",
+  [theme.breakpoints.down("sm")]: {
+    padding: "16px",
+    gap: "16px",
+  },
 }));
 
-export const QuizDialogPercent = styled(Typography)(({ theme }) => ({
-  fontSize: "2.5rem",
-  fontWeight: 700,
-  color: theme.palette.primary.main,
-  marginBottom: theme.spacing(1),
-  textAlign: "center",
+export const DialogContentBox = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  boxSizing: "border-box",
+  height: "fit-content",
+  padding: "24px",
+  // backgroundColor: theme.palette.custom.background.dark,
+  [theme.breakpoints.down("sm")]: {
+    padding: "16px",
+  },
 }));
 
-export const QuizDialogAnswers = styled(Typography)(({ theme }) => ({
-  fontSize: "1.1rem",
-  color: theme.palette.custom.text.light,
-  marginBottom: theme.spacing(2),
-  textAlign: "center",
-}));
-
-export const QuizDialogNofX = styled(Typography)(({ theme }) => ({
-  fontSize: "1rem",
-  color: theme.palette.custom.text.light,
-  marginTop: theme.spacing(1),
-  marginBottom: theme.spacing(2),
-}));
-
-export const QuizQuestionText = styled(Typography)(({ theme }) => ({
-  marginTop: theme.spacing(2),
-  marginBottom: theme.spacing(3),
-  fontWeight: 500,
-  textAlign: "left",
+export const QuizTopBar = styled(Box)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "flex-end",
+  width: "100%",
 }));
 
 export const CloseIconButton = styled(IconButton)(({ theme }) => ({
-  position: "relative",
   color: theme.palette.custom.text.light,
-  zIndex: 1,
-  marginLeft: "auto",
+  "&:hover": {
+    color: theme.palette.custom.text.white,
+    backgroundColor: theme.palette.custom.background.tertiary,
+  },
 }));
 
-export const StartButton = styled(Button)(({ theme }) => ({
+export const MobileCloseButton = styled(Button)(({ theme }) => ({
   color: theme.palette.custom.text.light,
-  textTransform: "none",
-}));
-
-export const PreviousButton = styled(Button)(({ theme }) => ({
-  textTransform: "none",
-  color: theme.palette.custom.text.white,
   "&:hover": {
-    background: theme.palette.custom.accent.gray,
-    opacity: 0.85,
-  },
-  "&&.Mui-disabled": {
-    background: (theme.palette.custom.accent.gray || "#6b7280") + "99",
     color: theme.palette.custom.text.white,
-    opacity: 0.5,
+    backgroundColor: "transparent",
   },
 }));
 
-export const NextButton = styled(Button)(({ theme }) => ({
-  background: theme.palette.custom.accent.blue,
-  color: theme.palette.custom.text.white,
-  "&:hover": {
-    background: theme.palette.custom.accent.blue,
-    opacity: 0.85,
+export const QuizDialogPercent = styled(Typography)(({ theme }) => ({
+  fontSize: "48px",
+  fontWeight: "bold",
+  color: theme.palette.custom.accent.teal,
+  textAlign: "center",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "36px",
   },
-  "&&.Mui-disabled": {
-    background: (theme.palette.custom.accent.blue || "#4a90e2") + "99",
-    color: theme.palette.custom.text.white,
-    opacity: 0.5,
-  },
-  textTransform: "none",
 }));
 
-export const SubmitButton = styled(Button)(({ theme }) => ({
-  textTransform: "none",
-  background: theme.palette.custom.accent.green,
+export const QuizDialogAnswers = styled(Typography)(({ theme }) => ({
+  fontSize: "20px",
+  color: theme.palette.custom.text.light,
+  textAlign: "center",
+  marginTop: "-16px",
+}));
+
+export const QuizDialogNofX = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.light,
+  textAlign: "center",
+  fontSize: "14px",
+}));
+
+export const QuizQuestionText = styled(Typography)(({ theme }) => ({
   color: theme.palette.custom.text.white,
-  "&:hover": {
-    background: theme.palette.custom.accent.green,
-    opacity: 0.85,
+  fontSize: "20px",
+  lineHeight: 1.4,
+  textAlign: "left",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "18px",
   },
-  "&&.Mui-disabled": {
-    background: (theme.palette.custom.accent.green || "#10b981") + "99",
-    color: theme.palette.custom.text.white,
-    opacity: 0.5,
-  },
+}));
+
+export const OptionListBox = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: "12px",
+  width: "100%",
 }));
 
 export const OptionButton = styled(Button, {
   shouldForwardProp: (prop) => prop !== "$selected",
 })<OptionButtonProps>(({ theme, $selected }) => ({
+  padding: "16px",
+  textAlign: "left",
   justifyContent: "flex-start",
-  fontSize: "1rem",
-  fontWeight: 400,
+  lineHeight: 1.4,
   textTransform: "none",
-  borderRadius: 8,
-  marginBottom: theme.spacing(1),
-  boxShadow: $selected ? theme.shadows[2] : "none",
-  background: $selected ? theme.palette.primary.main : "transparent",
+  backgroundColor: $selected
+    ? theme.palette.custom.background.tertiary
+    : "transparent",
   color: $selected
-    ? theme.palette.custom.text.white
+    ? theme.palette.custom.accent.teal
     : theme.palette.custom.text.light,
-  border: $selected ? "none" : `1.5px solid ${theme.palette.primary.main}`,
-  transition: "background 0.2s, color 0.2s, border 0.2s",
+  border: `1px solid ${
+    $selected
+      ? theme.palette.custom.accent.teal
+      : theme.palette.custom.background.tertiary
+  }`,
+
   "&:hover": {
-    background: $selected
-      ? theme.palette.primary.dark
-      : theme.palette.action.hover,
-    color: theme.palette.custom.text.white,
-    border: $selected ? "none" : `1.5px solid ${theme.palette.primary.dark}`,
+    backgroundColor: theme.palette.custom.background.tertiary,
+    borderColor: theme.palette.custom.accent.teal,
   },
-  "&:focus": {
-    outline: `2px solid ${theme.palette.primary.main}`,
-  },
-  textAlign: "start",
 }));
 
-export const DialogActionsRow = styled("div")(() => ({
+export const DialogActionsRow = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "space-between",
+  gap: "16px",
+  marginTop: "auto",
   width: "100%",
 }));
 
-export const OptionListBox = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(2),
-  marginBottom: theme.spacing(2),
+const BaseButton = styled(Button)(({ theme }) => ({
+  padding: "12px 24px",
+  textTransform: "none",
+  fontSize: "16px",
+  fontWeight: 500,
+  borderRadius: "8px",
 }));
 
-export const DialogContentBox = styled("div")(() => ({
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  background: "none",
-}));
-
-export const MobileCloseButton = styled(Button)(({ theme }) => ({
+export const StartButton = styled(BaseButton)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.accent.teal,
   color: theme.palette.custom.text.white,
-  marginBottom: 16,
+  "&:hover": {
+    backgroundColor: theme.palette.custom.accent.tealDark,
+  },
 }));
 
-export const SectionTitle = styled(Typography)(({ theme }) => ({
+export const PreviousButton = styled(BaseButton)(({ theme }) => ({
   color: theme.palette.custom.text.light,
-  fontWeight: 600,
-  marginBottom: theme.spacing(1),
+  borderColor: theme.palette.custom.background.tertiary,
+  "&:hover": {
+    borderColor: theme.palette.custom.accent.teal,
+    backgroundColor: "transparent",
+  },
 }));
 
-export const QuizTopBar = styled(Box)(({ theme }) => ({
-  display: "flex",
-  width: "100%",
+export const NextButton = styled(BaseButton)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.accent.teal,
+  color: theme.palette.custom.text.white,
+  "&:hover": {
+    backgroundColor: theme.palette.custom.accent.tealDark,
+  },
+  "&.Mui-disabled": {
+    backgroundColor: theme.palette.custom.background.tertiary,
+    color: theme.palette.custom.text.light,
+  },
 }));
+
+export const SubmitButton = styled(NextButton)``;
 
 export const QuizProgressContainer = styled(Box)(({ theme }) => ({
   display: "flex",
-  width: "100%",
   alignItems: "center",
-  gap: theme.spacing(1),
+  gap: "12px",
+  width: "100%",
 }));
 
-export const QuizProgressText = styled(Typography)({
-  color: "inherit",
-  minWidth: 40,
+export const QuizProgressText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.light,
+  minWidth: "45px",
   textAlign: "right",
-  flexShrink: 0,
-});
+}));
 
 export const VideoListContainer = styled(Box)({
   overflowY: "auto",
