@@ -1,9 +1,9 @@
-import { publicProcedure, router } from "../trpc";
+import { protectedProcedure, router } from "../trpc";
 import { ICategoriesService } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
 
 export const categoriesRouter = router({
-  getCategories: publicProcedure.query(async ({ ctx }) => {
+  getCategories: protectedProcedure.query(async ({ ctx }) => {
     try {
       const categoriesService = ctx.container.resolve<ICategoriesService>(
         DI_TOKENS.CATEGORIES_SERVICE

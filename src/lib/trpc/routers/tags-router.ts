@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { router, protectedProcedure } from "../trpc";
 import { ITagsService } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
 
@@ -26,7 +26,7 @@ const deleteTagInput = z.object({
 });
 
 export const tagsRouter = router({
-  getTags: publicProcedure
+  getTags: protectedProcedure
     .input(getTagsInput.optional())
     .query(async ({ ctx, input }) => {
       try {
@@ -43,7 +43,7 @@ export const tagsRouter = router({
       }
     }),
 
-  getTagsByCourseId: publicProcedure
+  getTagsByCourseId: protectedProcedure
     .input(getTagsByCourseIdInput)
     .query(async ({ ctx, input }) => {
       try {

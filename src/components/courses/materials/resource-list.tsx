@@ -1,35 +1,81 @@
-import { FC } from 'react';
-import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
+import { FC } from "react";
+import { Skeleton, ListItemAvatar, Avatar } from "@mui/material";
 import {
+  ResourceMaterialItem,
   ResourcesListContainer,
-  ResourceListItem,
-  ResourceIcon,
-  ResourceTitle,
-} from '@/components/styles/courses/materials.styles';
-
-interface Resource {
-  id: number;
-  title: string;
-  url: string;
-}
+  StyledListItemText,
+} from "@/components/styles/courses/materials.styles";
+import { trpc } from "@/lib/trpc/client";
+import ResourceCard from "./resource-card";
 
 interface ResourceListProps {
-  resources: Resource[];
+  courseId: string;
+  currentResourceId?: string;
+  onResourceSelect?: (resourceId: string) => void;
 }
 
-const ResourceList: FC<ResourceListProps> = ({ resources }) => (
-  <ResourcesListContainer>
-    {resources.map((resource) => (
-      <a key={resource.id} href={resource.url} download style={{ textDecoration: 'none' }}>
-        <ResourceListItem>
-          <ResourceIcon>
-            <MenuBookRoundedIcon fontSize="inherit" />
-          </ResourceIcon>
-          <ResourceTitle>{resource.title}</ResourceTitle>
-        </ResourceListItem>
-      </a>
+const ResourceSkeleton = () => (
+  <>
+    {[...Array(5)].map((_, index) => (
+      <ResourceMaterialItem key={index}>
+        <ListItemAvatar>
+          <Skeleton variant="circular">
+            <Avatar />
+          </Skeleton>
+        </ListItemAvatar>
+        <StyledListItemText
+          primary={<Skeleton width="60%" />}
+          secondary={<Skeleton width="30%" />}
+        />
+      </ResourceMaterialItem>
     ))}
-  </ResourcesListContainer>
+  </>
 );
 
-export default ResourceList; 
+const ResourceList: FC<ResourceListProps> = ({
+  courseId,
+  currentResourceId,
+  onResourceSelect,
+}) => {
+  const {
+    data: resources,
+    isLoading,
+    error,
+  } = trpc.resources.getResourceMaterialsByCourseId.useQuery(
+    { courseId },
+    {
+      enabled: !!courseId,
+    }
+  );
+
+  if (isLoading) {
+    return (
+      <ResourcesListContainer>
+        <ResourceSkeleton />
+      </ResourcesListContainer>
+    );
+  }
+
+  if (error) {
+    return <div>Error loading resources: {error.message}</div>;
+  }
+
+  if (!resources?.length) {
+    return <div>No resources available</div>;
+  }
+
+  return (
+    <ResourcesListContainer>
+      {resources.map((resource) => (
+        <ResourceCard
+          key={resource.id}
+          resource={resource}
+          isSelected={currentResourceId === resource.id}
+          onSelect={onResourceSelect}
+        />
+      ))}
+    </ResourcesListContainer>
+  );
+};
+
+export default ResourceList;

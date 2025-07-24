@@ -4,6 +4,8 @@ import {
   GetCoursesParams,
   GetCoursesResult,
   BasicCourse,
+  GetPurchasedCoursesResult,
+  FullCourse,
 } from "./interfaces/service.interfaces";
 
 export class CoursesService implements ICoursesService {
@@ -27,5 +29,20 @@ export class CoursesService implements ICoursesService {
     pageSize: number = 15
   ): Promise<GetCoursesResult> {
     return this.coursesDAL.getBookmarkedCourses(userId, page, pageSize);
+  }
+
+  async getPurchasedCourses(
+    userId: string,
+    page: number = 1,
+    pageSize: number = 15
+  ): Promise<GetPurchasedCoursesResult> {
+    return this.coursesDAL.getPurchasedCourses(userId, page, pageSize);
+  }
+
+  async getCourseMaterialsById(
+    id: string,
+    userId?: string
+  ): Promise<FullCourse | null> {
+    return this.coursesDAL.getCourseMaterialsById(id, userId);
   }
 }

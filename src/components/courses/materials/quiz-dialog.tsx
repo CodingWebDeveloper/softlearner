@@ -1,28 +1,59 @@
-import { FC, useState } from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import Typography from '@mui/material/Typography';
-import { QuizProgressBar, QuizDialogCard, QuizDialogPercent, QuizDialogAnswers, QuizDialogNofX, PreviousButton, NextButton, SubmitButton, OptionButton, DialogActionsRow, OptionListBox, DialogContentBox, CloseIconButton, StartButton, QuizQuestionText, MobileCloseButton, QuizTopBar } from '@/components/styles/courses/materials.styles';
-import { Box } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import CloseIcon from '@mui/icons-material/Close';
-import ConfirmAlert from '@/components/confirm-alert';
+"use client";
+
+import { FC, useState } from "react";
+import Dialog from "@mui/material/Dialog";
+import Typography from "@mui/material/Typography";
+import {
+  QuizProgressBar,
+  QuizDialogCard,
+  QuizDialogPercent,
+  QuizDialogAnswers,
+  QuizDialogNofX,
+  PreviousButton,
+  NextButton,
+  SubmitButton,
+  OptionButton,
+  DialogActionsRow,
+  OptionListBox,
+  DialogContentBox,
+  CloseIconButton,
+  StartButton,
+  QuizQuestionText,
+  MobileCloseButton,
+  QuizTopBar,
+} from "@/components/styles/courses/materials.styles";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import CloseIcon from "@mui/icons-material/Close";
+import ConfirmAlert from "@/components/confirm-alert";
+
+interface QuizQuestion {
+  id: number;
+  question: string;
+  options: string[];
+  correct: number;
+}
 
 interface Quiz {
   id: number;
   title: string;
   progress: number;
-  questions?: { id: number; question: string; options: string[]; correct: number }[];
+  questions?: QuizQuestion[];
 }
 
 interface QuizDialogProps {
   open: boolean;
   onClose: () => void;
   quiz: Quiz;
+  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
 }
 
-const QuizDialog: FC<QuizDialogProps & { maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' }> = ({ open, onClose, quiz, maxWidth = 'md' }) => {
+const QuizDialog: FC<QuizDialogProps> = ({
+  open,
+  onClose,
+  quiz,
+  maxWidth = "md",
+}) => {
   const theme = useTheme();
   const questions = quiz.questions || [];
   const [started, setStarted] = useState(false);
@@ -65,56 +96,59 @@ const QuizDialog: FC<QuizDialogProps & { maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 
   const handleConfirmClose = () => {
     setShowCloseConfirm(false);
     onClose();
+    // Reset state when closing
+    setStarted(false);
+    setCurrent(0);
+    setAnswers([]);
+    setSubmitted(false);
   };
 
-  const correctCount = questions.reduce((acc, q, idx) => acc + (answers[idx] === q.correct ? 1 : 0), 0);
-  const percent = questions.length ? ((correctCount / questions.length) * 100).toFixed(1) : '0.0';
+  const correctCount = submitted
+    ? questions.reduce(
+        (acc, q, idx) => acc + (answers[idx] === q.correct ? 1 : 0),
+        0
+      )
+    : 0;
+  const percent = questions.length
+    ? ((correctCount / questions.length) * 100).toFixed(1)
+    : "0.0";
 
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Dialog
       open={open}
-      onClose={() => { }}
+      onClose={handleRequestClose}
       maxWidth={maxWidth}
       fullWidth
       fullScreen
       PaperProps={{
         sx: {
-          background: theme.palette.custom?.background?.card || theme.palette.background.paper,
-          boxShadow: 'none',
+          background: "transparent",
+          boxShadow: "none",
         },
       }}
-      BackdropProps={{ style: { backgroundColor: 'rgba(0,0,0,0.7)' } }}
-      disableEscapeKeyDown
-      hideBackdrop={false}
+      BackdropProps={{
+        sx: {
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          backdropFilter: "blur(4px)",
+        },
+      }}
     >
       <DialogContentBox>
         <QuizDialogCard>
           <QuizTopBar>
             {isMobile ? (
               <MobileCloseButton
-                variant="text"
-                onClick={() => {
-                  if (started) {
-                    handleRequestClose();
-                  } else {
-                    onClose();
-                  }
-                }}
+                onClick={started ? handleRequestClose : onClose}
+                aria-label="Close quiz"
               >
                 Close
               </MobileCloseButton>
             ) : (
               <CloseIconButton
-                aria-label="close"
-                onClick={() => {
-                  if (started) {
-                    handleRequestClose();
-                  } else {
-                    onClose();
-                  }
-                }}
+                onClick={started ? handleRequestClose : onClose}
+                aria-label="Close quiz"
               >
                 <CloseIcon />
               </CloseIconButton>
@@ -124,25 +158,49 @@ const QuizDialog: FC<QuizDialogProps & { maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 
           {!started ? (
             <>
               <QuizDialogPercent>{quiz.progress}%</QuizDialogPercent>
-              <Typography variant="body1" align="center">Ready to start the quiz?</Typography>
-              <DialogActions>
-                <StartButton variant="contained" onClick={() => setStarted(true)} fullWidth>Start</StartButton>
-              </DialogActions>
+              <Typography
+                variant="h6"
+                align="center"
+                sx={{ color: theme.palette.custom.text.light }}
+              >
+                Ready to start the quiz?
+              </Typography>
+              <DialogActionsRow>
+                <StartButton
+                  onClick={handleStart}
+                  fullWidth
+                  aria-label="Start quiz"
+                >
+                  Start Quiz
+                </StartButton>
+              </DialogActionsRow>
             </>
           ) : !submitted ? (
             <>
-              <Typography variant="h5" >{quiz.title}</Typography>
-              <QuizProgressBar variant="determinate" value={((current + 1) / questions.length) * 100} />
-              <QuizDialogNofX>{`${current + 1} out of ${questions.length}`}</QuizDialogNofX>
-              <QuizQuestionText variant="h6">{questions[current]?.question}</QuizQuestionText>
+              <Typography
+                variant="h5"
+                sx={{ color: theme.palette.custom.text.white }}
+              >
+                {quiz.title}
+              </Typography>
+              <QuizProgressBar
+                variant="determinate"
+                value={((current + 1) / questions.length) * 100}
+              />
+              <QuizDialogNofX>
+                Question {current + 1} of {questions.length}
+              </QuizDialogNofX>
+              <QuizQuestionText>
+                {questions[current]?.question}
+              </QuizQuestionText>
               <OptionListBox>
                 {questions[current]?.options.map((opt, idx) => (
                   <OptionButton
                     key={idx}
-                    variant={answers[current] === idx ? 'contained' : 'outlined'}
                     $selected={answers[current] === idx}
                     onClick={() => handleOptionSelect(idx)}
                     fullWidth
+                    aria-label={`Option ${idx + 1}: ${opt}`}
                   >
                     {opt}
                   </OptionButton>
@@ -150,25 +208,25 @@ const QuizDialog: FC<QuizDialogProps & { maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 
               </OptionListBox>
               <DialogActionsRow>
                 <PreviousButton
-                  variant="outlined"
                   onClick={handlePrev}
                   disabled={current === 0}
+                  aria-label="Previous question"
                 >
                   Previous
                 </PreviousButton>
                 {current < questions.length - 1 ? (
                   <NextButton
-                    variant="contained"
                     onClick={handleNext}
                     disabled={answers[current] == null}
+                    aria-label="Next question"
                   >
                     Next
                   </NextButton>
                 ) : (
                   <SubmitButton
-                    variant="contained"
                     onClick={handleSubmit}
                     disabled={answers.length !== questions.length}
+                    aria-label="Submit quiz"
                   >
                     Submit
                   </SubmitButton>
@@ -178,27 +236,35 @@ const QuizDialog: FC<QuizDialogProps & { maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 
           ) : (
             <>
               <QuizDialogPercent>{percent}%</QuizDialogPercent>
-              <QuizDialogAnswers>You got {correctCount} answer{correctCount > 1 || correctCount === 0 ? 's' : ''} correct</QuizDialogAnswers>
+              <QuizDialogAnswers>
+                You got {correctCount}{" "}
+                {correctCount === 1 ? "answer" : "answers"} correct
+              </QuizDialogAnswers>
               <DialogActionsRow>
-                <StartButton variant="contained" onClick={onClose} fullWidth>Close</StartButton>
+                <StartButton
+                  onClick={handleConfirmClose}
+                  fullWidth
+                  aria-label="Close quiz results"
+                >
+                  Close
+                </StartButton>
               </DialogActionsRow>
             </>
           )}
         </QuizDialogCard>
       </DialogContentBox>
-      {started && (
-        <ConfirmAlert
-          open={showCloseConfirm}
-          onClose={handleCancelClose}
-          onConfirm={handleConfirmClose}
-          title="Are you sure you want to close?"
-          content="You will lose your progress."
-          confirmText="Yes, Close"
-          cancelText="Cancel"
-        />
-      )}
+
+      <ConfirmAlert
+        open={showCloseConfirm}
+        onClose={handleCancelClose}
+        onConfirm={handleConfirmClose}
+        title="Are you sure you want to close?"
+        content="Your progress will be lost if you close the quiz."
+        confirmText="Yes, Close Quiz"
+        cancelText="Continue Quiz"
+      />
     </Dialog>
   );
 };
 
-export default QuizDialog; 
+export default QuizDialog;

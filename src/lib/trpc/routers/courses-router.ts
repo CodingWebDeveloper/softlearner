@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { ICoursesService } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
+import { router, protectedProcedure } from "../trpc";
 
 const getCoursesInput = z.object({
   page: z.number().min(1).default(1),
@@ -16,8 +16,13 @@ const getBookmarkedCoursesInput = z.object({
   pageSize: z.number().min(1).max(100).default(15),
 });
 
+const getPurchasedCoursesInput = z.object({
+  page: z.number().min(1).default(1),
+  pageSize: z.number().min(1).max(100).default(15),
+});
+
 export const coursesRouter = router({
-  getCourses: publicProcedure
+  getCourses: protectedProcedure
     .input(getCoursesInput)
     .query(async ({ ctx, input }) => {
       try {
@@ -38,7 +43,7 @@ export const coursesRouter = router({
       }
     }),
 
-  getCourseById: publicProcedure
+  getCourseById: protectedProcedure
     .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
       try {
@@ -50,6 +55,33 @@ export const coursesRouter = router({
       } catch (error) {
         throw new Error(
           `Failed to fetch course: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  getCourseMaterialsById: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+
+        const course = await coursesService.getCourseMaterialsById(
+          input,
+          ctx.user.id
+        );
+
+        if (!course) {
+          throw new Error("Course not found");
+        }
+
+        return course;
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch course materials: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );
@@ -90,6 +122,28 @@ export const coursesRouter = router({
       } catch (error) {
         throw new Error(
           `Failed to fetch bookmarked courses: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  getPurchasedCourses: protectedProcedure
+    .input(getPurchasedCoursesInput)
+    .query(async ({ ctx, input }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+
+        return await coursesService.getPurchasedCourses(
+          ctx.user.id,
+          input.page,
+          input.pageSize
+        );
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch purchased courses: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );

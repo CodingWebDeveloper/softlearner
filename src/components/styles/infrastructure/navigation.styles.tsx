@@ -12,6 +12,7 @@ import {
   Divider,
   Drawer,
   BottomNavigation,
+  AppBar,
 } from "@mui/material";
 
 export const SidebarContainer = styled(Box)(({ theme }) => ({
@@ -43,7 +44,6 @@ export const SidebarContent = styled(Box)(() => ({
 export const SidebarFooter = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   borderTop: "1px solid rgba(255,255,255,0.1)",
-
 }));
 
 export const UserInfo = styled(Box)(() => ({
@@ -135,17 +135,25 @@ export const BottomNavContainer = styled(Box)(({ theme }) => ({
   paddingBottom: "env(safe-area-inset-bottom)",
 }));
 
-export const BottomNavAction = styled(BottomNavigationAction)(() => ({
-  "& .MuiBottomNavigationAction-label": {
-    fontSize: "0.75rem",
-    fontWeight: 500,
-  },
-  "& .MuiSvgIcon-root": {
-    fontSize: "20px",
+export const StyledBottomNavigation = styled(BottomNavigation)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.background.secondary,
+  borderTop: "1px solid rgba(255,255,255,0.1)",
+  "& .MuiBottomNavigationAction-root": {
+    color: theme.palette.custom.text.light,
+    "&.Mui-selected": {
+      color: theme.palette.custom.accent.teal,
+    },
   },
 }));
 
-// New styled components for inline styles
+export const BottomNavAction = styled(BottomNavigationAction)(() => ({
+  minWidth: 0,
+  padding: "6px 0",
+  "&.MuiBottomNavigationAction-root": {
+    minWidth: "auto",
+  },
+}));
+
 export const HeaderLogoContainer = styled(Box)(() => ({
   display: "flex",
   alignItems: "center",
@@ -162,72 +170,22 @@ export const HeaderLogoText = styled(Typography)(({ theme }) => ({
   fontWeight: 600,
 }));
 
-export const CloseButton = styled("button")(({ theme }) => ({
-  background: "none",
-  border: "none",
-  color: theme.palette.custom.text.light,
-  cursor: "pointer",
-  padding: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
 export const UserInfoContainer = styled(Box)(() => ({
   flex: 1,
   minWidth: 0,
 }));
 
 export const UserAvatar = styled(Avatar)(({ theme }) => ({
-  width: 40,
-  height: 40,
+  width: 32,
+  height: 32,
   backgroundColor: theme.palette.custom.accent.teal,
+  color: theme.palette.common.white,
   fontSize: "1rem",
 }));
 
 export const FooterDivider = styled(Divider)(() => ({
   borderColor: "rgba(255,255,255,0.1)",
   marginBottom: 16,
-}));
-
-export const SignOutListItem = styled(SidebarListItem)(() => ({
-  marginTop: 8,
-}));
-
-export const MobileDrawer = styled(Drawer)(({ theme }) => ({
-  "& .MuiDrawer-paper": {
-    width: 280,
-    backgroundColor: theme.palette.custom.background.dark,
-    border: "none",
-  },
-  zIndex: 1400,
-}));
-
-export const StyledBottomNavigation = styled(BottomNavigation)(({ theme }) => ({
-  backgroundColor: theme.palette.custom.background.secondary,
-  borderTop: "1px solid rgba(255,255,255,0.1)",
-  "& .MuiBottomNavigationAction-root": {
-    color: theme.palette.custom.text.light,
-    "&.Mui-selected": {
-      color: theme.palette.custom.accent.teal,
-    },
-  },
-}));
-
-export const MobileMenuButton = styled("button")(({ theme }) => ({
-  position: "fixed",
-  top: 16,
-  left: 16,
-  zIndex: 1200,
-  background: theme.palette.custom.background.secondary,
-  border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: "8px",
-  padding: "8px",
-  color: theme.palette.custom.text.white,
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
 }));
 
 export const DesktopDrawer = styled(Drawer)(({ theme }) => ({
@@ -242,15 +200,10 @@ export const DesktopDrawer = styled(Drawer)(({ theme }) => ({
   },
 }));
 
-export const MobileNavBar = styled(Box)(({ theme }) => ({
-  position: 'fixed',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  width: '100vw',
-  zIndex: 1200,
-  boxSizing: 'border-box',
-  margin: 0,
-  paddingLeft: 0,
-  paddingRight: 0,
+export const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.background.secondary,
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  "& .MuiToolbar-root": {
+    minHeight: 56,
+  },
 }));

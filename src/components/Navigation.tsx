@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { List, useTheme, useMediaQuery, Tooltip } from "@mui/material";
+import {
+  useTheme,
+  useMediaQuery,
+  Toolbar,
+  IconButton,
+  Typography,
+  List,
+} from "@mui/material";
 import {
   Home as HomeIcon,
   School as SchoolIcon,
-  Bookmark as BookmarkIcon,
   Book as BookIcon,
+  LocalLibrary as MyCoursesIcon,
+  MoreHoriz as MoreIcon,
   Person as PersonIcon,
   Settings as SettingsIcon,
-  Menu as MenuIcon,
-  Close as CloseIcon,
+  Bookmark as BookmarkIcon,
 } from "@mui/icons-material";
 import { useRouter, usePathname } from "next/navigation";
 import { useSupabase } from "@/contexts/supabase-context";
@@ -18,70 +24,57 @@ import { User } from "@supabase/supabase-js";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import ClientOnly from "./client-only";
 import {
+  BottomNavContainer,
+  BottomNavAction,
+  StyledBottomNavigation,
+  UserAvatar,
+  StyledAppBar,
   SidebarContainer,
   SidebarHeader,
   SidebarContent as StyledSidebarContent,
   SidebarFooter,
+  HeaderLogoContainer,
+  HeaderLogoIcon,
+  HeaderLogoText,
   UserInfo,
+  UserInfoContainer,
   UserName,
   UserEmail,
   SidebarListItem,
   SidebarListItemButton,
   SidebarListItemIcon,
   SidebarListItemText,
-  BottomNavContainer,
-  BottomNavAction,
-  HeaderLogoContainer,
-  HeaderLogoIcon,
-  HeaderLogoText,
-  CloseButton,
-  UserInfoContainer,
-  UserAvatar,
   FooterDivider,
-  SignOutListItem,
-  MobileDrawer,
-  StyledBottomNavigation,
-  MobileMenuButton,
   DesktopDrawer,
 } from "@/components/styles/infrastructure/navigation.styles";
 
 const Navigation = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const { user, signOut } = useSupabase();
+  const { user } = useSupabase();
 
   return (
     <ClientOnly fallback={null}>
-      <NavigationContent
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        pathname={pathname}
-        user={user}
-        signOut={signOut}
-        router={router}
-      />
+      <NavigationContent pathname={pathname} user={user} router={router} />
     </ClientOnly>
   );
 };
 
 const NavigationContent = ({
-  sidebarOpen,
-  setSidebarOpen,
   pathname,
   user,
-  signOut,
   router,
 }: {
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
   pathname: string;
   user: User | null;
-  signOut: () => Promise<void>;
   router: AppRouterInstance;
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
 
   const navigationItems = [
     {
@@ -92,9 +85,9 @@ const NavigationContent = ({
       showWhenUnauthenticated: false,
     },
     {
-      label: "Bookmarks",
-      icon: <BookmarkIcon />,
-      path: "/bookmarks",
+      label: "My Courses",
+      icon: <MyCoursesIcon />,
+      path: "/my-courses",
       showWhenAuthenticated: true,
       showWhenUnauthenticated: false,
     },
@@ -105,6 +98,28 @@ const NavigationContent = ({
       showWhenAuthenticated: true,
       showWhenUnauthenticated: true,
     },
+    {
+      label: "Bookmarks",
+      icon: <BookmarkIcon />,
+      path: "/bookmarks",
+      showWhenAuthenticated: true,
+      showWhenUnauthenticated: false,
+    },
+  ];
+
+  const mobileNavigationItems = [
+    ...navigationItems,
+    {
+      label: "More",
+      icon: <MoreIcon />,
+      path: "/more",
+      showWhenAuthenticated: true,
+      showWhenUnauthenticated: false,
+    },
+  ];
+
+  const desktopNavigationItems = [
+    ...navigationItems,
     {
       label: "Profile",
       icon: <PersonIcon />,
@@ -121,7 +136,7 @@ const NavigationContent = ({
     },
   ];
 
-  const filteredItems = navigationItems.filter((item) => {
+  const filteredMobileItems = mobileNavigationItems.filter((item) => {
     if (user) {
       return item.showWhenAuthenticated;
     } else {
@@ -129,17 +144,13 @@ const NavigationContent = ({
     }
   });
 
-  const handleNavigation = (path: string) => {
-    router.push(path);
-    if (isMobile) {
-      setSidebarOpen(false);
+  const filteredDesktopItems = desktopNavigationItems.filter((item) => {
+    if (user) {
+      return item.showWhenAuthenticated;
+    } else {
+      return item.showWhenUnauthenticated;
     }
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
-  };
+  });
 
   const SidebarContent = () => (
     <SidebarContainer>
@@ -150,16 +161,11 @@ const NavigationContent = ({
           </HeaderLogoIcon>
           <HeaderLogoText variant="h6">SoftLearner</HeaderLogoText>
         </HeaderLogoContainer>
-        {isMobile && (
-          <CloseButton onClick={() => setSidebarOpen(false)}>
-            <CloseIcon />
-          </CloseButton>
-        )}
       </SidebarHeader>
 
       <StyledSidebarContent>
         <List>
-          {filteredItems.map((item) => (
+          {filteredDesktopItems.map((item) => (
             <SidebarListItem key={item.path} disablePadding>
               <SidebarListItemButton
                 selected={pathname === item.path}
@@ -183,22 +189,9 @@ const NavigationContent = ({
               <UserName variant="body2">
                 {user.user_metadata?.full_name || "User"}
               </UserName>
-              <Tooltip title={user.email} placement="top">
-                <UserEmail variant="body2">{user.email}</UserEmail>
-              </Tooltip>
+              <UserEmail variant="body2">{user.email}</UserEmail>
             </UserInfoContainer>
           </UserInfo>
-          <SignOutListItem disablePadding>
-            <SidebarListItemButton
-              onClick={handleSignOut}
-              aria-label="Sign out"
-            >
-              <SidebarListItemIcon>
-                <SettingsIcon />
-              </SidebarListItemIcon>
-              <SidebarListItemText primary="Sign Out" />
-            </SidebarListItemButton>
-          </SignOutListItem>
         </SidebarFooter>
       )}
     </SidebarContainer>
@@ -207,14 +200,27 @@ const NavigationContent = ({
   if (isMobile) {
     return (
       <>
-        {/* Mobile Sidebar */}
-        <MobileDrawer
-          anchor="left"
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        >
-          <SidebarContent />
-        </MobileDrawer>
+        {/* Top App Bar */}
+        <StyledAppBar position="fixed">
+          <Toolbar>
+            <IconButton edge="start" color="inherit" aria-label="logo">
+              <SchoolIcon />
+            </IconButton>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              SoftLearner
+            </Typography>
+            {user && (
+              <IconButton
+                edge="end"
+                color="inherit"
+                aria-label="profile"
+                onClick={() => handleNavigation("/profile")}
+              >
+                <UserAvatar>{user.email?.charAt(0).toUpperCase()}</UserAvatar>
+              </IconButton>
+            )}
+          </Toolbar>
+        </StyledAppBar>
 
         {/* Mobile Bottom Navigation */}
         <BottomNavContainer>
@@ -226,45 +232,22 @@ const NavigationContent = ({
               }
             }}
           >
-            <BottomNavAction
-              label="Home"
-              value="/"
-              icon={<HomeIcon />}
-              showLabel
-            />
-            <BottomNavAction
-              label="Bookmarks"
-              value="/bookmarks"
-              icon={<BookmarkIcon />}
-              showLabel
-            />
-            <BottomNavAction
-              label="Courses"
-              value="/courses"
-              icon={<BookIcon />}
-              showLabel
-            />
-            <BottomNavAction
-              label="Profile"
-              value="/profile"
-              icon={<PersonIcon />}
-              showLabel
-            />
+            {filteredMobileItems.map((item) => (
+              <BottomNavAction
+                key={item.path}
+                label={item.label}
+                value={item.path}
+                icon={item.icon}
+                showLabel
+              />
+            ))}
           </StyledBottomNavigation>
         </BottomNavContainer>
-
-        {/* Mobile Menu Button */}
-        <MobileMenuButton
-          onClick={() => setSidebarOpen(true)}
-          aria-label="Open menu"
-        >
-          <MenuIcon />
-        </MobileMenuButton>
       </>
     );
   }
 
-  // Desktop Sidebar
+  // Desktop Navigation
   return (
     <DesktopDrawer variant="permanent">
       <SidebarContent />

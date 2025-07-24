@@ -19,6 +19,9 @@ import {
   BasicCourse,
   GetTagsParams,
   BasicReview,
+  GetPurchasedCoursesResult,
+  FullCourse,
+  BasicResource,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -30,6 +33,15 @@ export interface ICoursesDAL {
     page?: number,
     pageSize?: number
   ): Promise<GetCoursesResult>;
+  getPurchasedCourses(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<GetPurchasedCoursesResult>;
+  getCourseMaterialsById(
+    id: string,
+    userId?: string
+  ): Promise<FullCourse | null>;
 }
 
 export interface ICategoriesDAL {
@@ -46,6 +58,7 @@ export interface ITagsDAL {
 
 export interface IResourcesDAL {
   getResourcesByCourseId(courseId: string): Promise<PreviewResource[]>;
+  getResourceMaterialsByCourseId(courseId: string): Promise<BasicResource[]>;
 }
 
 export interface IReviewsDAL {

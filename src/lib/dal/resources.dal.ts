@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../database/database.types";
 import { IResourcesDAL } from "../di/interfaces/dal.interfaces";
 import { PreviewResource } from "../database/database.types";
+import { BasicResource } from "@/services/interfaces/service.interfaces";
 
 function formatIntervalToDuration(interval: string | null): string | undefined {
   if (!interval) return undefined;
@@ -47,6 +48,30 @@ export class ResourcesDAL implements IResourcesDAL {
     if (!data) return [];
 
     return data.map((resource: PreviewResource) => ({
+      ...resource,
+      duration: formatIntervalToDuration(resource.duration || null),
+    }));
+  }
+
+  async getResourceMaterialsByCourseId(
+    courseId: string
+  ): Promise<BasicResource[]> {
+    if (!courseId) return [];
+
+    const { data, error } = await this.supabase
+      .from("resources")
+      .select("*")
+      .eq("course_id", courseId)
+      .order("order_index", { ascending: true })
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw new Error(`Error fetching basic resources: ${error.message}`);
+    }
+
+    if (!data) return [];
+
+    return data.map((resource) => ({
       ...resource,
       duration: formatIntervalToDuration(resource.duration || null),
     }));

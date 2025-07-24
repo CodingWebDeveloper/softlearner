@@ -4,8 +4,13 @@ import { ReactNode } from "react";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { useSupabase } from "@/contexts/supabase-context";
 import ClientOnly from "./client-only";
-import { LayoutContainer, MainContent, FallbackContainer, FallbackMain } from "@/components/styles/infrastructure/layout.styles";
-import Navigation from "@/components/navigation";
+import {
+  LayoutContainer,
+  MainContent,
+  FallbackContainer,
+  FallbackMain,
+} from "@/components/styles/infrastructure/layout.styles";
+import Navigation from "./Navigation";
 
 interface LayoutProps {
   children: ReactNode;
@@ -16,9 +21,7 @@ const LayoutWrapper = ({ children }: LayoutProps) => {
     <ClientOnly
       fallback={
         <FallbackContainer>
-          <FallbackMain component="main">
-            {children}
-          </FallbackMain>
+          <FallbackMain component="main">{children}</FallbackMain>
         </FallbackContainer>
       }
     >
@@ -38,11 +41,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       <ClientOnly fallback={null}>{user && <Navigation />}</ClientOnly>
 
       {/* Main Content */}
-      <MainContent
-        component="main"
-        isMobile={isMobile}
-        hasUser={!!user}
-      >
+      <MainContent component="main" isMobile={isMobile} hasUser={!!user}>
         {children}
       </MainContent>
     </LayoutContainer>

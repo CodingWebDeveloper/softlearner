@@ -6,7 +6,6 @@ import {
   CourseTitle,
   CourseInstructor,
   StatusChip,
-  CourseDescription,
   ProgressSection,
   ProgressHeader,
   ProgressText,
@@ -17,16 +16,15 @@ import {
   ContinueButton,
 } from "@/components/styles/home-page/home-page.styles";
 import { formatDate } from "@/utils/date.utils";
-
 import { useRouter } from "next/navigation";
-import type { CustomCourseProgress } from "../page";
+import { PurchasedCourse } from "@/services/interfaces/service.interfaces";
 
-const CourseProgressCard = ({ course }: { course: CustomCourseProgress }) => {
+const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
   // Hooks
   const router = useRouter();
 
   // Handlers
-  const handleCourseCardClick = (courseId: string) => {
+  const handleClick = (courseId: string) => {
     router.push(`/courses/${courseId}/materials`);
   };
 
@@ -36,69 +34,79 @@ const CourseProgressCard = ({ course }: { course: CustomCourseProgress }) => {
   ) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      handleCourseCardClick(courseId);
+      handleClick(courseId);
     }
   };
 
+  const completedResources = course.resources.filter((r) => r.completed).length;
+  const totalResources = course.resources.length;
+  const progressPercentage = (completedResources / totalResources) * 100;
+  const status =
+    completedResources === totalResources
+      ? "completed"
+      : completedResources > 0
+      ? "in_progress"
+      : "not_started";
+
   return (
     <CourseCard
-      key={course.course.id}
+      key={course.id}
       tabIndex={0}
-      aria-label={`Course: ${course.course.title}`}
+      aria-label={`Course: ${course.name}`}
       role="button"
+      onClick={() => handleClick(course.id)}
+      onKeyDown={(e) => handleCourseCardKeyDown(e, course.id)}
     >
       <CourseCardContent>
         <CourseHeader>
           <div>
             <CourseTitle variant="h3" component="h2">
-              {course.course.title}
+              {course.name}
             </CourseTitle>
-            <CourseInstructor>{course.course.instructor_name}</CourseInstructor>
+            <CourseInstructor>{course.creator.full_name}</CourseInstructor>
           </div>
           <StatusChip
             label={
-              course.status === "completed"
+              status === "completed"
                 ? "Completed"
-                : course.status === "in_progress"
+                : status === "in_progress"
                 ? "In Progress"
                 : "Not Started"
             }
             color={
-              course.status === "completed"
+              status === "completed"
                 ? "success"
-                : course.status === "in_progress"
+                : status === "in_progress"
                 ? "warning"
                 : "default"
             }
-            aria-label={`Status: ${course.status}`}
+            aria-label={`Status: ${status}`}
           />
         </CourseHeader>
-        <CourseDescription>{course.course.description}</CourseDescription>
         <ProgressSection>
           <ProgressHeader>
             <ProgressText>
-              {course.completed_resources} of {course.total_resources} resources
-              completed
+              {completedResources} of {totalResources} resources completed
             </ProgressText>
             <ProgressPercentage>
-              {Math.round(course.progress_percentage)}%
+              {Math.round(progressPercentage)}%
             </ProgressPercentage>
           </ProgressHeader>
           <StyledProgressBar
             variant="determinate"
-            value={course.progress_percentage}
+            value={progressPercentage}
             aria-label="Course progress"
           />
         </ProgressSection>
         <CourseFooter>
           <LastAccessed>
-            Last accessed: {formatDate(course.last_accessed)}
+            Purchased: {formatDate(course.orderCreatedAt)}
           </LastAccessed>
-          {course.status !== "completed" && course.next_resource && (
+          {status !== "completed" && (
             <ContinueButton
               variant="contained"
-              onClick={() => handleCourseCardClick(course.course.id)}
-              aria-label={`Continue course: ${course.course.title}`}
+              onClick={() => handleClick(course.id)}
+              aria-label={`Continue course: ${course.name}`}
             >
               Continue
             </ContinueButton>

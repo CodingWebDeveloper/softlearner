@@ -8,6 +8,7 @@ import {
   CourseCreator,
 } from "@/services/interfaces/service.interfaces";
 import { ORDER_STATUS } from "@/constants/stripe-constants";
+import { FullCourse } from "@/services/interfaces/service.interfaces";
 
 type CourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {
   creator: CourseCreator;
@@ -18,6 +19,39 @@ type CourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {
 
 type BookmarkWithCourse = Database["public"]["Tables"]["bookmarks"]["Row"] & {
   course: CourseWithRelations;
+};
+
+type PurchasedCourseResource = {
+  id: string;
+  completed: boolean;
+};
+
+type PurchasedCourse = {
+  id: string;
+  name: string;
+  creator: CourseCreator;
+  resources: PurchasedCourseResource[];
+  orderCreatedAt: string;
+};
+
+type GetPurchasedCoursesResult = {
+  data: PurchasedCourse[];
+  totalRecords: number;
+};
+
+type OrderWithCourse = Database["public"]["Tables"]["orders"]["Row"] & {
+  course: {
+    id: string;
+    name: string;
+    creator: CourseCreator;
+    resources: Array<{
+      id: string;
+      user_resources: Array<{
+        user_id: string;
+        completed: boolean;
+      }> | null;
+    }>;
+  };
 };
 
 export class CoursesDAL implements ICoursesDAL {
@@ -265,5 +299,126 @@ export class CoursesDAL implements ICoursesDAL {
       data: transformedData,
       totalRecords: count || 0,
     };
+  }
+
+  async getPurchasedCourses(
+    userId: string,
+    page: number = 1,
+    pageSize: number = 15
+  ): Promise<GetPurchasedCoursesResult> {
+    // Calculate pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await this.supabase
+      .from("orders")
+      .select(
+        `
+        created_at,
+        course:course_id (
+          id,
+          name,
+          creator:creator_id (*),
+          resources (
+            id,
+            user_resources (
+              completed,
+              user_id
+            )
+          )
+        )
+        `,
+        { count: "exact" }
+      )
+      .eq("user_id", userId)
+      .eq("status", ORDER_STATUS.SUCCEEDED)
+      .range(from, to)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(`Error fetching purchased courses: ${error.message}`);
+    }
+
+    const transformedData =
+      (data as unknown as OrderWithCourse[])?.map((order) => {
+        const course = order.course;
+
+        return {
+          id: course.id,
+          name: course.name,
+          creator: course.creator,
+          resources: course.resources.map((resource) => ({
+            id: resource.id,
+            completed:
+              resource.user_resources?.some(
+                (ur) => ur.user_id === userId && ur.completed
+              ) ?? false,
+          })),
+          orderCreatedAt: order.created_at,
+        };
+      }) || [];
+
+    return {
+      data: transformedData,
+      totalRecords: count || 0,
+    };
+  }
+
+  async getCourseMaterialsById(
+    id: string,
+    userId?: string
+  ): Promise<FullCourse | null> {
+    let query = this.supabase
+      .from("courses")
+      .select(
+        `
+       *,
+        creator:creator_id(*),
+        category:category_id(*),
+        bookmarks!course_id(id)
+      `
+      )
+      .eq("id", id);
+
+    if (userId) {
+      query = query.eq("bookmarks.user_id", userId);
+    }
+
+    const { data, error } = await query.single();
+
+    if (error) {
+      throw new Error(`Error fetching course materials: ${error.message}`);
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    // Type assertion to unknown first, then to the expected type
+    const course = data as unknown as {
+      id: string;
+      name: string;
+      description: string | null;
+      created_at: string;
+      updated_at: string;
+      creator: CourseCreator;
+      category: Database["public"]["Tables"]["categories"]["Row"];
+      bookmarks: { id: string }[] | null;
+      video_url: string;
+    };
+
+    const courseData: FullCourse = {
+      id: course.id,
+      name: course.name,
+      description: course.description || "",
+      creator: course.creator,
+      category: course.category,
+      created_at: course.created_at,
+      updated_at: course.updated_at,
+      isBookmarked: (course.bookmarks?.length ?? 0) > 0,
+      video_url: course.video_url || "",
+    };
+
+    return courseData;
   }
 }
