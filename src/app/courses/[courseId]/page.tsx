@@ -19,7 +19,7 @@ import Skeleton from "@mui/material/Skeleton";
 const CourseDetailsPage: FC = () => {
   // General hooks
   const theme = useTheme();
-  const mobileMatches = useMediaQuery(theme.breakpoints.down("md"));
+  const desktopMatches = useMediaQuery(theme.breakpoints.up("lg"));
   const params = useParams();
   const courseId =
     typeof params?.courseId === "string"
@@ -94,18 +94,18 @@ const CourseDetailsPage: FC = () => {
   return (
     <CourseDetailsContainer>
       <Grid container spacing={6} alignItems="start">
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid size={{ xs: 12, md: 10, lg: 8 }}>
           <CourseHeader course={course} instructor={instructor} />
           <CourseTags courseId={courseId} />
-          {mobileMatches && (
+          {!desktopMatches && (
             <SidebarContainer>
               <CourseSidebar course={course} />
             </SidebarContainer>
           )}
           <CourseTabs course={course} />
         </Grid>
-        {!mobileMatches && (
-          <Grid size={{ xs: 12, md: 4 }}>
+        {desktopMatches && (
+          <Grid size={{ xs: 12, md: 5, lg: 4 }}>
             <CourseSidebar course={course} />
           </Grid>
         )}

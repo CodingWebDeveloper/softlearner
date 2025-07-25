@@ -48,3 +48,24 @@ export const PageTitle = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   color: theme.palette.custom.text.white,
 }));
+
+// Reusable Text Components
+export const LightText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.light,
+}));
+
+export const WhiteText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.white,
+}));
+
+export const BlackText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.black,
+}));
+
+export const AccentText = styled(Typography, {
+  shouldForwardProp: (prop) => prop !== "accentColor",
+})<{ accentColor?: "blue" | "gray" | "teal" | "green" | "orange" | "red" }>(
+  ({ theme, accentColor = "blue" }) => ({
+    color: theme.palette.custom.accent[accentColor],
+  })
+);

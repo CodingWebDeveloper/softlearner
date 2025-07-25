@@ -22,6 +22,10 @@ import {
   GetPurchasedCoursesResult,
   FullCourse,
   BasicResource,
+  BasicTest,
+  FullTest,
+  TestResult,
+  TestSubmission,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -107,4 +111,15 @@ export interface IPaymentsDAL {
 export interface IBookmarksDAL {
   createBookmark(userId: string, courseId: string): Promise<Bookmark>;
   deleteBookmark(userId: string, courseId: string): Promise<void>;
+}
+
+export interface ITestsDAL {
+  getTests(courseId: string): Promise<BasicTest[]>;
+  getTestById(id: string): Promise<FullTest | null>;
+  getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
+  createScore(
+    testId: string,
+    userId: string,
+    submission: TestSubmission
+  ): Promise<TestResult>;
 }

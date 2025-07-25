@@ -381,7 +381,12 @@ export const PreviousButton = styled(BaseButton)(({ theme }) => ({
   borderColor: theme.palette.custom.background.tertiary,
   "&:hover": {
     borderColor: theme.palette.custom.accent.teal,
+    backgroundColor: theme.palette.custom.background.tertiary,
+  },
+  "&.Mui-disabled": {
+    color: theme.palette.custom.text.light,
     backgroundColor: "transparent",
+    opacity: 0.5,
   },
 }));
 
