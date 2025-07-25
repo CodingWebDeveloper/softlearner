@@ -149,7 +149,8 @@ CREATE TABLE IF NOT EXISTS user_tests (
   test_id UUID REFERENCES tests(id) ON DELETE CASCADE,
   score INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, test_id)
 );
 
 -- Create UserAnswer table
@@ -159,7 +160,8 @@ CREATE TABLE IF NOT EXISTS user_answers (
   question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
   answer_option_id UUID REFERENCES answer_options(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_test_id, question_id, answer_option_id)
 );
 
 -- Add Tag table

@@ -13,6 +13,7 @@ import { trpc } from "@/lib/trpc/client";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import { formatDuration } from "@/utils/date.utils";
+import { LightText } from "@/components/styles/infrastructure/layout.styles";
 
 interface ResourceListProps {
   courseId?: string;
@@ -58,7 +59,7 @@ const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
 
   return (
     <>
-      {downloads.length > 0 && (
+      {downloads.length > 0 ? (
         <>
           <SectionTitle variant="subtitle2">
             Downloadable Resources
@@ -74,13 +75,17 @@ const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
             ))}
           </List>
         </>
+      ) : (
+        <LightText variant="body2" sx={{ mt: 1, ml: 1 }}>
+          No downloadable resources available for this course
+        </LightText>
       )}
       <ResourcesDivider />
-      {videos.length > 0 && (
+      {videos.length > 0 ? (
         <>
-          <SectionTitle variant="subtitle2">Lectures</SectionTitle>
+          <SectionTitle variant="subtitle2">Videos</SectionTitle>
           <List>
-            {videos.map((resource, idx) => (
+            {videos.map((resource) => (
               <ListItemStyled
                 key={resource.id}
                 secondaryAction={
@@ -94,13 +99,15 @@ const PreviewResourceList: FC<ResourceListProps> = ({ courseId }) => {
                 <ListItemIconStyled>
                   <PlayArrowRoundedIcon />
                 </ListItemIconStyled>
-                <ListItemTextStyled
-                  primary={`Module ${idx + 1}: ${resource.name}`}
-                />
+                <ListItemTextStyled primary={resource.name} />
               </ListItemStyled>
             ))}
           </List>
         </>
+      ) : (
+        <LightText variant="body2" sx={{ mt: 1, ml: 1 }}>
+          No videos available for this course
+        </LightText>
       )}
     </>
   );

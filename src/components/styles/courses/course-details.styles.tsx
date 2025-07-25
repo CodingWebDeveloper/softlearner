@@ -146,6 +146,7 @@ export const CustomTab = styled(Tab)(({ theme }) => ({
 export const SectionTitle = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(1),
   color: theme.palette.custom.text.light,
+  fontWeight: 700,
 }));
 
 export const ListItemStyled = styled(ListItem)(({ theme }) => ({

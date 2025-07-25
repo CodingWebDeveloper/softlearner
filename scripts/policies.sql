@@ -104,7 +104,7 @@ CREATE POLICY "Allow users to view their own orders" ON orders
 FOR SELECT USING (auth.uid() = user_id);
 
 -- Allow authenticated users to create orders for themselves only
-DROP POLICY IF EXISTS "Allow all users to create orders" ON orders;
+DROP POLICY IF EXISTS "Allow authenticated users to create orders" ON orders;
 CREATE POLICY "Allow authenticated users to create orders" ON orders
 FOR INSERT WITH CHECK (auth.uid() = user_id);
 
@@ -128,3 +128,142 @@ FOR INSERT WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Allow users to delete their own bookmarks" ON bookmarks;
 CREATE POLICY "Allow users to delete their own bookmarks" ON bookmarks
 FOR DELETE USING (auth.uid() = user_id);
+
+-- Tests Policies
+-- Allow all users to view tests
+DROP POLICY IF EXISTS "Allow all users to view tests" ON tests;
+CREATE POLICY "Allow all users to view tests" ON tests
+FOR SELECT USING (true);
+
+-- Questions Policies
+-- Allow users to view questions only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to view questions for purchased courses" ON questions;
+CREATE POLICY "Allow users to view questions for purchased courses" ON questions
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN tests t ON t.course_id = o.course_id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND t.id = questions.test_id
+  )
+);
+
+-- Answer Options Policies
+-- Allow users to view answer options only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to view answer options for purchased courses" ON answer_options;
+CREATE POLICY "Allow users to view answer options for purchased courses" ON answer_options
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN tests t ON t.course_id = o.course_id
+    JOIN questions q ON q.test_id = t.id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND q.id = answer_options.question_id
+  )
+);
+
+-- User Tests Policies
+-- Allow users to view their own test results only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to view their own test results" ON user_tests;
+CREATE POLICY "Allow users to view their own test results" ON user_tests
+FOR SELECT USING (
+  auth.uid() = user_id AND
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN tests t ON t.course_id = o.course_id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND t.id = user_tests.test_id
+  )
+);
+
+-- Allow users to create test results only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to create test results" ON user_tests;
+CREATE POLICY "Allow users to create test results" ON user_tests
+FOR INSERT WITH CHECK (
+  auth.uid() = user_id AND
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN tests t ON t.course_id = o.course_id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND t.id = user_tests.test_id
+  )
+);
+
+-- Allow users to update their own test results only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to update their own test results" ON user_tests;
+CREATE POLICY "Allow users to update their own test results" ON user_tests
+FOR UPDATE USING (
+  auth.uid() = user_id AND
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN tests t ON t.course_id = o.course_id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND t.id = user_tests.test_id
+  )
+) WITH CHECK (
+  auth.uid() = user_id AND
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN tests t ON t.course_id = o.course_id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND t.id = user_tests.test_id
+  )
+);
+
+-- User Answers Policies
+-- Allow users to view their own answers only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to view their own answers" ON user_answers;
+CREATE POLICY "Allow users to view their own answers" ON user_answers
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM user_tests ut
+    JOIN orders o ON o.user_id = ut.user_id
+    JOIN tests t ON t.course_id = o.course_id
+    WHERE ut.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND ut.id = user_answers.user_test_id
+  )
+);
+
+-- Allow users to create answers only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to create answers" ON user_answers;
+CREATE POLICY "Allow users to create answers" ON user_answers
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM user_tests ut
+    JOIN orders o ON o.user_id = ut.user_id
+    JOIN tests t ON t.course_id = o.course_id
+    WHERE ut.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND ut.id = user_answers.user_test_id
+  )
+);
+
+-- Allow users to update their own answers only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to update their own answers" ON user_answers;
+CREATE POLICY "Allow users to update their own answers" ON user_answers
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM user_tests ut
+    JOIN orders o ON o.user_id = ut.user_id
+    JOIN tests t ON t.course_id = o.course_id
+    WHERE ut.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND ut.id = user_answers.user_test_id
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM user_tests ut
+    JOIN orders o ON o.user_id = ut.user_id
+    JOIN tests t ON t.course_id = o.course_id
+    WHERE ut.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND ut.id = user_answers.user_test_id
+  )
+);

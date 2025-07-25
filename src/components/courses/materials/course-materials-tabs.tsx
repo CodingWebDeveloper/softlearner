@@ -24,12 +24,6 @@ const TABS = [
   { label: "Quizzes", value: 1 },
 ];
 
-const MOCK_QUIZZES = [
-  { id: 1, title: "Quiz 1: HTML Basics", progress: 100 },
-  { id: 2, title: "Quiz 2: CSS Selectors", progress: 60 },
-  { id: 3, title: "Quiz 3: JavaScript Variables", progress: 0 },
-];
-
 export const TabPanel = ({
   children,
   value,
@@ -66,8 +60,12 @@ const CourseMaterialsTabs: FC<CourseMaterialsTabsProps> = ({ courseId }) => {
         onChange={handleTabChange}
         aria-label="Course Materials Tabs"
         variant="fullWidth"
-        TabIndicatorProps={{
-          style: { backgroundColor: theme.palette.custom.accent.blue },
+        slotProps={{
+          indicator: {
+            style: {
+              backgroundColor: theme.palette.custom.accent.blue,
+            },
+          },
         }}
         textColor="inherit"
       >
@@ -85,7 +83,7 @@ const CourseMaterialsTabs: FC<CourseMaterialsTabsProps> = ({ courseId }) => {
         <ResourceList courseId={courseId} />
       </TabPanel>
       <TabPanel value={tab} index={1}>
-        <QuizList quizzes={MOCK_QUIZZES} />
+        <QuizList courseId={courseId} />
       </TabPanel>
     </VideoListSection>
   );

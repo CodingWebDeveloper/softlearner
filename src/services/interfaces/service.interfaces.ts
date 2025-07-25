@@ -228,3 +228,60 @@ export type GetPurchasedCoursesResult = {
   data: PurchasedCourse[];
   totalRecords: number;
 };
+
+export interface BasicTest {
+  id: string;
+  title: string;
+  description: string | null;
+  questionsCount: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BasicAnswerOption {
+  id: string;
+  text: string;
+}
+
+export interface BasicQuestion {
+  id: string;
+  text: string;
+  type: "single" | "multiple";
+  points: number;
+  options: BasicAnswerOption[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FullTest extends Omit<BasicTest, "questionsCount"> {
+  questions: BasicQuestion[];
+}
+
+export interface TestResult {
+  testId: string;
+  score: number;
+  maxScore: number;
+}
+
+export type TestSubmission = {
+  [questionId: string]: string[]; // Array of selected answer option IDs for each question
+};
+
+export interface TestWithProgress extends BasicTest {
+  progress: number;
+}
+
+export interface ITestsService {
+  getTests(courseId: string): Promise<BasicTest[]>;
+  getTestById(id: string): Promise<FullTest | null>;
+  getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
+  createScore(
+    testId: string,
+    userId: string,
+    submission: TestSubmission
+  ): Promise<TestResult>;
+  getTestMaterials(
+    courseId: string,
+    userId: string
+  ): Promise<TestWithProgress[]>;
+}

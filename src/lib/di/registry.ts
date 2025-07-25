@@ -11,6 +11,7 @@ import { VotesDAL } from "../dal/votes.dal";
 import { ResourcesDAL } from "../dal/resources.dal";
 import { PaymentsDAL } from "../dal/payments.dal";
 import { BookmarksDAL } from "../dal/bookmarks.dal";
+import { TestsDAL } from "../dal/tests.dal";
 
 // Service imports
 import { CategoriesService } from "@/services/categories.service";
@@ -21,6 +22,7 @@ import { ReviewsService } from "@/services/reviews.service";
 import { VotesService } from "@/services/votes.service";
 import { PaymentsService } from "@/services/payments.service";
 import { BookmarksService } from "@/services/bookmarks.service";
+import { TestsService } from "@/services/tests.service";
 
 // Interface imports
 import {
@@ -32,6 +34,7 @@ import {
   IResourcesDAL,
   IPaymentsDAL,
   IBookmarksDAL,
+  ITestsDAL,
 } from "./interfaces/dal.interfaces";
 
 import {
@@ -43,6 +46,7 @@ import {
   IVotesService,
   IPaymentsService,
   IBookmarksService,
+  ITestsService,
 } from "@/services/interfaces/service.interfaces";
 
 // Token constants for dependency injection
@@ -57,6 +61,7 @@ export const DI_TOKENS = {
   ORDERS_DAL: "ORDERS_DAL",
   PAYMENTS_DAL: "PAYMENTS_DAL",
   BOOKMARKS_DAL: "BOOKMARKS_DAL",
+  TESTS_DAL: "TESTS_DAL",
 
   // Service tokens
   CATEGORIES_SERVICE: "CATEGORIES_SERVICE",
@@ -67,6 +72,7 @@ export const DI_TOKENS = {
   VOTES_SERVICE: "VOTES_SERVICE",
   PAYMENTS_SERVICE: "PAYMENTS_SERVICE",
   BOOKMARKS_SERVICE: "BOOKMARKS_SERVICE",
+  TESTS_SERVICE: "TESTS_SERVICE",
 
   // Core dependencies
   SUPABASE: "SUPABASE",
@@ -122,6 +128,11 @@ export function registerDALs(
     DI_TOKENS.BOOKMARKS_DAL,
     (c) => new BookmarksDAL(c.resolve(DI_TOKENS.SUPABASE))
   );
+
+  container.register<ITestsDAL>(
+    DI_TOKENS.TESTS_DAL,
+    (c) => new TestsDAL(c.resolve(DI_TOKENS.SUPABASE))
+  );
 }
 
 /**
@@ -173,5 +184,10 @@ export function registerServices(
   container.register<IBookmarksService>(
     DI_TOKENS.BOOKMARKS_SERVICE,
     (c) => new BookmarksService(c.resolve(DI_TOKENS.BOOKMARKS_DAL))
+  );
+
+  container.register<ITestsService>(
+    DI_TOKENS.TESTS_SERVICE,
+    (c) => new TestsService(c.resolve(DI_TOKENS.TESTS_DAL))
   );
 }

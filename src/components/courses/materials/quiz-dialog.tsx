@@ -26,57 +26,93 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import CloseIcon from "@mui/icons-material/Close";
 import ConfirmAlert from "@/components/confirm-alert";
-
-interface QuizQuestion {
-  id: number;
-  question: string;
-  options: string[];
-  correct: number;
-}
-
-interface Quiz {
-  id: number;
-  title: string;
-  progress: number;
-  questions?: QuizQuestion[];
-}
+import { trpc } from "@/lib/trpc/client";
+import LoadingFallback from "@/components/loading-fallback";
+import { TestWithProgress } from "@/services/interfaces/service.interfaces";
 
 interface QuizDialogProps {
   open: boolean;
   onClose: () => void;
-  quiz: Quiz;
+  selectedTest: TestWithProgress;
+  courseId: string;
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
 }
 
 const QuizDialog: FC<QuizDialogProps> = ({
   open,
   onClose,
-  quiz,
+  selectedTest,
+  courseId,
   maxWidth = "md",
 }) => {
+  // General hooks
   const theme = useTheme();
-  const questions = quiz.questions || [];
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  // Queries
+  const { data: test, isLoading } = trpc.tests.getTestById.useQuery(
+    selectedTest.id,
+    {
+      enabled: open,
+    }
+  );
+
+  // Mutations
+  const createScoreMutation = trpc.tests.createScore.useMutation();
+  const utils = trpc.useUtils();
+
+  // States
   const [started, setStarted] = useState(false);
   const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<number[]>([]);
+  const [answers, setAnswers] = useState<{ [questionId: string]: string[] }>(
+    {}
+  );
   const [submitted, setSubmitted] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [testResult, setTestResult] = useState<{
+    testId: string;
+    score: number;
+    maxScore: number;
+  } | null>(null);
 
+  // Handlers
   const handleStart = () => {
     setStarted(true);
     setCurrent(0);
-    setAnswers([]);
+    setAnswers({});
     setSubmitted(false);
+    setTestResult(null);
   };
 
-  const handleOptionSelect = (optionIdx: number) => {
-    const newAnswers = [...answers];
-    newAnswers[current] = optionIdx;
+  const handleOptionSelect = (
+    questionId: string,
+    optionId: string,
+    isMultiple: boolean
+  ) => {
+    const newAnswers = { ...answers };
+
+    if (isMultiple) {
+      // For multiple choice, toggle the option
+      const currentAnswers = newAnswers[questionId] || [];
+      const optionIndex = currentAnswers.indexOf(optionId);
+
+      if (optionIndex > -1) {
+        currentAnswers.splice(optionIndex, 1);
+      } else {
+        currentAnswers.push(optionId);
+      }
+
+      newAnswers[questionId] = currentAnswers;
+    } else {
+      // For single choice, replace the answer
+      newAnswers[questionId] = [optionId];
+    }
+
     setAnswers(newAnswers);
   };
 
   const handleNext = () => {
-    if (current < questions.length - 1) {
+    if (test && current < test.questions.length - 1) {
       setCurrent(current + 1);
     }
   };
@@ -87,8 +123,24 @@ const QuizDialog: FC<QuizDialogProps> = ({
     }
   };
 
-  const handleSubmit = () => {
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    if (!test) return;
+
+    try {
+      const result = await createScoreMutation.mutateAsync({
+        testId: selectedTest.id,
+        submission: answers,
+      });
+
+      setTestResult(result);
+      setSubmitted(true);
+
+      // Invalidate getTestMaterials query to refresh the data
+      utils.tests.getTestMaterials.invalidate(courseId);
+    } catch (error) {
+      console.error("Failed to submit test:", error);
+      // You might want to show an error message to the user here
+    }
   };
 
   const handleRequestClose = () => setShowCloseConfirm(true);
@@ -99,21 +151,32 @@ const QuizDialog: FC<QuizDialogProps> = ({
     // Reset state when closing
     setStarted(false);
     setCurrent(0);
-    setAnswers([]);
+    setAnswers({});
     setSubmitted(false);
+    setTestResult(null);
   };
 
-  const correctCount = submitted
-    ? questions.reduce(
-        (acc, q, idx) => acc + (answers[idx] === q.correct ? 1 : 0),
-        0
-      )
-    : 0;
-  const percent = questions.length
-    ? ((correctCount / questions.length) * 100).toFixed(1)
-    : "0.0";
+  if (isLoading || !test) {
+    return (
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth={maxWidth}
+        fullWidth
+        fullScreen
+      >
+        <LoadingFallback />
+      </Dialog>
+    );
+  }
 
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  // Other variables
+  const currentQuestion = test.questions[current];
+  const isCurrentQuestionAnswered =
+    answers[currentQuestion?.id] && answers[currentQuestion?.id].length > 0;
+  const allQuestionsAnswered = test.questions.every(
+    (question) => answers[question.id] && answers[question.id].length > 0
+  );
 
   return (
     <Dialog
@@ -122,16 +185,18 @@ const QuizDialog: FC<QuizDialogProps> = ({
       maxWidth={maxWidth}
       fullWidth
       fullScreen
-      PaperProps={{
-        sx: {
-          background: "transparent",
-          boxShadow: "none",
+      slotProps={{
+        paper: {
+          sx: {
+            background: "transparent",
+            boxShadow: "none",
+          },
         },
-      }}
-      BackdropProps={{
-        sx: {
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
-          backdropFilter: "blur(4px)",
+        backdrop: {
+          sx: {
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            backdropFilter: "blur(4px)",
+          },
         },
       }}
     >
@@ -157,7 +222,7 @@ const QuizDialog: FC<QuizDialogProps> = ({
 
           {!started ? (
             <>
-              <QuizDialogPercent>{quiz.progress}%</QuizDialogPercent>
+              <QuizDialogPercent>{selectedTest.progress}%</QuizDialogPercent>
               <Typography
                 variant="h6"
                 align="center"
@@ -181,30 +246,38 @@ const QuizDialog: FC<QuizDialogProps> = ({
                 variant="h5"
                 sx={{ color: theme.palette.custom.text.white }}
               >
-                {quiz.title}
+                {test.title}
               </Typography>
               <QuizProgressBar
                 variant="determinate"
-                value={((current + 1) / questions.length) * 100}
+                value={((current + 1) / test.questions.length) * 100}
               />
               <QuizDialogNofX>
-                Question {current + 1} of {questions.length}
+                Question {current + 1} of {test.questions.length}
               </QuizDialogNofX>
-              <QuizQuestionText>
-                {questions[current]?.question}
-              </QuizQuestionText>
+              <QuizQuestionText>{currentQuestion?.text}</QuizQuestionText>
               <OptionListBox>
-                {questions[current]?.options.map((opt, idx) => (
-                  <OptionButton
-                    key={idx}
-                    $selected={answers[current] === idx}
-                    onClick={() => handleOptionSelect(idx)}
-                    fullWidth
-                    aria-label={`Option ${idx + 1}: ${opt}`}
-                  >
-                    {opt}
-                  </OptionButton>
-                ))}
+                {currentQuestion?.options.map((opt) => {
+                  const isSelected =
+                    answers[currentQuestion.id]?.includes(opt.id) || false;
+                  return (
+                    <OptionButton
+                      key={opt.id}
+                      $selected={isSelected}
+                      onClick={() =>
+                        handleOptionSelect(
+                          currentQuestion.id,
+                          opt.id,
+                          currentQuestion.type === "multiple"
+                        )
+                      }
+                      fullWidth
+                      aria-label={`Option: ${opt.text}`}
+                    >
+                      {opt.text}
+                    </OptionButton>
+                  );
+                })}
               </OptionListBox>
               <DialogActionsRow>
                 <PreviousButton
@@ -214,10 +287,10 @@ const QuizDialog: FC<QuizDialogProps> = ({
                 >
                   Previous
                 </PreviousButton>
-                {current < questions.length - 1 ? (
+                {current < test.questions.length - 1 ? (
                   <NextButton
                     onClick={handleNext}
-                    disabled={answers[current] == null}
+                    disabled={!isCurrentQuestionAnswered}
                     aria-label="Next question"
                   >
                     Next
@@ -225,20 +298,33 @@ const QuizDialog: FC<QuizDialogProps> = ({
                 ) : (
                   <SubmitButton
                     onClick={handleSubmit}
-                    disabled={answers.length !== questions.length}
+                    disabled={
+                      !allQuestionsAnswered || createScoreMutation.isPending
+                    }
                     aria-label="Submit quiz"
                   >
-                    Submit
+                    {createScoreMutation.isPending ? "Submitting..." : "Submit"}
                   </SubmitButton>
                 )}
               </DialogActionsRow>
             </>
           ) : (
             <>
-              <QuizDialogPercent>{percent}%</QuizDialogPercent>
+              <QuizDialogPercent>
+                {testResult
+                  ? `${Math.round(
+                      (testResult.score / testResult.maxScore) * 100
+                    )}%`
+                  : "0%"}
+              </QuizDialogPercent>
               <QuizDialogAnswers>
-                You got {correctCount}{" "}
-                {correctCount === 1 ? "answer" : "answers"} correct
+                {testResult ? (
+                  <>
+                    {`You got score of ${testResult.score} out of ${testResult.maxScore}!`}
+                  </>
+                ) : (
+                  "Results will be available soon"
+                )}
               </QuizDialogAnswers>
               <DialogActionsRow>
                 <StartButton
