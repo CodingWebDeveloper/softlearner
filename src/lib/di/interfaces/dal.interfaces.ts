@@ -26,6 +26,7 @@ import {
   FullTest,
   TestResult,
   TestSubmission,
+  UserDetails,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -137,4 +138,9 @@ export interface ITestsDAL {
     userId: string,
     submission: TestSubmission
   ): Promise<TestResult>;
+}
+
+export interface IUsersDAL {
+  getUserDetails(userId: string): Promise<UserDetails | null>;
+  getUserDetailsByUsername(username: string): Promise<UserDetails | null>;
 }

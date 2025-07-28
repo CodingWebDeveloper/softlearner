@@ -12,6 +12,7 @@ import { ResourcesDAL } from "../dal/resources.dal";
 import { PaymentsDAL } from "../dal/payments.dal";
 import { BookmarksDAL } from "../dal/bookmarks.dal";
 import { TestsDAL } from "../dal/tests.dal";
+import { UsersDAL } from "../dal/users.dal";
 
 // Service imports
 import { CategoriesService } from "@/services/categories.service";
@@ -23,6 +24,7 @@ import { VotesService } from "@/services/votes.service";
 import { PaymentsService } from "@/services/payments.service";
 import { BookmarksService } from "@/services/bookmarks.service";
 import { TestsService } from "@/services/tests.service";
+import { UsersService } from "@/services/users.service";
 
 // Interface imports
 import {
@@ -35,6 +37,7 @@ import {
   IPaymentsDAL,
   IBookmarksDAL,
   ITestsDAL,
+  IUsersDAL,
 } from "./interfaces/dal.interfaces";
 
 import {
@@ -47,6 +50,7 @@ import {
   IPaymentsService,
   IBookmarksService,
   ITestsService,
+  IUsersService,
 } from "@/services/interfaces/service.interfaces";
 
 // Token constants for dependency injection
@@ -62,6 +66,7 @@ export const DI_TOKENS = {
   PAYMENTS_DAL: "PAYMENTS_DAL",
   BOOKMARKS_DAL: "BOOKMARKS_DAL",
   TESTS_DAL: "TESTS_DAL",
+  USERS_DAL: "USERS_DAL",
 
   // Service tokens
   CATEGORIES_SERVICE: "CATEGORIES_SERVICE",
@@ -73,6 +78,7 @@ export const DI_TOKENS = {
   PAYMENTS_SERVICE: "PAYMENTS_SERVICE",
   BOOKMARKS_SERVICE: "BOOKMARKS_SERVICE",
   TESTS_SERVICE: "TESTS_SERVICE",
+  USERS_SERVICE: "USERS_SERVICE",
 
   // Core dependencies
   SUPABASE: "SUPABASE",
@@ -133,6 +139,11 @@ export function registerDALs(
     DI_TOKENS.TESTS_DAL,
     (c) => new TestsDAL(c.resolve(DI_TOKENS.SUPABASE))
   );
+
+  container.register<IUsersDAL>(
+    DI_TOKENS.USERS_DAL,
+    (c) => new UsersDAL(c.resolve(DI_TOKENS.SUPABASE))
+  );
 }
 
 /**
@@ -189,5 +200,10 @@ export function registerServices(
   container.register<ITestsService>(
     DI_TOKENS.TESTS_SERVICE,
     (c) => new TestsService(c.resolve(DI_TOKENS.TESTS_DAL))
+  );
+
+  container.register<IUsersService>(
+    DI_TOKENS.USERS_SERVICE,
+    (c) => new UsersService(c.resolve(DI_TOKENS.USERS_DAL))
   );
 }

@@ -1,34 +1,17 @@
 "use client";
 
-import {
-  useTheme,
-  useMediaQuery,
-  Toolbar,
-  IconButton,
-  Typography,
-  List,
-} from "@mui/material";
+import { List } from "@mui/material";
+import { School as SchoolIcon } from "@mui/icons-material";
+import { User } from "@supabase/supabase-js";
 import {
   Home as HomeIcon,
-  School as SchoolIcon,
   Book as BookIcon,
   LocalLibrary as MyCoursesIcon,
-  MoreHoriz as MoreIcon,
   Person as PersonIcon,
   Settings as SettingsIcon,
   Bookmark as BookmarkIcon,
 } from "@mui/icons-material";
-import { useRouter, usePathname } from "next/navigation";
-import { useSupabase } from "@/contexts/supabase-context";
-import { User } from "@supabase/supabase-js";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import ClientOnly from "./client-only";
 import {
-  BottomNavContainer,
-  BottomNavAction,
-  StyledBottomNavigation,
-  UserAvatar,
-  StyledAppBar,
   SidebarContainer,
   SidebarHeader,
   SidebarContent as StyledSidebarContent,
@@ -46,35 +29,25 @@ import {
   SidebarListItemText,
   FooterDivider,
   DesktopDrawer,
+  UserAvatar,
 } from "@/components/styles/infrastructure/navigation.styles";
+import { useSupabase } from "@/contexts/supabase-context";
+import { useRouter } from "next/navigation";
 
-const Navigation = () => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { user } = useSupabase();
-
-  return (
-    <ClientOnly fallback={null}>
-      <NavigationContent pathname={pathname} user={user} router={router} />
-    </ClientOnly>
-  );
-};
-
-const NavigationContent = ({
-  pathname,
-  user,
-  router,
-}: {
+interface DesktopNavigationProps {
   pathname: string;
   user: User | null;
-  router: AppRouterInstance;
-}) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  onNavigation: (path: string) => void;
+}
 
-  const handleNavigation = (path: string) => {
-    router.push(path);
-  };
+export const DesktopNavigation = ({
+  pathname,
+  user,
+  onNavigation,
+}: DesktopNavigationProps) => {
+  // General Hooks
+  const router = useRouter();
+  const { signOut } = useSupabase();
 
   const navigationItems = [
     {
@@ -105,21 +78,6 @@ const NavigationContent = ({
       showWhenAuthenticated: true,
       showWhenUnauthenticated: false,
     },
-  ];
-
-  const mobileNavigationItems = [
-    ...navigationItems,
-    {
-      label: "More",
-      icon: <MoreIcon />,
-      path: "/more",
-      showWhenAuthenticated: true,
-      showWhenUnauthenticated: false,
-    },
-  ];
-
-  const desktopNavigationItems = [
-    ...navigationItems,
     {
       label: "Profile",
       icon: <PersonIcon />,
@@ -136,7 +94,7 @@ const NavigationContent = ({
     },
   ];
 
-  const filteredMobileItems = mobileNavigationItems.filter((item) => {
+  const filteredItems = navigationItems.filter((item) => {
     if (user) {
       return item.showWhenAuthenticated;
     } else {
@@ -144,13 +102,10 @@ const NavigationContent = ({
     }
   });
 
-  const filteredDesktopItems = desktopNavigationItems.filter((item) => {
-    if (user) {
-      return item.showWhenAuthenticated;
-    } else {
-      return item.showWhenUnauthenticated;
-    }
-  });
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
 
   const SidebarContent = () => (
     <SidebarContainer>
@@ -165,11 +120,11 @@ const NavigationContent = ({
 
       <StyledSidebarContent>
         <List>
-          {filteredDesktopItems.map((item) => (
+          {filteredItems.map((item) => (
             <SidebarListItem key={item.path} disablePadding>
               <SidebarListItemButton
                 selected={pathname === item.path}
-                onClick={() => handleNavigation(item.path)}
+                onClick={() => onNavigation(item.path)}
                 aria-label={item.label}
               >
                 <SidebarListItemIcon>{item.icon}</SidebarListItemIcon>
@@ -192,67 +147,26 @@ const NavigationContent = ({
               <UserEmail variant="body2">{user.email}</UserEmail>
             </UserInfoContainer>
           </UserInfo>
+          <FooterDivider />
+          <SidebarListItem disablePadding>
+            <SidebarListItemButton
+              onClick={handleSignOut}
+              aria-label="Sign out"
+            >
+              <SidebarListItemIcon>
+                <SettingsIcon />
+              </SidebarListItemIcon>
+              <SidebarListItemText primary="Sign out" />
+            </SidebarListItemButton>
+          </SidebarListItem>
         </SidebarFooter>
       )}
     </SidebarContainer>
   );
 
-  if (isMobile) {
-    return (
-      <>
-        {/* Top App Bar */}
-        <StyledAppBar position="fixed">
-          <Toolbar>
-            <IconButton edge="start" color="inherit" aria-label="logo">
-              <SchoolIcon />
-            </IconButton>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              SoftLearner
-            </Typography>
-            {user && (
-              <IconButton
-                edge="end"
-                color="inherit"
-                aria-label="profile"
-                onClick={() => handleNavigation("/profile")}
-              >
-                <UserAvatar>{user.email?.charAt(0).toUpperCase()}</UserAvatar>
-              </IconButton>
-            )}
-          </Toolbar>
-        </StyledAppBar>
-
-        {/* Mobile Bottom Navigation */}
-        <BottomNavContainer>
-          <StyledBottomNavigation
-            value={pathname}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                handleNavigation(newValue);
-              }
-            }}
-          >
-            {filteredMobileItems.map((item) => (
-              <BottomNavAction
-                key={item.path}
-                label={item.label}
-                value={item.path}
-                icon={item.icon}
-                showLabel
-              />
-            ))}
-          </StyledBottomNavigation>
-        </BottomNavContainer>
-      </>
-    );
-  }
-
-  // Desktop Navigation
   return (
     <DesktopDrawer variant="permanent">
       <SidebarContent />
     </DesktopDrawer>
   );
 };
-
-export default Navigation;

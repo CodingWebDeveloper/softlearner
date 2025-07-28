@@ -300,3 +300,18 @@ export interface ITestsService {
     userId: string
   ): Promise<TestWithProgress[]>;
 }
+
+export interface IUsersService {
+  getUserDetails(userId: string): Promise<UserDetails | null>;
+  getUserDetailsByUsername(username: string): Promise<UserDetails | null>;
+}
+
+export interface UserDetails {
+  id: string;
+  full_name: string;
+  avatar_url: string;
+  username: string;
+  bio: string;
+  created_at: string;
+  updated_at: string;
+}

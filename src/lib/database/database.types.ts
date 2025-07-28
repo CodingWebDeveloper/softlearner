@@ -129,7 +129,8 @@ export interface User {
   id: string;
   full_name?: string;
   avatar_url?: string;
-  description?: string;
+  username?: string;
+  bio?: string;
   created_at: string;
   updated_at: string;
 }
