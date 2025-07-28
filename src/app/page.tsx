@@ -16,7 +16,7 @@ import {
   EmptyStateTitle,
   EmptyStateText,
 } from "@/components/styles/home-page/home-page.styles";
-import CourseProgressCard from "@/components/courses/course-progress-card";
+import CourseProgressCard from "@/components/courses/course-progress/course-progress-card";
 import { trpc } from "@/lib/trpc/client";
 
 const Home = () => {

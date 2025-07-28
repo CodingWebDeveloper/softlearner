@@ -50,8 +50,6 @@ export class TestsService implements ITestsService {
       ])
     );
 
-    console.log(resultsMap);
-
     return tests.map((test) => {
       const result = resultsMap.get(test.id);
       const progress =

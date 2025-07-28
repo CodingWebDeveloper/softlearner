@@ -13,11 +13,11 @@ import {
   StyledProgressBar,
   CourseFooter,
   LastAccessed,
-  ContinueButton,
 } from "@/components/styles/home-page/home-page.styles";
 import { formatDate } from "@/utils/date.utils";
 import { useRouter } from "next/navigation";
 import { PurchasedCourse } from "@/services/interfaces/service.interfaces";
+import ContinueCard from "./continue-card";
 
 const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
   // Hooks
@@ -102,15 +102,7 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
           <LastAccessed>
             Purchased: {formatDate(course.orderCreatedAt)}
           </LastAccessed>
-          {status !== "completed" && (
-            <ContinueButton
-              variant="contained"
-              onClick={() => handleClick(course.id)}
-              aria-label={`Continue course: ${course.name}`}
-            >
-              Continue
-            </ContinueButton>
-          )}
+          {status !== "completed" && <ContinueCard course={course} />}
         </CourseFooter>
       </CourseCardContent>
     </CourseCard>

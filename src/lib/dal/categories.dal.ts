@@ -7,7 +7,6 @@ export class CategoriesDAL implements ICategoriesDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   async getCategories(): Promise<Category[]> {
-    console.log("hello");
     const { data: categories, error } = await this.supabase
       .from("categories")
       .select("*")

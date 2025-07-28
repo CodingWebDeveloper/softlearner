@@ -11,8 +11,30 @@ export class ResourcesService implements IResourcesService {
   }
 
   async getResourceMaterialsByCourseId(
-    courseId: string
+    courseId: string,
+    userId?: string
   ): Promise<BasicResource[]> {
-    return this.resourcesDAL.getResourceMaterialsByCourseId(courseId);
+    return this.resourcesDAL.getResourceMaterialsByCourseId(courseId, userId);
+  }
+
+  async getNextResourceToComplete(
+    courseId: string,
+    userId: string
+  ): Promise<string | null> {
+    return this.resourcesDAL.getNextResourceToComplete(courseId, userId);
+  }
+
+  async toggleResourceCompletion(
+    userId: string,
+    resourceId: string
+  ): Promise<boolean> {
+    return this.resourcesDAL.toggleResourceCompletion(userId, resourceId);
+  }
+
+  async getResourceCompletionStatus(
+    userId: string,
+    resourceId: string
+  ): Promise<boolean> {
+    return this.resourcesDAL.getResourceCompletionStatus(userId, resourceId);
   }
 }

@@ -6,6 +6,8 @@ import {
   VideoSection,
   VideoEmbed,
   InstructorBox,
+  DownloadSection,
+  DownloadLink,
 } from "@/components/styles/courses/materials.styles";
 import BookmarkCard from "../courses-list/bookmark-card";
 import { FullCourse } from "@/services/interfaces/service.interfaces";
@@ -14,6 +16,9 @@ import { selectResource } from "@/lib/store/features/resourceSlice";
 import CourseTags from "../course-details/course-tags";
 import CategoryIcon from "@mui/icons-material/Category";
 import { CategoryChip } from "@/components/styles/courses/course-details.styles";
+import CompleteCard from "./complete-card";
+import DownloadIcon from "@mui/icons-material/Download";
+import { RESOURCE_TYPES } from "@/constants/database-constants";
 
 interface CourseVideoSectionProps {
   course: FullCourse;
@@ -26,19 +31,52 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
   // Selectors
   const selectedResource = useAppSelector(selectResource);
 
+  const renderContent = () => {
+    if (!selectedResource) {
+      return (
+        <VideoEmbed>
+          <iframe
+            width="100%"
+            height="360"
+            src={course.video_url}
+            title={course.name}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </VideoEmbed>
+      );
+    }
+
+    if (selectedResource.type === RESOURCE_TYPES.VIDEO) {
+      return (
+        <VideoEmbed>
+          <iframe
+            width="100%"
+            height="360"
+            src={selectedResource.url}
+            title={selectedResource.name}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </VideoEmbed>
+      );
+    }
+
+    return (
+      <DownloadSection>
+        <DownloadLink href={selectedResource.url} download>
+          <DownloadIcon />
+          Download Resource
+        </DownloadLink>
+      </DownloadSection>
+    );
+  };
+
   return (
     <VideoSection>
-      <VideoEmbed>
-        <iframe
-          width="100%"
-          height="360"
-          src={selectedResource?.videoUrl || course.video_url}
-          title={""}
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </VideoEmbed>
+      {renderContent()}
       <Box
         display="flex"
         alignItems="center"
@@ -50,12 +88,17 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
           fontWeight={600}
           style={{ color: theme.palette.custom.text.white }}
         >
-          {course.name}
+          {selectedResource?.name || course.name}
         </Typography>
-        <BookmarkCard
-          courseId={course.id}
-          initialIsBookmarked={course.isBookmarked}
-        />
+        <Box display="flex" gap={2}>
+          {selectedResource && (
+            <CompleteCard resourceId={selectedResource.id} />
+          )}
+          <BookmarkCard
+            courseId={course.id}
+            initialIsBookmarked={course.isBookmarked}
+          />
+        </Box>
       </Box>
       <Box mt={1}>
         <CategoryChip label={course.category.name} icon={<CategoryIcon />} />
@@ -65,7 +108,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
         style={{ color: theme.palette.custom.text.light }}
         mt={2}
       >
-        {course.description}
+        {selectedResource?.short_summary || course.description}
       </Typography>
       <CourseTags courseId={course.id} />
 

@@ -267,3 +267,55 @@ FOR UPDATE USING (
     AND ut.id = user_answers.user_test_id
   )
 );
+
+-- User Resources Policies
+-- Allow users to view their own resource completion records only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to view their own resource completion records" ON user_resources;
+CREATE POLICY "Allow users to view their own resource completion records" ON user_resources
+FOR SELECT USING (
+  auth.uid() = user_id AND
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN resources r ON r.course_id = o.course_id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND r.id = user_resources.resource_id
+  )
+);
+
+-- Allow users to create resource completion records only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to create resource completion records" ON user_resources;
+CREATE POLICY "Allow users to create resource completion records" ON user_resources
+FOR INSERT WITH CHECK (
+  auth.uid() = user_id AND
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN resources r ON r.course_id = o.course_id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND r.id = user_resources.resource_id
+  )
+);
+
+-- Allow users to update their own resource completion records only for courses they have purchased
+DROP POLICY IF EXISTS "Allow users to update their own resource completion records" ON user_resources;
+CREATE POLICY "Allow users to update their own resource completion records" ON user_resources
+FOR UPDATE USING (
+  auth.uid() = user_id AND
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN resources r ON r.course_id = o.course_id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND r.id = user_resources.resource_id
+  )
+) WITH CHECK (
+  auth.uid() = user_id AND
+  EXISTS (
+    SELECT 1 FROM orders o
+    JOIN resources r ON r.course_id = o.course_id
+    WHERE o.user_id = auth.uid()
+    AND o.status = 'SUCCEEDED'
+    AND r.id = user_resources.resource_id
+  )
+);

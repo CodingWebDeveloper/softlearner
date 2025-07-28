@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, SyntheticEvent, useState } from "react";
+import { FC, SyntheticEvent } from "react";
 import { Box, Tabs, useTheme } from "@mui/material";
 import {
   VideoListSection,
@@ -8,6 +8,7 @@ import {
 } from "@/components/styles/courses/materials.styles";
 import QuizList from "./quiz-list";
 import ResourceList from "./resource-list";
+import { useSearchParams, useRouter } from "next/navigation";
 
 interface CourseMaterialsTabsProps {
   courseId: string;
@@ -20,9 +21,9 @@ interface TabPanelProps {
 }
 
 const TABS = [
-  { label: "Resources", value: 0 },
-  { label: "Quizzes", value: 1 },
-];
+  { label: "Resources", value: 0, param: "resources" },
+  { label: "Quizzes", value: 1, param: "quizzes" },
+] as const;
 
 export const TabPanel = ({
   children,
@@ -46,17 +47,25 @@ export const TabPanel = ({
 const CourseMaterialsTabs: FC<CourseMaterialsTabsProps> = ({ courseId }) => {
   // General hooks
   const theme = useTheme();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [tab, setTab] = useState(0);
+  // Get current tab from URL or default to resources
+  const currentTab =
+    TABS.find((tab) => tab.param === searchParams.get("tab")) || TABS[0];
 
   const handleTabChange = (_: SyntheticEvent, newValue: number) => {
-    setTab(newValue);
+    const newTab = TABS[newValue];
+    // Create new URLSearchParams with only the tab parameter
+    const params = new URLSearchParams();
+    params.set("tab", newTab.param);
+    router.push(`?${params.toString()}`, { scroll: false });
   };
 
   return (
     <VideoListSection>
       <Tabs
-        value={tab}
+        value={currentTab.value}
         onChange={handleTabChange}
         aria-label="Course Materials Tabs"
         variant="fullWidth"
@@ -75,14 +84,14 @@ const CourseMaterialsTabs: FC<CourseMaterialsTabsProps> = ({ courseId }) => {
             label={tabItem.label}
             id={`tab-${tabItem.value}`}
             aria-controls={`tabpanel-${tabItem.value}`}
-            selected={tab === tabItem.value}
+            selected={currentTab.value === tabItem.value}
           />
         ))}
       </Tabs>
-      <TabPanel value={tab} index={0}>
+      <TabPanel value={currentTab.value} index={0}>
         <ResourceList courseId={courseId} />
       </TabPanel>
-      <TabPanel value={tab} index={1}>
+      <TabPanel value={currentTab.value} index={1}>
         <QuizList courseId={courseId} />
       </TabPanel>
     </VideoListSection>

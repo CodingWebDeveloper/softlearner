@@ -7,7 +7,7 @@ import {
 } from "@/components/styles/infrastructure/layout.styles";
 import { trpc } from "@/lib/trpc/client";
 import LoadingFallback from "@/components/loading-fallback";
-import CourseProgressCard from "@/components/courses/course-progress-card";
+import CourseProgressCard from "@/components/courses/course-progress/course-progress-card";
 
 const MyCoursesPage = () => {
   const {
