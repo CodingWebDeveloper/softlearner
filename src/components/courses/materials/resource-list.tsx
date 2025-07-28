@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useRef } from "react";
 import { Skeleton, ListItemAvatar, Avatar } from "@mui/material";
 import {
   ResourceMaterialItem,
@@ -42,6 +42,7 @@ const ResourceList: FC<ResourceListProps> = ({ courseId }) => {
   const dispatch = useAppDispatch();
   const selectedResource = useAppSelector(selectResource);
   const resourceId = searchParams.get("resourceId");
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const {
     data: resources,
@@ -67,6 +68,21 @@ const ResourceList: FC<ResourceListProps> = ({ courseId }) => {
     }
   }, [resources]);
 
+  // Scroll to selected resource
+  useEffect(() => {
+    if (selectedResource && containerRef.current) {
+      const selectedElement = containerRef.current.querySelector(
+        `[data-resource-id="${selectedResource.id}"]`
+      );
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }
+    }
+  }, [selectedResource]);
+
   if (isLoading) {
     return (
       <ResourcesListContainer>
@@ -84,7 +100,7 @@ const ResourceList: FC<ResourceListProps> = ({ courseId }) => {
   }
 
   return (
-    <ResourcesListContainer>
+    <ResourcesListContainer ref={containerRef}>
       {resources.map((resource) => (
         <ResourceCard key={resource.id} resource={resource} />
       ))}

@@ -1,11 +1,6 @@
 "use client";
 
 import { FC } from "react";
-import {
-  selectResource,
-  setResource,
-} from "@/lib/store/features/resourceSlice";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { ListItemAvatar } from "@mui/material";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import { BasicResource } from "@/services/interfaces/service.interfaces";
@@ -15,6 +10,11 @@ import {
 } from "@/components/styles/courses/materials.styles";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import { RESOURCE_TYPES } from "@/constants/database-constants";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import {
+  selectResource,
+  setResource,
+} from "@/lib/store/features/resourceSlice";
 import { useSearchParams, useRouter } from "next/navigation";
 
 interface ResourceCardProps {
@@ -22,15 +22,11 @@ interface ResourceCardProps {
 }
 
 const ResourceCard: FC<ResourceCardProps> = ({ resource }) => {
-  // General hooks
   const dispatch = useAppDispatch();
+  const selectedResource = useAppSelector(selectResource);
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Selectors
-  const selectedResource = useAppSelector(selectResource);
-
-  // Other variables
   const isVideo = resource.type === RESOURCE_TYPES.VIDEO;
   const isSelected = selectedResource?.id === resource.id;
 
@@ -56,6 +52,7 @@ const ResourceCard: FC<ResourceCardProps> = ({ resource }) => {
         onKeyDown={handleKeyDown}
         aria-label={`Play ${resource.name}`}
         selected={isSelected}
+        data-resource-id={resource.id}
       >
         <ListItemAvatar>
           <PlayCircleOutlineIcon fontSize="large" />
@@ -77,6 +74,7 @@ const ResourceCard: FC<ResourceCardProps> = ({ resource }) => {
       onKeyDown={handleKeyDown}
       aria-label={`Download ${resource.name}`}
       selected={isSelected}
+      data-resource-id={resource.id}
     >
       <ListItemAvatar>
         <MenuBookRoundedIcon fontSize="large" />
