@@ -76,6 +76,13 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
 
   return (
     <VideoSection>
+      <Typography
+        variant="h5"
+        fontWeight={600}
+        style={{ color: theme.palette.custom.text.white }}
+      >
+        {course.name}
+      </Typography>
       {renderContent()}
       <Box
         display="flex"
@@ -84,11 +91,11 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
         mt={2}
       >
         <Typography
-          variant="h5"
+          variant="h6"
           fontWeight={600}
           style={{ color: theme.palette.custom.text.white }}
         >
-          {selectedResource?.name || course.name}
+          {selectedResource?.name}
         </Typography>
         <Box display="flex" gap={2}>
           {selectedResource && (
@@ -100,6 +107,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
           />
         </Box>
       </Box>
+
       <Box mt={1}>
         <CategoryChip label={course.category.name} icon={<CategoryIcon />} />
       </Box>
