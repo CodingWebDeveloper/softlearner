@@ -62,7 +62,22 @@ export interface ITagsDAL {
 
 export interface IResourcesDAL {
   getResourcesByCourseId(courseId: string): Promise<PreviewResource[]>;
-  getResourceMaterialsByCourseId(courseId: string): Promise<BasicResource[]>;
+  getResourceMaterialsByCourseId(
+    courseId: string,
+    userId?: string
+  ): Promise<BasicResource[]>;
+  getNextResourceToComplete(
+    courseId: string,
+    userId: string
+  ): Promise<string | null>;
+  toggleResourceCompletion(
+    userId: string,
+    resourceId: string
+  ): Promise<boolean>;
+  getResourceCompletionStatus(
+    userId: string,
+    resourceId: string
+  ): Promise<boolean>;
 }
 
 export interface IReviewsDAL {

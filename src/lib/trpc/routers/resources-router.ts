@@ -29,11 +29,72 @@ export const resourcesRouter = router({
           DI_TOKENS.RESOURCES_SERVICE
         );
         return await resourcesService.getResourceMaterialsByCourseId(
-          input.courseId
+          input.courseId,
+          ctx.user.id
         );
       } catch (error) {
         throw new Error(
           `Failed to fetch resource materials: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  getNextResourceToComplete: protectedProcedure
+    .input(z.object({ courseId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      try {
+        const resourcesService = ctx.container.resolve<IResourcesService>(
+          DI_TOKENS.RESOURCES_SERVICE
+        );
+        return await resourcesService.getNextResourceToComplete(
+          input.courseId,
+          ctx.user.id
+        );
+      } catch (error) {
+        throw new Error(
+          `Failed to get next resource to complete: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  toggleResourceCompletion: protectedProcedure
+    .input(z.object({ resourceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const resourcesService = ctx.container.resolve<IResourcesService>(
+          DI_TOKENS.RESOURCES_SERVICE
+        );
+        return await resourcesService.toggleResourceCompletion(
+          ctx.user.id,
+          input.resourceId
+        );
+      } catch (error) {
+        throw new Error(
+          `Failed to toggle resource completion: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  getResourceCompletionStatus: protectedProcedure
+    .input(z.object({ resourceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      try {
+        const resourcesService = ctx.container.resolve<IResourcesService>(
+          DI_TOKENS.RESOURCES_SERVICE
+        );
+        return await resourcesService.getResourceCompletionStatus(
+          ctx.user.id,
+          input.resourceId
+        );
+      } catch (error) {
+        throw new Error(
+          `Failed to get resource completion status: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );

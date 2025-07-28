@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { Skeleton, ListItemAvatar, Avatar } from "@mui/material";
 import {
   ResourceMaterialItem,
@@ -7,11 +7,15 @@ import {
 } from "@/components/styles/courses/materials.styles";
 import { trpc } from "@/lib/trpc/client";
 import ResourceCard from "./resource-card";
+import { useSearchParams } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import {
+  setResource,
+  selectResource,
+} from "@/lib/store/features/resourceSlice";
 
 interface ResourceListProps {
   courseId: string;
-  currentResourceId?: string;
-  onResourceSelect?: (resourceId: string) => void;
 }
 
 const ResourceSkeleton = () => (
@@ -32,11 +36,13 @@ const ResourceSkeleton = () => (
   </>
 );
 
-const ResourceList: FC<ResourceListProps> = ({
-  courseId,
-  currentResourceId,
-  onResourceSelect,
-}) => {
+const ResourceList: FC<ResourceListProps> = ({ courseId }) => {
+  // General hooks
+  const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
+  const selectedResource = useAppSelector(selectResource);
+  const resourceId = searchParams.get("resourceId");
+
   const {
     data: resources,
     isLoading,
@@ -47,6 +53,19 @@ const ResourceList: FC<ResourceListProps> = ({
       enabled: !!courseId,
     }
   );
+
+  // Handle initial load and URL sync
+  useEffect(() => {
+    if (resources) {
+      // Only set from URL if no resource is selected (initial load/refresh)
+      if (resourceId && !selectedResource) {
+        const resource = resources.find((r) => r.id === resourceId);
+        if (resource) {
+          dispatch(setResource(resource));
+        }
+      }
+    }
+  }, [resources]);
 
   if (isLoading) {
     return (
@@ -67,12 +86,7 @@ const ResourceList: FC<ResourceListProps> = ({
   return (
     <ResourcesListContainer>
       {resources.map((resource) => (
-        <ResourceCard
-          key={resource.id}
-          resource={resource}
-          isSelected={currentResourceId === resource.id}
-          onSelect={onResourceSelect}
-        />
+        <ResourceCard key={resource.id} resource={resource} />
       ))}
     </ResourcesListContainer>
   );

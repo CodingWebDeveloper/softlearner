@@ -1,17 +1,17 @@
 import { Category, Tag, PreviewResource } from "@/lib/database/database.types";
+import { ResourceType } from "@/constants/database-constants";
 
-export type BasicResource = {
+export interface BasicResource {
   id: string;
-  url: string;
   name: string;
+  url: string;
   short_summary?: string;
-  type?: "video" | "downloadable file";
+  type: ResourceType;
   course_id: string;
   order_index?: number;
   duration?: string;
-  created_at: string;
-  updated_at: string;
-};
+  completed?: boolean;
+}
 
 type User = {
   id: string;
@@ -172,7 +172,22 @@ export interface ITagsService {
 
 export interface IResourcesService {
   getResourcesByCourseId(courseId: string): Promise<PreviewResource[]>;
-  getResourceMaterialsByCourseId(courseId: string): Promise<BasicResource[]>;
+  getResourceMaterialsByCourseId(
+    courseId: string,
+    userId?: string
+  ): Promise<BasicResource[]>;
+  getNextResourceToComplete(
+    courseId: string,
+    userId: string
+  ): Promise<string | null>;
+  toggleResourceCompletion(
+    userId: string,
+    resourceId: string
+  ): Promise<boolean>;
+  getResourceCompletionStatus(
+    userId: string,
+    resourceId: string
+  ): Promise<boolean>;
 }
 
 export interface IReviewsService {

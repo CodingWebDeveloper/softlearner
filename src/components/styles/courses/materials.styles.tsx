@@ -421,3 +421,32 @@ export const VideoListContainer = styled(Box)({
   overflowY: "auto",
   maxHeight: "500px",
 });
+
+export const DownloadSection = styled(Box)(({ theme }) => ({
+  width: "100%",
+  height: 360,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: theme.palette.custom.background.secondary,
+  borderRadius: theme.shape.borderRadius,
+  gap: theme.spacing(2),
+}));
+
+export const DownloadLink = styled("a")(({ theme }) => ({
+  backgroundColor: theme.palette.custom.accent.teal,
+  color: theme.palette.custom.text.white,
+  padding: theme.spacing(2, 4),
+  borderRadius: theme.shape.borderRadius,
+  textDecoration: "none",
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  fontFamily: theme.typography.button.fontFamily,
+  fontWeight: theme.typography.button.fontWeight,
+  fontSize: theme.typography.button.fontSize,
+  "&:hover": {
+    backgroundColor: theme.palette.custom.accent.tealDark,
+  },
+}));

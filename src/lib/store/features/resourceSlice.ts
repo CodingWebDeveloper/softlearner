@@ -1,31 +1,31 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "..";
+import { BasicResource } from "@/services/interfaces/service.interfaces";
 
-interface CourseMaterialsState {
-  resource: {
-    id: string;
-    videoUrl: string;
-  } | null;
+interface ResourceState {
+  selectedResource: BasicResource | null;
 }
 
-const initialState: CourseMaterialsState = {
-  resource: null,
+const initialState: ResourceState = {
+  selectedResource: null,
 };
 
-const resourceSlice = createSlice({
+export const resourceSlice = createSlice({
   name: "resource",
   initialState,
   reducers: {
-    setResource(
-      state: CourseMaterialsState,
-      action: PayloadAction<{ id: string; videoUrl: string }>
-    ) {
-      state.resource = action.payload;
+    setResource: (state, action: PayloadAction<BasicResource | null>) => {
+      state.selectedResource = action.payload;
+    },
+    clearResource: (state) => {
+      state.selectedResource = null;
     },
   },
 });
 
-export const { setResource } = resourceSlice.actions;
+export const { setResource, clearResource } = resourceSlice.actions;
+
+export const selectResource = (state: RootState) =>
+  state.resource.selectedResource;
+
 export default resourceSlice.reducer;
-export const selectResource = (state: RootState) => state.resource.resource;

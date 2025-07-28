@@ -54,14 +54,25 @@ export class ResourcesDAL implements IResourcesDAL {
   }
 
   async getResourceMaterialsByCourseId(
-    courseId: string
+    courseId: string,
+    userId?: string
   ): Promise<BasicResource[]> {
     if (!courseId) return [];
 
-    const { data, error } = await this.supabase
+    const query = this.supabase
       .from("resources")
-      .select("*")
-      .eq("course_id", courseId)
+      .select(
+        `
+        *,
+        user_resources (
+          completed,
+          user_id
+        )
+      `
+      )
+      .eq("course_id", courseId);
+
+    const { data, error } = await query
       .order("order_index", { ascending: true })
       .order("created_at", { ascending: true });
 
@@ -74,6 +85,122 @@ export class ResourcesDAL implements IResourcesDAL {
     return data.map((resource) => ({
       ...resource,
       duration: formatIntervalToDuration(resource.duration || null),
+      completed:
+        resource.user_resources?.find(
+          (ur: { user_id: string; completed: boolean }) => ur.user_id === userId
+        )?.completed ?? false,
     }));
+  }
+
+  async getNextResourceToComplete(
+    courseId: string,
+    userId: string
+  ): Promise<string | null> {
+    if (!courseId || !userId) {
+      throw new Error("Course ID and User ID are required");
+    }
+
+    // Get all resources for the course with completion status
+    const { data, error } = await this.supabase
+      .from("resources")
+      .select(
+        `
+        id,
+        order_index,
+        user_resources (
+          completed,
+          user_id
+        )
+      `
+      )
+      .eq("course_id", courseId)
+      .order("order_index", { ascending: true });
+
+    if (error) {
+      throw new Error(
+        `Error fetching resources for next completion: ${error.message}`
+      );
+    }
+
+    if (!data || data.length === 0) return null;
+
+    // Find the first resource that is not completed
+    const nextResource = data.find((resource) => {
+      const isCompleted =
+        resource.user_resources?.find(
+          (ur: { user_id: string; completed: boolean }) => ur.user_id === userId
+        )?.completed ?? false;
+      return !isCompleted;
+    });
+
+    return nextResource?.id || null;
+  }
+
+  async toggleResourceCompletion(
+    userId: string,
+    resourceId: string
+  ): Promise<boolean> {
+    if (!userId || !resourceId) {
+      throw new Error("User ID and Resource ID are required");
+    }
+
+    const { data: existingRecord, error: fetchError } = await this.supabase
+      .from("user_resources")
+      .select("completed")
+      .eq("user_id", userId)
+      .eq("resource_id", resourceId)
+      .single();
+
+    if (fetchError && fetchError.code !== "PGRST116") {
+      // PGRST116 is the error code for no rows returned
+      throw new Error(
+        `Error fetching user resource completion: ${fetchError.message}`
+      );
+    }
+
+    const newCompletionStatus = !existingRecord?.completed;
+
+    const { data, error } = await this.supabase
+      .from("user_resources")
+      .upsert(
+        {
+          user_id: userId,
+          resource_id: resourceId,
+          completed: newCompletionStatus,
+        },
+        { onConflict: "user_id,resource_id" }
+      )
+      .select("completed")
+      .single();
+
+    if (error) {
+      throw new Error(`Error updating resource completion: ${error.message}`);
+    }
+
+    return data?.completed ?? false;
+  }
+
+  async getResourceCompletionStatus(
+    userId: string,
+    resourceId: string
+  ): Promise<boolean> {
+    if (!userId || !resourceId) {
+      throw new Error("User ID and Resource ID are required");
+    }
+
+    const { data, error } = await this.supabase
+      .from("user_resources")
+      .select("completed")
+      .eq("user_id", userId)
+      .eq("resource_id", resourceId)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      throw new Error(
+        `Error fetching resource completion status: ${error.message}`
+      );
+    }
+
+    return data?.completed ?? false;
   }
 }
