@@ -7,6 +7,7 @@ import { paymentsRouter } from "./payments-router";
 import { votesRouter } from "./votes-router";
 import { bookmarksRouter } from "./bookmarks-router";
 import { testsRouter } from "./tests-router";
+import { usersRouter } from "./users-router";
 import { router } from "../trpc";
 
 export const appRouter = router({
@@ -19,6 +20,7 @@ export const appRouter = router({
   votes: votesRouter,
   bookmarks: bookmarksRouter,
   tests: testsRouter,
+  users: usersRouter,
 });
 
 export type AppRouter = typeof appRouter;

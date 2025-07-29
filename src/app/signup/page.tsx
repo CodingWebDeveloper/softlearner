@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Typography, Link, Breadcrumbs, Box } from "@mui/material";
+import { Typography, Link } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { HashLoader } from "react-spinners";
 import { useSupabase } from "@/contexts/supabase-context";

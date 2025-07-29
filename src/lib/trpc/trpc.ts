@@ -1,5 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
+import superjson, { SuperJSONResult } from "superjson";
 import { createClient } from "@/lib/supabase/server";
 import { ZodError } from "zod";
 import { createRequestContainer } from "@/lib/di/container";
@@ -22,8 +22,25 @@ export const createTRPCContext = async () => {
   };
 };
 
+const customTransformer = {
+  serialize: (data: unknown) => {
+    // Don't transform FormData or ArrayBuffer - let them pass through
+    if (data instanceof FormData || data instanceof ArrayBuffer) {
+      return data;
+    }
+    return superjson.serialize(data);
+  },
+  deserialize: (data: unknown) => {
+    // FormData and ArrayBuffer come through as-is from client
+    if (data instanceof FormData || data instanceof ArrayBuffer) {
+      return data;
+    }
+    return superjson.deserialize(data as SuperJSONResult);
+  },
+};
+
 const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
+  transformer: customTransformer,
   errorFormatter({ shape, error }) {
     return {
       ...shape,

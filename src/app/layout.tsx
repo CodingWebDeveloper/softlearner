@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
 };
 
@@ -41,23 +41,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ClientOnly
-          fallback={<LoadingFallback />}
-        >
+        <ClientOnly fallback={<LoadingFallback />}>
           <StoreProvider>
-            <SupabaseProvider>
-              <TrpcProvider>
+            <TrpcProvider>
+              <SupabaseProvider>
                 <ThemeRegistry>
-                  <LayoutWrapper>
-                    {children}
-                  </LayoutWrapper>
+                  <LayoutWrapper>{children}</LayoutWrapper>
                 </ThemeRegistry>
-              </TrpcProvider>
-            </SupabaseProvider>
+              </SupabaseProvider>
+            </TrpcProvider>
           </StoreProvider>
         </ClientOnly>
       </body>
     </html>
-
   );
 }

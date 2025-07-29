@@ -10,7 +10,7 @@ import {
   FallbackContainer,
   FallbackMain,
 } from "@/components/styles/infrastructure/layout.styles";
-import Navigation from "./Navigation";
+import Navigation from "./navigation/navigation";
 
 interface LayoutProps {
   children: ReactNode;

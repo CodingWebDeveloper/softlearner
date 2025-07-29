@@ -300,3 +300,33 @@ export interface ITestsService {
     userId: string
   ): Promise<TestWithProgress[]>;
 }
+
+export interface IUsersService {
+  getUserDetails(userId: string): Promise<UserDetails | null>;
+  getUserDetailsByUsername(username: string): Promise<UserDetails | null>;
+  updateUserDetails(
+    userId: string,
+    updateData: UpdateProfile
+  ): Promise<UserDetails | null>;
+  uploadProfileImage(userId: string, file: File): Promise<string>;
+  getProfileImageBlob(avatarPath: string): Promise<Blob>;
+  removeProfileImage(userId: string): Promise<void>;
+  changePassword(userId: string, newPassword: string): Promise<void>;
+}
+
+export interface UserDetails {
+  id: string;
+  full_name: string;
+  avatar_url: string;
+  username: string;
+  bio: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UpdateProfile {
+  full_name?: string;
+  username?: string;
+  bio?: string;
+  avatar_url?: string;
+}

@@ -1,12 +1,21 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { trpc } from "@/lib/trpc/client";
+import { UserDetails } from "@/services/interfaces/service.interfaces";
 
 interface SupabaseContextType {
   user: User | null;
   session: Session | null;
+  userProfile: UserDetails | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
@@ -22,6 +31,11 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Queries
+  const { data: userProfile, isPending: isPendingUserProfile } =
+    trpc.users.getUserProfile.useQuery();
+
+  // Effects
   useEffect(() => {
     const supabase = createClient();
 
@@ -78,10 +92,13 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
+  const isPending = isPendingUserProfile || loading;
+
   const value = {
     user,
+    userProfile: userProfile ?? null,
     session,
-    loading,
+    loading: isPending,
     signIn,
     signUp,
     signOut,

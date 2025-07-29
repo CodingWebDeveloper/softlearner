@@ -1,8 +1,12 @@
 "use client";
 
 import { ReactNode } from "react";
-import { ThemeProvider as MuiThemeProvider, CssBaseline, GlobalStyles } from "@mui/material";
-import { createTheme, Theme } from "@mui/material/styles";
+import {
+  ThemeProvider as MuiThemeProvider,
+  CssBaseline,
+  GlobalStyles,
+} from "@mui/material";
+import { createTheme } from "@mui/material/styles";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 
@@ -13,7 +17,7 @@ const cache = createCache({
 });
 
 // Extend the theme interface to include custom colors
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   interface Palette {
     custom: {
       background: {
@@ -82,12 +86,12 @@ declare module '@mui/material/styles' {
 
 const theme = createTheme({
   palette: {
-    mode: "light",
+    mode: "dark",
     primary: {
-      main: "#1976d2",
+      main: "#4a90e2",
     },
     secondary: {
-      main: "#9c27b0",
+      main: "#4ecdc4",
     },
     // Custom colors found throughout the codebase
     custom: {
@@ -125,8 +129,8 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: "#ffffff",
-          color: "#171717",
+          backgroundColor: "#1a1b23",
+          color: "#b0b3b8",
         },
       },
     },
@@ -143,11 +147,7 @@ export const ThemeGlobalStyles = (
   />
 );
 
-export default function ThemeProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <CacheProvider value={cache}>
       <MuiThemeProvider theme={theme}>
