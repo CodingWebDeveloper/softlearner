@@ -17,9 +17,13 @@ interface SupabaseContextType {
   session: Session | null;
   userProfile: UserDetails | null;
   loading: boolean;
+  isRecoveryMode: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
+  setRecoveryMode: (isRecovery: boolean) => void;
 }
 
 const SupabaseContext = createContext<SupabaseContextType | undefined>(
@@ -30,6 +34,7 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
   // Queries
   const { data: userProfile, isPending: isPendingUserProfile } =
@@ -92,6 +97,26 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
+  const resetPassword = async (email: string) => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    });
+    if (error) throw error;
+  };
+
+  const updatePassword = async (password: string) => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({
+      password: password,
+    });
+    if (error) throw error;
+  };
+
+  const setRecoveryMode = (isRecovery: boolean) => {
+    setIsRecoveryMode(isRecovery);
+  };
+
   const isPending = isPendingUserProfile || loading;
 
   const value = {
@@ -99,9 +124,13 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     userProfile: userProfile ?? null,
     session,
     loading: isPending,
+    isRecoveryMode,
     signIn,
     signUp,
     signOut,
+    resetPassword,
+    updatePassword,
+    setRecoveryMode,
   };
 
   return (

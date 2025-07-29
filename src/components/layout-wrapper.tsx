@@ -33,14 +33,14 @@ const LayoutWrapper = ({ children }: LayoutProps) => {
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { user } = useSupabase();
+  const { user, isRecoveryMode } = useSupabase();
 
   return (
     <LayoutContainer>
-      {/* Navigation - only show for authenticated users */}
-      <ClientOnly fallback={null}>{user && <Navigation />}</ClientOnly>
+      <ClientOnly fallback={null}>
+        {user && !isRecoveryMode && <Navigation />}
+      </ClientOnly>
 
-      {/* Main Content */}
       <MainContent component="main" isMobile={isMobile} hasUser={!!user}>
         {children}
       </MainContent>

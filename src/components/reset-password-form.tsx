@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { TextField, Link, Box } from "@mui/material";
+import { TextField } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { HashLoader } from "react-spinners";
 import { useSupabase } from "@/contexts/supabase-context";
@@ -15,13 +15,8 @@ import {
   SubmitButton,
 } from "@/components/styles/auth/auth-form.styles";
 
-interface AuthFormProps {
-  mode: "signin" | "signup";
-}
-
 interface FormValues {
   email: string;
-  password: string;
 }
 
 // Validation schema
@@ -29,22 +24,18 @@ const validationSchema = Yup.object({
   email: Yup.string()
     .email("Invalid email address")
     .required("Email is required"),
-  password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
 });
 
-const AuthForm = ({ mode }: AuthFormProps) => {
+const ResetPasswordForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const theme = useTheme();
 
-  const { signIn, signUp } = useSupabase();
+  const { resetPassword } = useSupabase();
 
   const initialValues: FormValues = {
     email: "",
-    password: "",
   };
 
   const handleSubmit = async (
@@ -56,13 +47,10 @@ const AuthForm = ({ mode }: AuthFormProps) => {
     setMessage(null);
 
     try {
-      if (mode === "signin") {
-        await signIn(values.email, values.password);
-        setMessage("Signed in successfully!");
-      } else {
-        await signUp(values.email, values.password);
-        setMessage("Check your email for the confirmation link!");
-      }
+      await resetPassword(values.email);
+      setMessage(
+        "Password reset link sent! Check your email for further instructions."
+      );
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -74,7 +62,7 @@ const AuthForm = ({ mode }: AuthFormProps) => {
   return (
     <AuthFormPaper>
       <AuthFormTitle variant="h4" component="h1">
-        {mode === "signin" ? "Sign In" : "Sign Up"}
+        Reset Password
       </AuthFormTitle>
 
       {error && <AlertContainer severity="error">{error}</AlertContainer>}
@@ -102,31 +90,6 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                 helperText={touched.email && errors.email}
               />
 
-              <Field
-                as={TextField}
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                margin="normal"
-                required
-                disabled={loading}
-                error={touched.password && Boolean(errors.password)}
-                helperText={touched.password && errors.password}
-              />
-
-              {mode === "signin" && (
-                <Box sx={{ textAlign: "right", mt: 1 }}>
-                  <Link
-                    href="/reset-password"
-                    variant="body2"
-                    underline="hover"
-                  >
-                    Forgot password?
-                  </Link>
-                </Box>
-              )}
-
               <SubmitButton
                 type="submit"
                 fullWidth
@@ -138,10 +101,8 @@ const AuthForm = ({ mode }: AuthFormProps) => {
                     color={theme.palette.custom.text.white}
                     size={20}
                   />
-                ) : mode === "signin" ? (
-                  "Sign In"
                 ) : (
-                  "Sign Up"
+                  "Send Reset Link"
                 )}
               </SubmitButton>
             </FormContainer>
@@ -152,4 +113,4 @@ const AuthForm = ({ mode }: AuthFormProps) => {
   );
 };
 
-export default AuthForm;
+export default ResetPasswordForm;
