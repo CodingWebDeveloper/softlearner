@@ -1,6 +1,6 @@
 "use client";
 
-import { Typography, Grid } from "@mui/material";
+import { Typography, Grid, Container } from "@mui/material";
 import {
   PageContainer,
   PageTitle,
@@ -47,16 +47,18 @@ const MyCoursesPage = () => {
 
   return (
     <PageContainer>
-      <PageTitle variant="h4" color="textPrimary" gutterBottom>
-        My Courses
-      </PageTitle>
-      <Grid container spacing={3}>
-        {purchasedCourses.data.map((course) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={course.id}>
-            <CourseProgressCard course={course} />
-          </Grid>
-        ))}
-      </Grid>
+      <Container maxWidth="lg">
+        <PageTitle variant="h4" color="textPrimary" gutterBottom>
+          My Courses
+        </PageTitle>
+        <Grid container spacing={3}>
+          {purchasedCourses.data.map((course) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={course.id}>
+              <CourseProgressCard course={course} />
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
     </PageContainer>
   );
 };

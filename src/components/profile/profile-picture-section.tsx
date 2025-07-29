@@ -53,6 +53,13 @@ export const ProfilePictureSection = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate that the file is an image
+    if (!file.type.startsWith("image/")) {
+      console.error("Selected file is not an image");
+      alert("Please select an image file");
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -158,13 +165,13 @@ export const ProfilePictureSection = () => {
             <UploadRequirements>
               At least 800x800 px recommended.
               <br />
-              JPG or PNG is allowed.
+              JPG, PNG, GIF, WebP, or SVG is allowed.
             </UploadRequirements>
 
             <HiddenFileInput
               ref={fileInputRef}
               type="file"
-              accept="image/jpeg,image/png"
+              accept="image/*"
               onChange={handleFileChange}
             />
           </ProfilePictureInfoContainer>

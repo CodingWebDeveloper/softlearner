@@ -126,6 +126,7 @@ export const UploadButton = styled(Button)(({ theme }) => ({
   "&:hover": {
     backgroundColor: theme.palette.custom.text.light,
   },
+  textTransform: "none",
 }));
 
 export const UploadRequirements = styled("div")(({ theme }) => ({

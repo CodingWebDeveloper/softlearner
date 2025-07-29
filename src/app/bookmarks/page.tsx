@@ -12,7 +12,7 @@ import {
 } from "@/components/styles/infrastructure/layout.styles";
 import { trpc } from "@/lib/trpc/client";
 import { COURSES_PER_PAGE } from "@/utils/constants";
-import { Alert } from "@mui/material";
+import { Alert, Container } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -62,7 +62,7 @@ export default function BookmarksPage() {
 
   if (!coursesData || coursesData.data.length === 0) {
     return (
-      <StyledContainer>
+      <PageContainer>
         <PageTitle variant="h4" gutterBottom>
           My Bookmarks
         </PageTitle>
@@ -70,32 +70,34 @@ export default function BookmarksPage() {
         <Alert severity="info">
           You haven&apos;t bookmarked any courses yet.
         </Alert>
-      </StyledContainer>
+      </PageContainer>
     );
   }
 
   // Render
   return (
     <PageContainer>
-      <PageTitle variant="h4" gutterBottom>
-        My Bookmarks
-      </PageTitle>
+      <Container maxWidth="lg">
+        <PageTitle variant="h4" gutterBottom>
+          My Bookmarks
+        </PageTitle>
 
-      <CoursesGrid>
-        {coursesData.data.map((course) => (
-          <CourseCard
-            key={course.id}
-            course={course}
-            handleNavigate={() => handleNavigate(course.id)}
-          />
-        ))}
-      </CoursesGrid>
+        <CoursesGrid>
+          {coursesData.data.map((course) => (
+            <CourseCard
+              key={course.id}
+              course={course}
+              handleNavigate={() => handleNavigate(course.id)}
+            />
+          ))}
+        </CoursesGrid>
 
-      <CourseListPagination
-        currentPage={page}
-        totalPages={Math.ceil(coursesData.totalRecords / COURSES_PER_PAGE)}
-        onChange={handlePageChange}
-      />
+        <CourseListPagination
+          currentPage={page}
+          totalPages={Math.ceil(coursesData.totalRecords / COURSES_PER_PAGE)}
+          onChange={handlePageChange}
+        />
+      </Container>
     </PageContainer>
   );
 }

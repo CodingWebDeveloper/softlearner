@@ -12,7 +12,7 @@ import {
 export default function ProfilePage() {
   return (
     <PageContainer>
-      <Container maxWidth="md">
+      <Container maxWidth="lg">
         <ProfilePageHeader>
           <ProfilePageTitle variant="h4" component="h1" gutterBottom>
             Profile

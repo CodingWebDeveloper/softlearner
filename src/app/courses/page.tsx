@@ -7,6 +7,7 @@ import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
 import { setSearch } from "@/lib/store/features/filterSlice";
 import TagsList from "@/components/courses/courses-list/tags-list";
 import { PageContainer } from "@/components/styles/infrastructure/layout.styles";
+import { Container } from "@mui/material";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -45,20 +46,22 @@ const CoursesPage = () => {
 
   return (
     <PageContainer>
-      {/* Search */}
-      <SearchTextField
-        fullWidth
-        variant="outlined"
-        placeholder="Search courses..."
-        value={searchInput}
-        onChange={handleSearchChange}
-        aria-label="Search courses"
-      />
-      {/* Filters */}
-      <Filter />
-      <TagsList />
-      {/* Courses List */}
-      <CoursesList />
+      <Container maxWidth="lg">
+        {/* Search */}
+        <SearchTextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search courses..."
+          value={searchInput}
+          onChange={handleSearchChange}
+          aria-label="Search courses"
+        />
+        {/* Filters */}
+        <Filter />
+        <TagsList />
+        {/* Courses List */}
+        <CoursesList />
+      </Container>
     </PageContainer>
   );
 };
