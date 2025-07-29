@@ -6,7 +6,6 @@ import { Typography, Link } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { HashLoader } from "react-spinners";
 import { useSupabase } from "@/contexts/supabase-context";
-import AuthForm from "@/components/auth-form";
 import {
   AuthContainer,
   BreadcrumbsContainer,
@@ -19,9 +18,10 @@ import {
   BreadcrumbsStyled,
   FooterText,
 } from "@/components/styles/auth/auth-pages.styles";
+import ResetPasswordForm from "@/components/reset-password-form";
 
-const SignInPage = () => {
-  const { user, loading } = useSupabase();
+const ResetPasswordPage = () => {
+  const { user, loading, setRecoveryMode } = useSupabase();
   const router = useRouter();
   const theme = useTheme();
 
@@ -31,6 +31,11 @@ const SignInPage = () => {
       router.push("/");
     }
   }, [loading, user]);
+
+  // Ensure recovery mode is false on reset password page
+  useEffect(() => {
+    setRecoveryMode(false);
+  }, [setRecoveryMode]);
 
   // Show loading while checking authentication
   if (loading) {
@@ -54,32 +59,30 @@ const SignInPage = () => {
             <Link href="/" color="inherit" underline="hover">
               Home
             </Link>
-            <Typography color="text.primary">Sign In</Typography>
+            <Link href="/signin" color="inherit" underline="hover">
+              Sign In
+            </Link>
+            <Typography color="text.primary">Reset Password</Typography>
           </BreadcrumbsStyled>
         </BreadcrumbsContainer>
 
         <HeaderPaper>
           <AuthTitle variant="h3" component="h1">
-            Welcome Back
+            Reset Your Password
           </AuthTitle>
           <AuthSubtitle variant="h6">
-            Sign in to your account to continue
+            Enter your email address and we&apos;ll send you a link to reset
+            your password
           </AuthSubtitle>
         </HeaderPaper>
 
-        <AuthForm mode="signin" />
+        <ResetPasswordForm />
 
         <FooterContainer>
           <FooterText>
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" underline="hover">
-              Sign up here
-            </Link>
-          </FooterText>
-          <FooterText>
-            Forgot your password?{" "}
-            <Link href="/reset-password" underline="hover">
-              Reset it here
+            Remember your password?{" "}
+            <Link href="/signin" underline="hover">
+              Sign in here
             </Link>
           </FooterText>
         </FooterContainer>
@@ -88,4 +91,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
+export default ResetPasswordPage;
