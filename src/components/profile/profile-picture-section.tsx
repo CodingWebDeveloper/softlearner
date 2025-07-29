@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useRef, ChangeEvent, MouseEvent } from "react";
-import {
-  Box,
-  CardContent,
-  Skeleton,
-  CircularProgress,
-  Menu,
-} from "@mui/material";
+import { CardContent, Skeleton, Menu } from "@mui/material";
 import { MoreVert as MoreVertIcon } from "@mui/icons-material";
 import {
   ProfileCard,
@@ -16,6 +10,12 @@ import {
   AvatarContainer,
   AvatarMenuButton,
   AvatarMenuItem,
+  ProfilePictureContainer,
+  ProfilePictureInfoContainer,
+  HiddenFileInput,
+  SkeletonButton,
+  SkeletonTextContainer,
+  CircularProgressWithMargin,
 } from "@/components/styles/profile/profile.styles";
 import { useSupabase } from "@/contexts/supabase-context";
 import { trpc } from "@/lib/trpc/client";
@@ -102,21 +102,16 @@ export const ProfilePictureSection = () => {
     return (
       <ProfileCard>
         <CardContent>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+          <ProfilePictureContainer>
             <Skeleton variant="circular" width={120} height={120} />
-            <Box>
-              <Skeleton
-                variant="rectangular"
-                width={150}
-                height={40}
-                sx={{ borderRadius: 1 }}
-              />
-              <Box sx={{ mt: 1 }}>
+            <ProfilePictureInfoContainer>
+              <SkeletonButton variant="rectangular" width={150} height={40} />
+              <SkeletonTextContainer>
                 <Skeleton variant="text" width={200} />
                 <Skeleton variant="text" width={150} />
-              </Box>
-            </Box>
-          </Box>
+              </SkeletonTextContainer>
+            </ProfilePictureInfoContainer>
+          </ProfilePictureContainer>
         </CardContent>
       </ProfileCard>
     );
@@ -125,7 +120,7 @@ export const ProfilePictureSection = () => {
   return (
     <ProfileCard>
       <CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+        <ProfilePictureContainer>
           <AvatarContainer>
             <AvatarImage
               avatarUrl={userProfile?.avatar_url}
@@ -147,14 +142,14 @@ export const ProfilePictureSection = () => {
             )}
           </AvatarContainer>
 
-          <Box>
+          <ProfilePictureInfoContainer>
             <UploadButton
               onClick={handleUploadClick}
               disabled={isProcessing}
               variant="outlined"
             >
               {isProcessing ? (
-                <CircularProgress size={16} color="inherit" />
+                <CircularProgressWithMargin size={16} color="inherit" />
               ) : (
                 "Upload new photo"
               )}
@@ -166,15 +161,14 @@ export const ProfilePictureSection = () => {
               JPG or PNG is allowed.
             </UploadRequirements>
 
-            <input
+            <HiddenFileInput
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png"
-              style={{ display: "none" }}
               onChange={handleFileChange}
             />
-          </Box>
-        </Box>
+          </ProfilePictureInfoContainer>
+        </ProfilePictureContainer>
 
         <Menu
           anchorEl={anchorEl}
@@ -191,7 +185,7 @@ export const ProfilePictureSection = () => {
         >
           <AvatarMenuItem onClick={handleRemoveAvatar} disabled={isRemoving}>
             {isRemoving ? (
-              <CircularProgress size={16} sx={{ mr: 1 }} />
+              <CircularProgressWithMargin size={16} />
             ) : (
               "Remove photo"
             )}

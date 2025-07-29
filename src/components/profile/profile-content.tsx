@@ -4,6 +4,7 @@ import { Box, Grid } from "@mui/material";
 import { ProfilePictureSection } from "./profile-picture-section";
 import { PersonalInfoSection } from "./personal-info-section";
 import { BioSection } from "./bio-section";
+import { ChangePasswordSection } from "./change-password-section";
 
 export const ProfileContent = () => {
   return (
@@ -19,6 +20,10 @@ export const ProfileContent = () => {
 
         <Grid size={{ xs: 12, md: 6 }}>
           <BioSection />
+        </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <ChangePasswordSection />
         </Grid>
       </Grid>
     </Box>

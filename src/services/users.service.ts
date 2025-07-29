@@ -36,4 +36,8 @@ export class UsersService implements IUsersService {
   async removeProfileImage(userId: string): Promise<void> {
     return this.usersDAL.removeProfileImage(userId);
   }
+
+  async changePassword(userId: string, newPassword: string): Promise<void> {
+    return this.usersDAL.changePassword(userId, newPassword);
+  }
 }

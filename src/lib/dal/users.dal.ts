@@ -217,4 +217,15 @@ export class UsersDAL implements IUsersDAL {
       throw new Error(`Error updating user profile: ${updateError.message}`);
     }
   }
+
+  async changePassword(userId: string, newPassword: string): Promise<void> {
+    // Use the updateUser method instead of admin.updateUserById
+    const { error } = await this.supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      throw new Error(`Error changing password: ${error.message}`);
+    }
+  }
 }

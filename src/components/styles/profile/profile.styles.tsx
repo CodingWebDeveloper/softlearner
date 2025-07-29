@@ -7,6 +7,11 @@ import {
   Avatar,
   IconButton,
   MenuItem,
+  Divider,
+  Typography,
+  Alert,
+  Skeleton,
+  CircularProgress,
 } from "@mui/material";
 
 export const ProfileCard = styled(Card)(({ theme }) => ({
@@ -148,4 +153,126 @@ export const AvatarMenuButton = styled(IconButton)(({ theme }) => ({
 
 export const AvatarMenuItem = styled(MenuItem)(() => ({
   minWidth: 120,
+}));
+
+export const ChangePasswordButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.background.tertiary,
+  color: theme.palette.custom.text.white,
+  borderColor: theme.palette.custom.background.tertiary,
+  textTransform: "none",
+  "&:hover": {
+    backgroundColor: theme.palette.custom.background.secondary,
+    borderColor: theme.palette.custom.background.secondary,
+  },
+}));
+
+export const PasswordFormContainer = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: 16,
+}));
+
+export const PasswordButtonContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  gap: theme.spacing(2),
+  marginTop: theme.spacing(1),
+}));
+
+export const UpdatePasswordButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.accent.blue,
+  color: theme.palette.custom.text.white,
+  textTransform: "none",
+  "&:hover": {
+    backgroundColor: theme.palette.custom.accent.blue + "dd",
+  },
+  "&:disabled": {
+    backgroundColor: theme.palette.custom.background.tertiary,
+    color: theme.palette.custom.text.light,
+  },
+}));
+
+export const CancelPasswordButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.custom.text.light,
+  borderColor: theme.palette.custom.background.tertiary,
+  textTransform: "none",
+  "&:hover": {
+    borderColor: theme.palette.custom.text.white,
+    backgroundColor: theme.palette.custom.background.tertiary,
+  },
+  "&:disabled": {
+    borderColor: theme.palette.custom.background.tertiary,
+    color: theme.palette.custom.text.light,
+  },
+}));
+
+export const ProfileDivider = styled(Divider)(({ theme }) => ({
+  borderColor: theme.palette.custom.background.tertiary,
+  marginBottom: theme.spacing(2),
+}));
+
+export const PasswordHeaderContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  marginBottom: theme.spacing(2),
+}));
+
+export const PasswordDescription = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+  color: theme.palette.custom.text.light,
+}));
+
+export const SuccessAlert = styled(Alert)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+export const ProfilePictureContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(3),
+}));
+
+export const ProfilePictureInfoContainer = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "column",
+}));
+
+export const ProfilePictureUploadContainer = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(1),
+}));
+
+export const HiddenFileInput = styled("input")(() => ({
+  display: "none",
+}));
+
+export const SkeletonButton = styled(Skeleton)(({ theme }) => ({
+  borderRadius: theme.spacing(1),
+}));
+
+export const SkeletonTextContainer = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(1),
+}));
+
+export const ButtonContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  gap: theme.spacing(1),
+  marginTop: theme.spacing(2),
+}));
+
+export const CircularProgressWithMargin = styled(CircularProgress)(
+  ({ theme }) => ({
+    marginRight: theme.spacing(1),
+  })
+);
+
+export const ProfilePageHeader = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
+}));
+
+export const ProfilePageTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.white,
+}));
+
+export const ProfilePageDescription = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.light,
 }));

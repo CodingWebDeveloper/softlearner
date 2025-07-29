@@ -1,14 +1,12 @@
 "use client";
 import { useEffect, useState, ChangeEvent } from "react";
 import CoursesList from "@/components/courses/courses-list/courses-list";
-import {
-  CoursesPageContainer,
-  SearchTextField,
-} from "@/components/styles/courses/courses.styles";
+import { SearchTextField } from "@/components/styles/courses/courses.styles";
 import Filter from "@/components/courses/courses-list/filter";
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
 import { setSearch } from "@/lib/store/features/filterSlice";
 import TagsList from "@/components/courses/courses-list/tags-list";
+import { PageContainer } from "@/components/styles/infrastructure/layout.styles";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -46,7 +44,7 @@ const CoursesPage = () => {
   };
 
   return (
-    <CoursesPageContainer>
+    <PageContainer>
       {/* Search */}
       <SearchTextField
         fullWidth
@@ -61,7 +59,7 @@ const CoursesPage = () => {
       <TagsList />
       {/* Courses List */}
       <CoursesList />
-    </CoursesPageContainer>
+    </PageContainer>
   );
 };
 

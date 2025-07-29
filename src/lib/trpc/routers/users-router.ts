@@ -3,6 +3,8 @@ import { IUsersService } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
 import { router, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { Database } from "@/lib/database/database.types";
 
 export const usersRouter = router({
   getUserProfile: protectedProcedure.query(async ({ ctx }) => {
@@ -120,4 +122,54 @@ export const usersRouter = router({
       );
     }
   }),
+  changePassword: protectedProcedure
+    .input(
+      z.object({
+        currentPassword: z.string().min(1),
+        newPassword: z.string().min(6),
+        confirmPassword: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Validate that new password and confirm password match
+        if (input.newPassword !== input.confirmPassword) {
+          throw new Error("New password and confirm password do not match");
+        }
+
+        // Validate that new password is different from current password
+        if (input.currentPassword === input.newPassword) {
+          throw new Error(
+            "New password must be different from current password"
+          );
+        }
+
+        // First, verify the current password by attempting to sign in
+        const supabase = ctx.container.resolve(
+          DI_TOKENS.SUPABASE
+        ) as SupabaseClient<Database>;
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: ctx.user.email!,
+          password: input.currentPassword,
+        });
+
+        if (signInError) {
+          throw new Error("Current password is incorrect");
+        }
+
+        const usersService = ctx.container.resolve<IUsersService>(
+          DI_TOKENS.USERS_SERVICE
+        );
+
+        await usersService.changePassword(ctx.user.id, input.newPassword);
+
+        return { success: true };
+      } catch (error) {
+        throw new Error(
+          `Failed to change password: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 });

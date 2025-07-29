@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CardContent, Box, Skeleton, CircularProgress } from "@mui/material";
+import { CardContent, Box, Skeleton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -16,6 +16,9 @@ import {
   ProfileInfoInput,
   SaveButton,
   CancelButton,
+  SkeletonButton,
+  ButtonContainer,
+  CircularProgressWithMargin,
 } from "@/components/styles/profile/profile.styles";
 import { useSupabase } from "@/contexts/supabase-context";
 import { trpc } from "@/lib/trpc/client";
@@ -75,12 +78,7 @@ export const PersonalInfoSection = () => {
         <CardContent>
           <ProfileCardHeader>
             <ProfileCardTitle>Personal Info</ProfileCardTitle>
-            <Skeleton
-              variant="rectangular"
-              width={60}
-              height={32}
-              sx={{ borderRadius: 1 }}
-            />
+            <SkeletonButton variant="rectangular" width={60} height={32} />
           </ProfileCardHeader>
           <Box>
             <ProfileInfoItem>
@@ -184,7 +182,7 @@ export const PersonalInfoSection = () => {
               </Box>
 
               {isEditing && (
-                <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                <ButtonContainer>
                   <CancelButton onClick={handleCancelClick}>
                     Cancel
                   </CancelButton>
@@ -193,12 +191,12 @@ export const PersonalInfoSection = () => {
                     disabled={isPendingUpdate || !isValid || !dirty}
                   >
                     {isPendingUpdate ? (
-                      <CircularProgress size={16} color="inherit" />
+                      <CircularProgressWithMargin size={16} color="inherit" />
                     ) : (
                       "Save changes"
                     )}
                   </SaveButton>
-                </Box>
+                </ButtonContainer>
               )}
             </Form>
           )}

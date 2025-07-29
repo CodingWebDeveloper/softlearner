@@ -1,32 +1,29 @@
-import { Container, Typography, Box } from "@mui/material";
+"use client";
+
+import { Container } from "@mui/material";
 import { ProfileContent } from "@/components/profile/profile-content";
+import { PageContainer } from "@/components/styles/infrastructure/layout.styles";
+import {
+  ProfilePageHeader,
+  ProfilePageTitle,
+  ProfilePageDescription,
+} from "@/components/styles/profile/profile.styles";
 
 export default function ProfilePage() {
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "custom.background.dark",
-        py: 4,
-      }}
-    >
+    <PageContainer>
       <Container maxWidth="md">
-        <Box sx={{ mb: 4 }}>
-          <Typography
-            variant="h4"
-            component="h1"
-            gutterBottom
-            sx={{ color: "custom.text.white" }}
-          >
+        <ProfilePageHeader>
+          <ProfilePageTitle variant="h4" component="h1" gutterBottom>
             Profile
-          </Typography>
-          <Typography variant="body1" sx={{ color: "custom.text.light" }}>
+          </ProfilePageTitle>
+          <ProfilePageDescription variant="body1">
             Manage your account settings and preferences
-          </Typography>
-        </Box>
+          </ProfilePageDescription>
+        </ProfilePageHeader>
 
         <ProfileContent />
       </Container>
-    </Box>
+    </PageContainer>
   );
 }

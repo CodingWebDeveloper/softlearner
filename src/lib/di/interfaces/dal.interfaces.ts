@@ -151,6 +151,7 @@ export interface IUsersDAL {
   uploadProfileImage(userId: string, file: File): Promise<string>;
   getProfileImageBlob(avatarPath: string): Promise<Blob>;
   removeProfileImage(userId: string): Promise<void>;
+  changePassword(userId: string, newPassword: string): Promise<void>;
 }
 
 export interface AvatarBlobResult {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CardContent, Box, Skeleton, CircularProgress } from "@mui/material";
+import { CardContent, Box, Skeleton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -14,6 +14,9 @@ import {
   ProfileBioTextarea,
   SaveButton,
   CancelButton,
+  SkeletonButton,
+  ButtonContainer,
+  CircularProgressWithMargin,
 } from "@/components/styles/profile/profile.styles";
 import { useSupabase } from "@/contexts/supabase-context";
 import { trpc } from "@/lib/trpc/client";
@@ -60,12 +63,7 @@ export const BioSection = () => {
         <CardContent>
           <ProfileCardHeader>
             <ProfileCardTitle>Bio</ProfileCardTitle>
-            <Skeleton
-              variant="rectangular"
-              width={60}
-              height={32}
-              sx={{ borderRadius: 1 }}
-            />
+            <SkeletonButton variant="rectangular" width={60} height={32} />
           </ProfileCardHeader>
           <Box>
             <Skeleton variant="text" width="100%" height={20} />
@@ -131,7 +129,7 @@ export const BioSection = () => {
               )}
 
               {isEditing && (
-                <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                <ButtonContainer>
                   <CancelButton onClick={handleCancelClick}>
                     Cancel
                   </CancelButton>
@@ -140,12 +138,12 @@ export const BioSection = () => {
                     disabled={isPendingUpdate || !isValid || !dirty}
                   >
                     {isPendingUpdate ? (
-                      <CircularProgress size={16} color="inherit" />
+                      <CircularProgressWithMargin size={16} color="inherit" />
                     ) : (
                       "Save changes"
                     )}
                   </SaveButton>
-                </Box>
+                </ButtonContainer>
               )}
             </Form>
           )}
