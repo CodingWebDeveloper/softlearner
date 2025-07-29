@@ -1,39 +1,89 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Box, CardContent, Skeleton } from "@mui/material";
+import { useState, useRef, ChangeEvent, MouseEvent } from "react";
+import {
+  Box,
+  CardContent,
+  Skeleton,
+  CircularProgress,
+  Menu,
+} from "@mui/material";
+import { MoreVert as MoreVertIcon } from "@mui/icons-material";
 import {
   ProfileCard,
-  ProfileAvatar,
   UploadButton,
   UploadRequirements,
+  AvatarContainer,
+  AvatarMenuButton,
+  AvatarMenuItem,
 } from "@/components/styles/profile/profile.styles";
 import { useSupabase } from "@/contexts/supabase-context";
+import { trpc } from "@/lib/trpc/client";
+import { AvatarImage } from "./avatar-image";
 
 export const ProfilePictureSection = () => {
-  const [isUploading, setIsUploading] = useState(false);
+  // States
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Supabase
   const { userProfile, loading: isLoading } = useSupabase();
+  const utils = trpc.useUtils();
 
+  // TRPC
+  const { mutateAsync: uploadProfileImage, isPending: isUploading } =
+    trpc.users.uploadProfileImage.useMutation();
+  const { mutateAsync: removeProfileImage, isPending: isRemoving } =
+    trpc.users.removeProfileImage.useMutation();
+
+  // Handlers
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleMenuOpen = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
     try {
-      // TODO: Implement file upload logic
-      console.log("Uploading file:", file);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await uploadProfileImage(formData);
+
+      // Invalidate user profile to refresh data
+      utils.users.getUserProfile.invalidate();
+
+      handleMenuClose();
     } catch (error) {
       console.error("Error uploading file:", error);
     } finally {
-      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!userProfile?.avatar_url) return;
+
+    try {
+      await removeProfileImage();
+
+      // Invalidate user profile to refresh data
+      utils.users.getUserProfile.invalidate();
+      handleMenuClose();
+    } catch (error) {
+      console.error("Error removing avatar:", error);
     }
   };
 
@@ -45,6 +95,8 @@ export const ProfilePictureSection = () => {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  const isProcessing = isUploading || isRemoving;
 
   if (isLoading || !userProfile) {
     return (
@@ -74,20 +126,38 @@ export const ProfilePictureSection = () => {
     <ProfileCard>
       <CardContent>
         <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-          <ProfileAvatar
-            src={userProfile?.avatar_url || undefined}
-            alt={userProfile?.full_name || "Profile"}
-          >
-            {userProfile?.full_name ? getInitials(userProfile.full_name) : "U"}
-          </ProfileAvatar>
+          <AvatarContainer>
+            <AvatarImage
+              avatarUrl={userProfile?.avatar_url}
+              alt={userProfile?.full_name || "Profile"}
+            >
+              {userProfile?.full_name
+                ? getInitials(userProfile.full_name)
+                : "U"}
+            </AvatarImage>
+
+            {userProfile?.avatar_url && (
+              <AvatarMenuButton
+                size="small"
+                onClick={handleMenuOpen}
+                disabled={isProcessing}
+              >
+                <MoreVertIcon fontSize="small" />
+              </AvatarMenuButton>
+            )}
+          </AvatarContainer>
 
           <Box>
             <UploadButton
               onClick={handleUploadClick}
-              disabled={isUploading}
+              disabled={isProcessing}
               variant="outlined"
             >
-              {isUploading ? "Uploading..." : "Upload new photo"}
+              {isProcessing ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                "Upload new photo"
+              )}
             </UploadButton>
 
             <UploadRequirements>
@@ -105,6 +175,28 @@ export const ProfilePictureSection = () => {
             />
           </Box>
         </Box>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <AvatarMenuItem onClick={handleRemoveAvatar} disabled={isRemoving}>
+            {isRemoving ? (
+              <CircularProgress size={16} sx={{ mr: 1 }} />
+            ) : (
+              "Remove photo"
+            )}
+          </AvatarMenuItem>
+        </Menu>
       </CardContent>
     </ProfileCard>
   );

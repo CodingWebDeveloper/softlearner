@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { CardContent, Box, Skeleton } from "@mui/material";
+import { CardContent, Box, Skeleton, CircularProgress } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
 import {
   ProfileCard,
   ProfileCardHeader,
@@ -14,15 +16,23 @@ import {
   CancelButton,
 } from "@/components/styles/profile/profile.styles";
 import { useSupabase } from "@/contexts/supabase-context";
+import { trpc } from "@/lib/trpc/client";
+
+const validationSchema = Yup.object({
+  bio: Yup.string()
+    .max(500, "Bio must be less than 500 characters")
+    .required("Bio is required"),
+});
 
 export const BioSection = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [bioText, setBioText] = useState("");
 
   const { userProfile, loading: isLoading } = useSupabase();
+  const { mutateAsync: updateProfile, isPending: isPendingUpdate } =
+    trpc.users.updateProfile.useMutation();
+  const utils = trpc.useUtils();
 
   const handleEditClick = () => {
-    setBioText(userProfile?.bio || "");
     setIsEditing(true);
   };
 
@@ -30,10 +40,14 @@ export const BioSection = () => {
     setIsEditing(false);
   };
 
-  const handleSaveClick = async () => {
+  const handleSubmit = async (values: { bio: string }) => {
     try {
-      // TODO: Implement update logic
-      console.log("Saving bio:", bioText);
+      await updateProfile({
+        bio: values.bio,
+      });
+
+      utils.users.getUserProfile.invalidate();
+
       setIsEditing(false);
     } catch (error) {
       console.error("Error saving bio:", error);
@@ -74,30 +88,68 @@ export const BioSection = () => {
               Edit
             </EditButton>
           )}
-          {isEditing && (
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <CancelButton onClick={handleCancelClick}>Cancel</CancelButton>
-              <SaveButton onClick={handleSaveClick}>Save changes</SaveButton>
-            </Box>
-          )}
         </ProfileCardHeader>
 
-        {isEditing ? (
-          <ProfileBioTextarea
-            fullWidth
-            multiline
-            rows={6}
-            value={bioText}
-            onChange={(e) => setBioText(e.target.value)}
-            placeholder="Tell us about yourself..."
-            variant="outlined"
-          />
-        ) : (
-          <ProfileBioText>
-            {userProfile?.bio ||
-              "No bio added yet. Click edit to add your bio."}
-          </ProfileBioText>
-        )}
+        <Formik
+          initialValues={{
+            bio: userProfile?.bio || "",
+          }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+          enableReinitialize
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            isValid,
+            dirty,
+          }) => (
+            <Form>
+              {isEditing ? (
+                <Field
+                  as={ProfileBioTextarea}
+                  fullWidth
+                  multiline
+                  rows={6}
+                  name="bio"
+                  value={values.bio}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="Tell us about yourself..."
+                  variant="outlined"
+                  error={touched.bio && Boolean(errors.bio)}
+                  helperText={touched.bio && errors.bio}
+                />
+              ) : (
+                <ProfileBioText>
+                  {userProfile?.bio ||
+                    "No bio added yet. Click edit to add your bio."}
+                </ProfileBioText>
+              )}
+
+              {isEditing && (
+                <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                  <CancelButton onClick={handleCancelClick}>
+                    Cancel
+                  </CancelButton>
+                  <SaveButton
+                    type="submit"
+                    disabled={isPendingUpdate || !isValid || !dirty}
+                  >
+                    {isPendingUpdate ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : (
+                      "Save changes"
+                    )}
+                  </SaveButton>
+                </Box>
+              )}
+            </Form>
+          )}
+        </Formik>
       </CardContent>
     </ProfileCard>
   );

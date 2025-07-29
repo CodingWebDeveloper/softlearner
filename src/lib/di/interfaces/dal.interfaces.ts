@@ -27,6 +27,7 @@ import {
   TestResult,
   TestSubmission,
   UserDetails,
+  UpdateProfile,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -143,4 +144,30 @@ export interface ITestsDAL {
 export interface IUsersDAL {
   getUserDetails(userId: string): Promise<UserDetails | null>;
   getUserDetailsByUsername(username: string): Promise<UserDetails | null>;
+  updateUserDetails(
+    userId: string,
+    updateData: UpdateProfile
+  ): Promise<UserDetails | null>;
+  uploadProfileImage(userId: string, file: File): Promise<string>;
+  getProfileImageBlob(avatarPath: string): Promise<Blob>;
+  removeProfileImage(userId: string): Promise<void>;
+}
+
+export interface AvatarBlobResult {
+  blob: Blob;
+  url: string;
+}
+
+export interface IAvatarDAL {
+  getAvatarBlob(path: string): Promise<AvatarBlobResult | null>;
+  uploadAvatar(
+    userId: string,
+    file: File | Blob
+  ): Promise<{ url: string; path: string }>;
+  updateAvatar(
+    userId: string,
+    file: File | Blob,
+    currentPath?: string
+  ): Promise<{ url: string; path: string }>;
+  deleteAvatar(userId: string, path: string): Promise<void>;
 }

@@ -1,5 +1,13 @@
 import { styled } from "@mui/material/styles";
-import { Card, Box, Button, TextField, Avatar } from "@mui/material";
+import {
+  Card,
+  Box,
+  Button,
+  TextField,
+  Avatar,
+  IconButton,
+  MenuItem,
+} from "@mui/material";
 
 export const ProfileCard = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.custom.background.card,
@@ -38,7 +46,7 @@ export const EditButton = styled(Button)(({ theme }) => ({
 
 export const SaveButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
-  color: theme.palette.custom?.text.white || "#ffffff",
+  color: theme.palette.custom?.text.white,
   "&:hover": {
     backgroundColor: theme.palette.primary.dark,
   },
@@ -120,4 +128,24 @@ export const UploadRequirements = styled("div")(({ theme }) => ({
   color: theme.palette.custom.text.light,
   marginTop: theme.spacing(1),
   lineHeight: 1.4,
+}));
+
+export const AvatarContainer = styled(Box)(() => ({
+  position: "relative",
+}));
+
+export const AvatarMenuButton = styled(IconButton)(({ theme }) => ({
+  position: "absolute",
+  top: -8,
+  right: -8,
+  backgroundColor: theme.palette.background.paper,
+  border: "1px solid",
+  borderColor: theme.palette.divider,
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
+}));
+
+export const AvatarMenuItem = styled(MenuItem)(() => ({
+  minWidth: 120,
 }));
