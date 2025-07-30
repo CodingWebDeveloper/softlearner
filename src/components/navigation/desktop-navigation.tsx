@@ -10,6 +10,7 @@ import {
   Person as PersonIcon,
   Settings as SettingsIcon,
   Bookmark as BookmarkIcon,
+  Logout as LogoutIcon,
 } from "@mui/icons-material";
 import {
   SidebarContainer,
@@ -154,7 +155,7 @@ export const DesktopNavigation = ({
               aria-label="Sign out"
             >
               <SidebarListItemIcon>
-                <SettingsIcon />
+                <LogoutIcon />
               </SidebarListItemIcon>
               <SidebarListItemText primary="Sign out" />
             </SidebarListItemButton>

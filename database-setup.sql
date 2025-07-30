@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   avatar_url TEXT,
   username TEXT UNIQUE,
   bio TEXT,
+  role TEXT CHECK (role IN ('student', 'creator', 'admin')) DEFAULT 'student',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

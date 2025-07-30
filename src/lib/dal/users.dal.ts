@@ -4,6 +4,7 @@ import { IUsersDAL } from "../di/interfaces/dal.interfaces";
 import {
   UserDetails,
   UpdateProfile,
+  UserRole,
 } from "@/services/interfaces/service.interfaces";
 
 type UserRow = Database["public"]["Tables"]["users"]["Row"];
@@ -39,6 +40,25 @@ export class UsersDAL implements IUsersDAL {
     };
 
     return userDetails;
+  }
+
+  async getUserRole(userId: string): Promise<UserRole | null> {
+    const { data, error } = await this.supabase
+      .from("users")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      throw new Error(`Error fetching user role: ${error.message}`);
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    const userRole = data.role as UserRole;
+    return userRole;
   }
 
   async getUserDetailsByUsername(

@@ -28,6 +28,7 @@ import {
   TestSubmission,
   UserDetails,
   UpdateProfile,
+  UserRole,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -144,6 +145,7 @@ export interface ITestsDAL {
 export interface IUsersDAL {
   getUserDetails(userId: string): Promise<UserDetails | null>;
   getUserDetailsByUsername(username: string): Promise<UserDetails | null>;
+  getUserRole(userId: string): Promise<UserRole | null>;
   updateUserDetails(
     userId: string,
     updateData: UpdateProfile

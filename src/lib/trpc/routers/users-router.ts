@@ -7,6 +7,33 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/lib/database/database.types";
 
 export const usersRouter = router({
+  getUserRole: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const usersService = ctx.container.resolve<IUsersService>(
+        DI_TOKENS.USERS_SERVICE
+      );
+
+      const userRole = await usersService.getUserRole(ctx.user.id);
+
+      if (!userRole) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User profile not found",
+        });
+      }
+
+      return {
+        role: userRole,
+        userId: ctx.user.id,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch user role: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }),
   getUserProfile: protectedProcedure.query(async ({ ctx }) => {
     try {
       const usersService = ctx.container.resolve<IUsersService>(

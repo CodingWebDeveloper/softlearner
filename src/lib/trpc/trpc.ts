@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ZodError } from "zod";
 import { createRequestContainer } from "@/lib/di/container";
 import { registerServices } from "@/lib/di/registry";
+import { IUsersService } from "@/services/interfaces/service.interfaces";
+import { DI_TOKENS } from "@/lib/di/registry";
 
 export const createTRPCContext = async () => {
   const supabase = await createClient();
@@ -75,3 +77,42 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
     },
   });
 });
+
+// Role-based authorization middleware
+export function requireUserRole(
+  required:
+    | "student"
+    | "creator"
+    | "admin"
+    | Array<"student" | "creator" | "admin">
+) {
+  return t.middleware(async ({ ctx, next }) => {
+    if (!ctx.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const usersService = ctx.container.resolve<IUsersService>(
+      DI_TOKENS.USERS_SERVICE
+    );
+
+    const userRole = await usersService.getUserRole(ctx.user.id);
+
+    if (!userRole) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "User role not found",
+      });
+    }
+
+    const requiredRoles = Array.isArray(required) ? required : [required];
+
+    if (!requiredRoles.includes(userRole)) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Access denied",
+      });
+    }
+
+    return next();
+  });
+}

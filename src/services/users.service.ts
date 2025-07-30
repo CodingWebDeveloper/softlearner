@@ -3,6 +3,7 @@ import {
   IUsersService,
   UserDetails,
   UpdateProfile,
+  UserRole,
 } from "./interfaces/service.interfaces";
 
 export class UsersService implements IUsersService {
@@ -16,6 +17,10 @@ export class UsersService implements IUsersService {
     username: string
   ): Promise<UserDetails | null> {
     return this.usersDAL.getUserDetailsByUsername(username);
+  }
+
+  async getUserRole(userId: string): Promise<UserRole | null> {
+    return this.usersDAL.getUserRole(userId);
   }
 
   async updateUserDetails(

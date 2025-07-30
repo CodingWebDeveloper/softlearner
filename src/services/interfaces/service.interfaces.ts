@@ -30,6 +30,8 @@ export type CourseCreator = {
 
 export type VoteType = "Up" | "Down";
 
+export type UserRole = "student" | "creator" | "admin";
+
 export interface Vote {
   id: string;
   user_id: string;
@@ -304,6 +306,7 @@ export interface ITestsService {
 export interface IUsersService {
   getUserDetails(userId: string): Promise<UserDetails | null>;
   getUserDetailsByUsername(username: string): Promise<UserDetails | null>;
+  getUserRole(userId: string): Promise<UserRole | null>;
   updateUserDetails(
     userId: string,
     updateData: UpdateProfile
