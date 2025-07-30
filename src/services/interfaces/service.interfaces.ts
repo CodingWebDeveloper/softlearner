@@ -333,3 +333,78 @@ export interface UpdateProfile {
   bio?: string;
   avatar_url?: string;
 }
+
+// Creator Application Interfaces
+export interface CreatorApplication {
+  id: string;
+  user_id: string;
+  bio: string;
+  content_type: string;
+  portfolio_links: string[];
+  experience_level: "beginner" | "intermediate" | "advanced" | "expert";
+  motivation: string;
+  status: "pending" | "approved" | "rejected";
+  admin_notes?: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateCreatorApplicationInput {
+  bio: string;
+  content_type: string;
+  portfolio_links: string[];
+  experience_level: "beginner" | "intermediate" | "advanced" | "expert";
+  motivation: string;
+}
+
+export interface UpdateCreatorApplicationInput {
+  status: "pending" | "approved" | "rejected";
+  admin_notes?: string;
+}
+
+export interface GetCreatorApplicationsParams {
+  page: number;
+  pageSize: number;
+  status?: "pending" | "approved" | "rejected";
+  search?: string;
+}
+
+export interface GetCreatorApplicationsResult {
+  data: CreatorApplication[];
+  totalRecords: number;
+}
+
+export interface ApplicationLog {
+  id: string;
+  application_id: string;
+  admin_id: string;
+  action: string;
+  notes?: string;
+  created_at: string;
+}
+
+export interface ICreatorApplicationsService {
+  createApplication(
+    userId: string,
+    input: CreateCreatorApplicationInput
+  ): Promise<CreatorApplication>;
+  getUserApplication(userId: string): Promise<CreatorApplication | null>;
+  getApplications(
+    params: GetCreatorApplicationsParams
+  ): Promise<GetCreatorApplicationsResult>;
+  getApplicationById(id: string): Promise<CreatorApplication | null>;
+  updateApplicationStatus(
+    id: string,
+    adminId: string,
+    input: UpdateCreatorApplicationInput
+  ): Promise<CreatorApplication>;
+  logApplicationAction(
+    applicationId: string,
+    adminId: string,
+    action: string,
+    notes?: string
+  ): Promise<ApplicationLog>;
+  getApplicationLogs(applicationId: string): Promise<ApplicationLog[]>;
+}

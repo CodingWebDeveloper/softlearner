@@ -29,6 +29,12 @@ import {
   UserDetails,
   UpdateProfile,
   UserRole,
+  CreatorApplication,
+  CreateCreatorApplicationInput,
+  UpdateCreatorApplicationInput,
+  GetCreatorApplicationsParams,
+  GetCreatorApplicationsResult,
+  ApplicationLog,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -173,4 +179,28 @@ export interface IAvatarDAL {
     currentPath?: string
   ): Promise<{ url: string; path: string }>;
   deleteAvatar(userId: string, path: string): Promise<void>;
+}
+
+export interface ICreatorApplicationsDAL {
+  createApplication(
+    userId: string,
+    input: CreateCreatorApplicationInput
+  ): Promise<CreatorApplication>;
+  getUserApplication(userId: string): Promise<CreatorApplication | null>;
+  getApplications(
+    params: GetCreatorApplicationsParams
+  ): Promise<GetCreatorApplicationsResult>;
+  getApplicationById(id: string): Promise<CreatorApplication | null>;
+  updateApplicationStatus(
+    id: string,
+    adminId: string,
+    input: UpdateCreatorApplicationInput
+  ): Promise<CreatorApplication>;
+  logApplicationAction(
+    applicationId: string,
+    adminId: string,
+    action: string,
+    notes?: string
+  ): Promise<ApplicationLog>;
+  getApplicationLogs(applicationId: string): Promise<ApplicationLog[]>;
 }

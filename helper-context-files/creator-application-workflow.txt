@@ -1,0 +1,27 @@
+User Submits Creator Application
+
+Implement a user interface where authenticated users can fill out and submit an application to become a content creator.
+
+The application should capture necessary information such as bio, content type, portfolio links, etc.
+
+Admin Reviews Application
+
+Provide an admin dashboard or interface to view a list of submitted creator applications.
+
+Enable the admin to review application details and either approve or reject the application.
+
+Admin actions should be logged for auditing purposes.
+
+Notify User & Update Role
+
+Upon approval or rejection, automatically send an email notification to the user with the decision and any relevant message (e.g., reason for rejection or next steps after approval).
+
+If the application is approved, update the user’s role to “creator” in the system, granting appropriate permissions.
+
+Optional Enhancements
+
+Include status tracking (e.g., "Pending", "Approved", "Rejected") for applications visible to the user.
+
+Allow users to reapply or appeal if rejected.
+
+Implement email templates for consistent messaging.
