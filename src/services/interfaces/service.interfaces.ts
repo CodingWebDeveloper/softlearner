@@ -1,5 +1,5 @@
 import { Category, Tag, PreviewResource } from "@/lib/database/database.types";
-import { ResourceType } from "@/constants/database-constants";
+import { ResourceType } from "@/lib/constants/database-constants";
 
 export interface BasicResource {
   id: string;
@@ -325,6 +325,13 @@ export interface UserDetails {
   bio: string;
   created_at: string;
   updated_at: string;
+  role: UserRole;
+}
+
+export interface BasicUserInfo {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
 }
 
 export interface UpdateProfile {
@@ -337,7 +344,7 @@ export interface UpdateProfile {
 // Creator Application Interfaces
 export interface CreatorApplication {
   id: string;
-  user_id: string;
+  user: BasicUserInfo;
   bio: string;
   content_type: string;
   portfolio_links: string[];

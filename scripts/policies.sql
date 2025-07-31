@@ -474,3 +474,20 @@ FOR INSERT WITH CHECK (
     AND u.role = 'admin'
   )
 );
+
+-- Allow admins to update user roles (for creator role assignment)
+DROP POLICY IF EXISTS "Allow admins to update user roles" ON users;
+CREATE POLICY "Allow admins to update user roles" ON users
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+);

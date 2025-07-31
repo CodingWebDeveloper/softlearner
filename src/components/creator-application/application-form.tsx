@@ -8,19 +8,24 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Chip,
-  Box,
   Typography,
-  Alert,
   CircularProgress,
+  Box,
 } from "@mui/material";
 import { trpc } from "@/lib/trpc/client";
+import {
+  FormContainer,
+  ErrorAlert,
+  PortfolioInputContainer,
+  PortfolioChipsContainer,
+  StyledButton,
+} from "@/components/styles/creator-application/application-form.styles";
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -129,13 +134,9 @@ export const ApplicationForm = ({
 
       <form onSubmit={formik.handleSubmit}>
         <DialogContent>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+          {error && <ErrorAlert severity="error">{error}</ErrorAlert>}
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <FormContainer>
             {/* Bio */}
             <TextField
               fullWidth
@@ -195,7 +196,7 @@ export const ApplicationForm = ({
               <Typography variant="subtitle2" gutterBottom>
                 Portfolio Links
               </Typography>
-              <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+              <PortfolioInputContainer>
                 <TextField
                   fullWidth
                   size="small"
@@ -209,16 +210,15 @@ export const ApplicationForm = ({
                     }
                   }}
                 />
-                <Button
+                <StyledButton
                   variant="outlined"
                   onClick={handleAddPortfolioLink}
                   disabled={!portfolioLink}
-                  sx={{ textTransform: "none" }}
                 >
                   Add
-                </Button>
-              </Box>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                </StyledButton>
+              </PortfolioInputContainer>
+              <PortfolioChipsContainer>
                 {formik.values.portfolio_links.map((link, index) => (
                   <Chip
                     key={index}
@@ -228,7 +228,7 @@ export const ApplicationForm = ({
                     variant="outlined"
                   />
                 ))}
-              </Box>
+              </PortfolioChipsContainer>
               {formik.touched.portfolio_links &&
                 formik.errors.portfolio_links && (
                   <Typography variant="caption" color="error">
@@ -253,18 +253,17 @@ export const ApplicationForm = ({
               }
               helperText={formik.touched.motivation && formik.errors.motivation}
             />
-          </Box>
+          </FormContainer>
         </DialogContent>
 
         <DialogActions>
-          <Button
+          <StyledButton
             onClick={handleClose}
             disabled={createApplicationMutation.isPending}
-            sx={{ textTransform: "none" }}
           >
             Cancel
-          </Button>
-          <Button
+          </StyledButton>
+          <StyledButton
             type="submit"
             variant="contained"
             disabled={createApplicationMutation.isPending || !formik.isValid}
@@ -273,12 +272,11 @@ export const ApplicationForm = ({
                 <CircularProgress size={20} />
               ) : null
             }
-            sx={{ textTransform: "none" }}
           >
             {createApplicationMutation.isPending
               ? "Submitting..."
               : "Submit Application"}
-          </Button>
+          </StyledButton>
         </DialogActions>
       </form>
     </Dialog>

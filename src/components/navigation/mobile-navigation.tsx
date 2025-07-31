@@ -2,7 +2,6 @@
 
 import { Toolbar, IconButton, Typography } from "@mui/material";
 import { School as SchoolIcon } from "@mui/icons-material";
-import { User } from "@supabase/supabase-js";
 import {
   Home as HomeIcon,
   Book as BookIcon,
@@ -17,18 +16,19 @@ import {
   UserAvatar,
   StyledAppBar,
 } from "@/components/styles/infrastructure/navigation.styles";
+import { useSupabase } from "@/contexts/supabase-context";
 
 interface MobileNavigationProps {
   pathname: string;
-  user: User | null;
   onNavigation: (path: string) => void;
 }
 
 export const MobileNavigation = ({
   pathname,
-  user,
   onNavigation,
 }: MobileNavigationProps) => {
+  const { user } = useSupabase();
+
   const navigationItems = [
     {
       label: "Home",

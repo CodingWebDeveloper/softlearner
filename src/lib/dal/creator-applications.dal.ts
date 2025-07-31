@@ -104,7 +104,11 @@ export class CreatorApplicationsDAL implements ICreatorApplicationsDAL {
     const transformedData = (data as CreatorApplicationWithUser[] | null)?.map(
       (application) => ({
         id: application.id,
-        user_id: application.user_id,
+        user: {
+          id: application.user_id,
+          full_name: application.user.full_name,
+          avatar_url: application.user.avatar_url,
+        },
         bio: application.bio,
         content_type: application.content_type,
         portfolio_links: application.portfolio_links,
@@ -144,7 +148,7 @@ export class CreatorApplicationsDAL implements ICreatorApplicationsDAL {
     adminId: string,
     input: UpdateCreatorApplicationInput
   ): Promise<CreatorApplication> {
-    const updateData: any = {
+    const updateData: Partial<CreatorApplication> = {
       status: input.status,
       reviewed_by: adminId,
       reviewed_at: new Date().toISOString(),
@@ -163,6 +167,18 @@ export class CreatorApplicationsDAL implements ICreatorApplicationsDAL {
 
     if (error) {
       throw new Error(`Error updating application status: ${error.message}`);
+    }
+
+    // If application is approved, update the user's role to "creator"
+    if (input.status === "approved") {
+      const { error: userUpdateError } = await this.supabase
+        .from("users")
+        .update({ role: "creator" })
+        .eq("id", data.user_id);
+
+      if (userUpdateError) {
+        throw new Error(`Error updating user role: ${userUpdateError.message}`);
+      }
     }
 
     return data as CreatorApplication;

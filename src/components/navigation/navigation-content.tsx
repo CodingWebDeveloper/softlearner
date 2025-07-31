@@ -1,20 +1,17 @@
 "use client";
 
 import { useTheme, useMediaQuery } from "@mui/material";
-import { User } from "@supabase/supabase-js";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { MobileNavigation } from "./mobile-navigation";
 import { DesktopNavigation } from "./desktop-navigation";
 
 interface NavigationContentProps {
   pathname: string;
-  user: User | null;
   router: AppRouterInstance;
 }
 
 export const NavigationContent = ({
   pathname,
-  user,
   router,
 }: NavigationContentProps) => {
   const theme = useTheme();
@@ -26,19 +23,11 @@ export const NavigationContent = ({
 
   if (isMobile) {
     return (
-      <MobileNavigation
-        pathname={pathname}
-        user={user}
-        onNavigation={handleNavigation}
-      />
+      <MobileNavigation pathname={pathname} onNavigation={handleNavigation} />
     );
   }
 
   return (
-    <DesktopNavigation
-      pathname={pathname}
-      user={user}
-      onNavigation={handleNavigation}
-    />
+    <DesktopNavigation pathname={pathname} onNavigation={handleNavigation} />
   );
 };

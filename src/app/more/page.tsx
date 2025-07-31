@@ -11,14 +11,16 @@ import {
   Person as PersonIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
+  AdminPanelSettings as AdminIcon,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useSupabase } from "@/contexts/supabase-context";
 import { PageContainer } from "@/components/styles/infrastructure/layout.styles";
+import { ROLES } from "@/utils/constants";
 
 const MorePage = () => {
   const router = useRouter();
-  const { signOut } = useSupabase();
+  const { signOut, user } = useSupabase();
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -42,6 +44,17 @@ const MorePage = () => {
       path: "/settings",
       onClick: () => handleNavigation("/settings"),
     },
+    // Admin dashboard - only show for admin users
+    ...(user?.user_metadata?.role === ROLES.ADMIN
+      ? [
+          {
+            label: "Admin Dashboard",
+            icon: <AdminIcon />,
+            path: "/admin",
+            onClick: () => handleNavigation("/admin"),
+          },
+        ]
+      : []),
   ];
 
   return (

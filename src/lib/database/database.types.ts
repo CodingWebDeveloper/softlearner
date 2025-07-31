@@ -145,6 +145,7 @@ export interface User {
   bio?: string;
   created_at: string;
   updated_at: string;
+  role: "admin" | "creator" | "student";
 }
 
 // Update Course interface

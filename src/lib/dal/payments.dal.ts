@@ -5,15 +5,15 @@ import {
   CreateCheckoutSessionInput,
   CheckoutSessionResponse,
 } from "@/services/interfaces/service.interfaces";
-import { ORDER_STATUS } from "@/constants/stripe-constants";
+import { ORDER_STATUS } from "@/lib/constants/stripe-constants";
 import { TRPCError } from "@trpc/server";
-import { PAYMENT_ERRORS } from "@/constants/error-messages";
+import { PAYMENT_ERRORS } from "@/lib/constants/error-messages";
 import {
   stripe,
   formatAmountForStripe,
   getActualCoursePrice,
 } from "../stripe/stripe";
-import { STRIPE_PAYMENT_METHODS } from "@/constants/stripe-constants";
+import { STRIPE_PAYMENT_METHODS } from "@/lib/constants/stripe-constants";
 
 export class PaymentsDAL implements IPaymentsDAL {
   constructor(private supabase: SupabaseClient<Database>) {}

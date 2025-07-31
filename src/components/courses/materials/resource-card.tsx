@@ -9,7 +9,7 @@ import {
   ResourceMaterialItem,
 } from "@/components/styles/courses/materials.styles";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import { RESOURCE_TYPES } from "@/constants/database-constants";
+import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   selectResource,

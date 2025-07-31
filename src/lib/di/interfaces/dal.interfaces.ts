@@ -161,26 +161,6 @@ export interface IUsersDAL {
   removeProfileImage(userId: string): Promise<void>;
   changePassword(userId: string, newPassword: string): Promise<void>;
 }
-
-export interface AvatarBlobResult {
-  blob: Blob;
-  url: string;
-}
-
-export interface IAvatarDAL {
-  getAvatarBlob(path: string): Promise<AvatarBlobResult | null>;
-  uploadAvatar(
-    userId: string,
-    file: File | Blob
-  ): Promise<{ url: string; path: string }>;
-  updateAvatar(
-    userId: string,
-    file: File | Blob,
-    currentPath?: string
-  ): Promise<{ url: string; path: string }>;
-  deleteAvatar(userId: string, path: string): Promise<void>;
-}
-
 export interface ICreatorApplicationsDAL {
   createApplication(
     userId: string,
