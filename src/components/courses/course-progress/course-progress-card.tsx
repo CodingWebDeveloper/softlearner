@@ -63,7 +63,9 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
             <CourseTitle variant="h3" component="h2">
               {course.name}
             </CourseTitle>
-            <CourseInstructor>{course.creator.full_name}</CourseInstructor>
+            <CourseInstructor>
+              {course.creator?.full_name || "Unknown"}
+            </CourseInstructor>
           </div>
           <StatusChip
             label={

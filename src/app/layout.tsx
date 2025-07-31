@@ -41,17 +41,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ClientOnly fallback={<LoadingFallback />}>
-          <StoreProvider>
-            <TrpcProvider>
-              <SupabaseProvider>
-                <ThemeRegistry>
-                  <LayoutWrapper>{children}</LayoutWrapper>
-                </ThemeRegistry>
-              </SupabaseProvider>
-            </TrpcProvider>
-          </StoreProvider>
-        </ClientOnly>
+        <StoreProvider>
+          <TrpcProvider>
+            <SupabaseProvider>
+              <ThemeRegistry>
+                <LayoutWrapper>{children}</LayoutWrapper>
+              </ThemeRegistry>
+            </SupabaseProvider>
+          </TrpcProvider>
+        </StoreProvider>
       </body>
     </html>
   );

@@ -74,6 +74,33 @@ export const ProfileAvatar = styled(Avatar)(({ theme }) => ({
   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
 }));
 
+export const ProfileAvatarSmall = styled(Avatar)(({ theme }) => ({
+  width: 40,
+  height: 40,
+  fontSize: "1rem",
+  backgroundColor: theme.palette.custom.accent.teal,
+  border: `2px solid ${theme.palette.custom.background.card}`,
+  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+}));
+
+export const ProfileAvatarMedium = styled(Avatar)(({ theme }) => ({
+  width: 80,
+  height: 80,
+  fontSize: "2rem",
+  backgroundColor: theme.palette.custom.accent.teal,
+  border: `3px solid ${theme.palette.custom.background.card}`,
+  boxShadow: "0 3px 9px rgba(0, 0, 0, 0.3)",
+}));
+
+export const ProfileAvatarLarge = styled(Avatar)(({ theme }) => ({
+  width: 120,
+  height: 120,
+  fontSize: "3rem",
+  backgroundColor: theme.palette.custom.accent.teal,
+  border: `4px solid ${theme.palette.custom.background.card}`,
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+}));
+
 export const ProfileInfoItem = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   "&:last-child": {

@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 
 export const LayoutContainer = styled(Box)(() => ({
   display: "flex",
@@ -69,3 +69,85 @@ export const AccentText = styled(Typography, {
     color: theme.palette.custom.accent[accentColor],
   })
 );
+
+export const ProfilePageDescription = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.light,
+}));
+
+export const EmptyStateContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  textAlign: "center",
+  padding: theme.spacing(8, 2),
+  minHeight: "60vh",
+}));
+
+export const EmptyStateIllustration = styled(Box)(({ theme }) => ({
+  width: 200,
+  height: 200,
+  marginBottom: theme.spacing(4),
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: "50%",
+  background: `linear-gradient(135deg, ${theme.palette.custom.accent.teal}20, ${theme.palette.custom.accent.blue}20)`,
+  border: `2px dashed ${theme.palette.custom.accent.teal}40`,
+  position: "relative",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 120,
+    height: 120,
+    borderRadius: "50%",
+    background: `linear-gradient(135deg, ${theme.palette.custom.accent.teal}, ${theme.palette.custom.accent.blue})`,
+    opacity: 0.1,
+  },
+}));
+
+export const EmptyStateTitle = styled(Typography)(({ theme }) => ({
+  fontSize: "2rem",
+  fontWeight: 700,
+  color: theme.palette.custom.text.white,
+  marginBottom: theme.spacing(2),
+  background: `linear-gradient(135deg, ${theme.palette.custom.text.white}, ${theme.palette.custom.text.light})`,
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  backgroundClip: "text",
+}));
+
+export const EmptyStateDescription = styled(Typography)(({ theme }) => ({
+  fontSize: "1.125rem",
+  color: theme.palette.custom.text.light,
+  marginBottom: theme.spacing(4),
+  maxWidth: 500,
+  lineHeight: 1.6,
+}));
+
+export const EmptyStateButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.custom.accent.teal,
+  color: theme.palette.custom.text.white,
+  padding: theme.spacing(1.5, 3),
+  fontSize: "1rem",
+  fontWeight: 600,
+  textTransform: "none",
+  borderRadius: theme.spacing(2),
+  boxShadow: `0 4px 12px ${theme.palette.custom.accent.teal}40`,
+  transition: "all 0.3s ease",
+  "&:hover": {
+    backgroundColor: theme.palette.custom.accent.teal + "dd",
+    transform: "translateY(-2px)",
+    boxShadow: `0 6px 16px ${theme.palette.custom.accent.teal}60`,
+  },
+}));
+
+export const EmptyStateIcon = styled(Box)(({ theme }) => ({
+  fontSize: "4rem",
+  color: theme.palette.custom.accent.teal,
+  marginBottom: theme.spacing(2),
+  opacity: 0.8,
+}));

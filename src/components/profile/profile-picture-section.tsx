@@ -20,6 +20,7 @@ import {
 import { useSupabase } from "@/contexts/supabase-context";
 import { trpc } from "@/lib/trpc/client";
 import { AvatarImage } from "./avatar-image";
+import { getInitials } from "@/utils/utils";
 
 export const ProfilePictureSection = () => {
   // States
@@ -94,15 +95,6 @@ export const ProfilePictureSection = () => {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const isProcessing = isUploading || isRemoving;
 
   if (isLoading || !userProfile) {
@@ -132,6 +124,7 @@ export const ProfilePictureSection = () => {
             <AvatarImage
               avatarUrl={userProfile?.avatar_url}
               alt={userProfile?.full_name || "Profile"}
+              size="large"
             >
               {userProfile?.full_name
                 ? getInitials(userProfile.full_name)

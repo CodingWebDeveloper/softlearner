@@ -1,7 +1,7 @@
 "use client";
 import CourseCard from "@/components/courses/courses-list/course-card";
 import CourseListPagination from "@/components/courses/courses-list/course-list-pagination";
-import LoadingFallback from "@/components/loading-fallback";
+import LoadingFallback, { EmptyState } from "@/components/loading-fallback";
 import {
   CoursesGrid,
   StyledContainer,
@@ -63,13 +63,12 @@ export default function BookmarksPage() {
   if (!coursesData || coursesData.data.length === 0) {
     return (
       <PageContainer>
-        <PageTitle variant="h4" gutterBottom>
-          My Bookmarks
-        </PageTitle>
-
-        <Alert severity="info">
-          You haven&apos;t bookmarked any courses yet.
-        </Alert>
+        <EmptyState
+          type="bookmarks"
+          title="Your Reading List is Empty"
+          description="Start building your personal learning library by bookmarking courses that interest you. Your bookmarks will be saved here for easy access."
+          buttonText="Discover Courses"
+        />
       </PageContainer>
     );
   }

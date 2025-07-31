@@ -81,9 +81,9 @@ const CourseDetailsPage: FC = () => {
 
   const instructor = course.creator
     ? {
-        name: course.creator.full_name || "",
+        name: course.creator?.full_name || "",
         role: "Instructor",
-        avatar: course.creator.avatar_url || "",
+        avatar: course.creator?.avatar_url || "",
       }
     : {
         name: "Unknown",

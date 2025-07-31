@@ -6,10 +6,11 @@ import {
   CourseTitle,
   InstructorName,
   InstructorRole,
-  InstructorAvatar,
 } from "@/components/styles/courses/course-details.styles";
 import BookmarkCard from "../courses-list/bookmark-card";
 import { BasicCourse } from "@/services/interfaces/service.interfaces";
+import { AvatarImage } from "@/components/profile/avatar-image";
+import { getInitials } from "@/utils/utils";
 
 interface Instructor {
   name: string;
@@ -47,7 +48,13 @@ const CourseHeader: FC<CourseHeaderProps> = ({ course, instructor }) => {
       </Stack>
 
       <InstructorBox>
-        <InstructorAvatar src={instructor.avatar} alt={instructor.name} />
+        <AvatarImage
+          avatarUrl={instructor.avatar || undefined}
+          alt={instructor.name}
+          size="medium"
+        >
+          {instructor.name ? getInitials(instructor.name) : "U"}
+        </AvatarImage>
         <Box>
           <InstructorName
             variant="h6"

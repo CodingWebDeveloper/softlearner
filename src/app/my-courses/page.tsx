@@ -6,7 +6,7 @@ import {
   PageTitle,
 } from "@/components/styles/infrastructure/layout.styles";
 import { trpc } from "@/lib/trpc/client";
-import LoadingFallback from "@/components/loading-fallback";
+import LoadingFallback, { EmptyState } from "@/components/loading-fallback";
 import CourseProgressCard from "@/components/courses/course-progress/course-progress-card";
 
 const MyCoursesPage = () => {
@@ -38,9 +38,12 @@ const MyCoursesPage = () => {
   if (!purchasedCourses || purchasedCourses.data.length === 0) {
     return (
       <PageContainer>
-        <Typography variant="h5" color="textPrimary">
-          You haven&apos;t purchased any courses yet.
-        </Typography>
+        <EmptyState
+          type="courses"
+          title="Your Learning Journey Awaits"
+          description="Start your educational adventure by exploring our curated collection of courses. From programming to design, we have something for every learner."
+          buttonText="Explore Courses"
+        />
       </PageContainer>
     );
   }

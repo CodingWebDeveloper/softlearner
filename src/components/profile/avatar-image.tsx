@@ -1,17 +1,49 @@
 "use client";
 
+/**
+ * AvatarImage Component
+ *
+ * A customizable avatar component that supports different sizes.
+ *
+ * Usage examples:
+ *
+ * // Small avatar (40x40px) - good for lists, comments, etc.
+ * <AvatarImage avatarUrl={user.avatar} alt="User" size="small" />
+ *
+ * // Medium avatar (80x80px) - default size, good for course headers, etc.
+ * <AvatarImage avatarUrl={user.avatar} alt="User" size="medium" />
+ *
+ * // Large avatar (120x120px) - good for profile pages, detailed views
+ * <AvatarImage avatarUrl={user.avatar} alt="User" size="large" />
+ *
+ * // Default (medium size)
+ * <AvatarImage avatarUrl={user.avatar} alt="User" />
+ */
+
 import { useState, useEffect } from "react";
 import { Skeleton } from "@mui/material";
-import { ProfileAvatar } from "@/components/styles/profile/profile.styles";
+import {
+  ProfileAvatarSmall,
+  ProfileAvatarMedium,
+  ProfileAvatarLarge,
+} from "@/components/styles/profile/profile.styles";
 import { trpc } from "@/lib/trpc/client";
+
+type AvatarSize = "small" | "medium" | "large";
 
 interface AvatarImageProps {
   avatarUrl?: string;
   alt: string;
   children?: React.ReactNode;
+  size?: AvatarSize;
 }
 
-export const AvatarImage = ({ avatarUrl, alt, children }: AvatarImageProps) => {
+export const AvatarImage = ({
+  avatarUrl,
+  alt,
+  children,
+  size = "medium",
+}: AvatarImageProps) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
 
   const { data: profileImageData, isLoading } =
@@ -46,13 +78,42 @@ export const AvatarImage = ({ avatarUrl, alt, children }: AvatarImageProps) => {
     }
   }, [profileImageData]);
 
+  const getAvatarComponent = () => {
+    switch (size) {
+      case "small":
+        return ProfileAvatarSmall;
+      case "large":
+        return ProfileAvatarLarge;
+      case "medium":
+      default:
+        return ProfileAvatarMedium;
+    }
+  };
+
+  const getSkeletonSize = () => {
+    switch (size) {
+      case "small":
+        return 40;
+      case "large":
+        return 120;
+      case "medium":
+      default:
+        return 80;
+    }
+  };
+
+  const AvatarComponent = getAvatarComponent();
+  const skeletonSize = getSkeletonSize();
+
   if (isLoading) {
-    return <Skeleton variant="circular" width={120} height={120} />;
+    return (
+      <Skeleton variant="circular" width={skeletonSize} height={skeletonSize} />
+    );
   }
 
   return (
-    <ProfileAvatar src={imageSrc} alt={alt}>
+    <AvatarComponent src={imageSrc} alt={alt}>
       {children}
-    </ProfileAvatar>
+    </AvatarComponent>
   );
 };

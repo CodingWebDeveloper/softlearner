@@ -1,7 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import { Box, Typography, Avatar, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import {
   VideoSection,
   VideoEmbed,
@@ -19,6 +19,8 @@ import { CategoryChip } from "@/components/styles/courses/course-details.styles"
 import CompleteCard from "./complete-card";
 import DownloadIcon from "@mui/icons-material/Download";
 import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
+import { AvatarImage } from "@/components/profile/avatar-image";
+import { getInitials } from "@/utils/utils";
 
 interface CourseVideoSectionProps {
   course: FullCourse;
@@ -121,17 +123,22 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
       <CourseTags courseId={course.id} />
 
       <InstructorBox>
-        <Avatar
-          src={course.creator.avatar_url || undefined}
-          alt={course.creator.full_name || "Instructor"}
-        />
+        <AvatarImage
+          avatarUrl={course.creator?.avatar_url || undefined}
+          alt={course.creator?.full_name || "Instructor"}
+          size="small"
+        >
+          {course.creator?.full_name
+            ? getInitials(course.creator.full_name)
+            : "U"}
+        </AvatarImage>
         <Box ml={2}>
           <Typography
             variant="subtitle1"
             fontWeight={500}
             style={{ color: theme.palette.custom.text.white }}
           >
-            {course.creator.full_name}
+            {course.creator?.full_name || "Unknown"}
           </Typography>
         </Box>
       </InstructorBox>
