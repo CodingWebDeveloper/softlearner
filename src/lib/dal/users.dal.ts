@@ -37,6 +37,7 @@ export class UsersDAL implements IUsersDAL {
       bio: user.bio || "",
       created_at: user.created_at,
       updated_at: user.updated_at,
+      role: user.role as UserRole,
     };
 
     return userDetails;
@@ -90,6 +91,7 @@ export class UsersDAL implements IUsersDAL {
       bio: user.bio || "",
       created_at: user.created_at,
       updated_at: user.updated_at,
+      role: user.role as UserRole,
     };
 
     return userDetails;
@@ -127,6 +129,7 @@ export class UsersDAL implements IUsersDAL {
       bio: user.bio || "",
       created_at: user.created_at,
       updated_at: user.updated_at,
+      role: user.role as UserRole,
     };
 
     return userDetails;

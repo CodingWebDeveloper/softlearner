@@ -7,7 +7,7 @@ import {
   BasicCourse,
   CourseCreator,
 } from "@/services/interfaces/service.interfaces";
-import { ORDER_STATUS } from "@/constants/stripe-constants";
+import { ORDER_STATUS } from "@/lib/constants/stripe-constants";
 import { FullCourse } from "@/services/interfaces/service.interfaces";
 
 type CourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {

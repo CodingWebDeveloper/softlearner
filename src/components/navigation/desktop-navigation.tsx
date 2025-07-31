@@ -1,8 +1,8 @@
 "use client";
 
-import { List } from "@mui/material";
+import { useState } from "react";
+import { List, Collapse } from "@mui/material";
 import { School as SchoolIcon } from "@mui/icons-material";
-import { User } from "@supabase/supabase-js";
 import {
   Home as HomeIcon,
   Book as BookIcon,
@@ -11,6 +11,14 @@ import {
   Settings as SettingsIcon,
   Bookmark as BookmarkIcon,
   Logout as LogoutIcon,
+  AdminPanelSettings as AdminIcon,
+  ExpandLess,
+  ExpandMore,
+  People as PeopleIcon,
+  Category as CategoryIcon,
+  LocalOffer as TagIcon,
+  Assessment as AssessmentIcon,
+  Security as SecurityIcon,
 } from "@mui/icons-material";
 import {
   SidebarContainer,
@@ -32,25 +40,48 @@ import {
   DesktopDrawer,
   UserAvatar,
 } from "@/components/styles/infrastructure/navigation.styles";
+import {
+  AdminActionButton,
+  AdminActionIcon,
+  AdminActionText,
+  AdminSubItemButton,
+  AdminSubItemText,
+} from "@/components/styles/admin/admin-navigation.styles";
 import { useSupabase } from "@/contexts/supabase-context";
 import { useRouter } from "next/navigation";
+import { ROLES } from "@/utils/constants";
+
+interface NavigationItem {
+  label: string;
+  icon: React.ReactNode;
+  path: string;
+  showWhenAuthenticated: boolean;
+  showWhenUnauthenticated: boolean;
+  adminOnly?: boolean;
+}
+
+interface AdminActionItem {
+  label: string;
+  icon: React.ReactNode;
+  path: string;
+  description?: string;
+}
 
 interface DesktopNavigationProps {
   pathname: string;
-  user: User | null;
   onNavigation: (path: string) => void;
 }
 
 export const DesktopNavigation = ({
   pathname,
-  user,
   onNavigation,
 }: DesktopNavigationProps) => {
   // General Hooks
   const router = useRouter();
-  const { signOut } = useSupabase();
+  const { signOut, user, userProfile } = useSupabase();
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
 
-  const navigationItems = [
+  const navigationItems: NavigationItem[] = [
     {
       label: "Home",
       icon: <HomeIcon />,
@@ -95,6 +126,51 @@ export const DesktopNavigation = ({
     },
   ];
 
+  const adminActionItems: AdminActionItem[] = [
+    {
+      label: "Dashboard",
+      icon: <AdminIcon />,
+      path: "/admin",
+      description: "Main admin dashboard",
+    },
+    {
+      label: "Creator Applications",
+      icon: <PeopleIcon />,
+      path: "/admin/creator-applications",
+      description: "Review creator applications",
+    },
+    {
+      label: "User Management",
+      icon: <PeopleIcon />,
+      path: "/admin/users",
+      description: "Manage platform users",
+    },
+    {
+      label: "Categories",
+      icon: <CategoryIcon />,
+      path: "/admin/categories",
+      description: "Manage course categories",
+    },
+    {
+      label: "Tags",
+      icon: <TagIcon />,
+      path: "/admin/tags",
+      description: "Manage course tags",
+    },
+    {
+      label: "Analytics",
+      icon: <AssessmentIcon />,
+      path: "/admin/analytics",
+      description: "Platform analytics and reports",
+    },
+    {
+      label: "Security",
+      icon: <SecurityIcon />,
+      path: "/admin/security",
+      description: "Security settings and logs",
+    },
+  ];
+
   const filteredItems = navigationItems.filter((item) => {
     if (user) {
       return item.showWhenAuthenticated;
@@ -103,9 +179,15 @@ export const DesktopNavigation = ({
     }
   });
 
+  const isAdmin = userProfile?.role === ROLES.ADMIN;
+
   const handleSignOut = async () => {
     await signOut();
     router.push("/");
+  };
+
+  const handleAdminMenuToggle = () => {
+    setAdminMenuOpen(!adminMenuOpen);
   };
 
   const SidebarContent = () => (
@@ -133,6 +215,44 @@ export const DesktopNavigation = ({
               </SidebarListItemButton>
             </SidebarListItem>
           ))}
+
+          {/* Admin Actions Section */}
+          {isAdmin && (
+            <>
+              <SidebarListItem disablePadding>
+                <AdminActionButton
+                  onClick={handleAdminMenuToggle}
+                  aria-label="Admin Actions"
+                >
+                  <AdminActionIcon>
+                    <AdminIcon />
+                  </AdminActionIcon>
+                  <AdminActionText primary="Admin Actions" />
+                  {adminMenuOpen ? <ExpandLess /> : <ExpandMore />}
+                </AdminActionButton>
+              </SidebarListItem>
+
+              <Collapse in={adminMenuOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {adminActionItems.map((item) => (
+                    <SidebarListItem key={item.path} disablePadding>
+                      <AdminSubItemButton
+                        selected={pathname === item.path}
+                        onClick={() => onNavigation(item.path)}
+                        aria-label={item.label}
+                      >
+                        <SidebarListItemIcon>{item.icon}</SidebarListItemIcon>
+                        <AdminSubItemText
+                          primary={item.label}
+                          secondary={item.description}
+                        />
+                      </AdminSubItemButton>
+                    </SidebarListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </>
+          )}
         </List>
       </StyledSidebarContent>
 

@@ -79,7 +79,7 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
 });
 
 // Role-based authorization middleware
-export function requireUserRole(
+export function requireRole(
   required:
     | "student"
     | "creator"

@@ -5,6 +5,7 @@ import { ProfilePictureSection } from "./profile-picture-section";
 import { PersonalInfoSection } from "./personal-info-section";
 import { BioSection } from "./bio-section";
 import { ChangePasswordSection } from "./change-password-section";
+import { ApplicationStatus } from "../creator-application/application-status";
 
 export const ProfileContent = () => {
   return (
@@ -24,6 +25,10 @@ export const ProfileContent = () => {
 
         <Grid size={{ xs: 12 }}>
           <ChangePasswordSection />
+        </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <ApplicationStatus />
         </Grid>
       </Grid>
     </Box>

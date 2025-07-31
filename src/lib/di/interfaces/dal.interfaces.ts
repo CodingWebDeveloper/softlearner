@@ -29,6 +29,12 @@ import {
   UserDetails,
   UpdateProfile,
   UserRole,
+  CreatorApplication,
+  CreateCreatorApplicationInput,
+  UpdateCreatorApplicationInput,
+  GetCreatorApplicationsParams,
+  GetCreatorApplicationsResult,
+  ApplicationLog,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -155,22 +161,26 @@ export interface IUsersDAL {
   removeProfileImage(userId: string): Promise<void>;
   changePassword(userId: string, newPassword: string): Promise<void>;
 }
-
-export interface AvatarBlobResult {
-  blob: Blob;
-  url: string;
-}
-
-export interface IAvatarDAL {
-  getAvatarBlob(path: string): Promise<AvatarBlobResult | null>;
-  uploadAvatar(
+export interface ICreatorApplicationsDAL {
+  createApplication(
     userId: string,
-    file: File | Blob
-  ): Promise<{ url: string; path: string }>;
-  updateAvatar(
-    userId: string,
-    file: File | Blob,
-    currentPath?: string
-  ): Promise<{ url: string; path: string }>;
-  deleteAvatar(userId: string, path: string): Promise<void>;
+    input: CreateCreatorApplicationInput
+  ): Promise<CreatorApplication>;
+  getUserApplication(userId: string): Promise<CreatorApplication | null>;
+  getApplications(
+    params: GetCreatorApplicationsParams
+  ): Promise<GetCreatorApplicationsResult>;
+  getApplicationById(id: string): Promise<CreatorApplication | null>;
+  updateApplicationStatus(
+    id: string,
+    adminId: string,
+    input: UpdateCreatorApplicationInput
+  ): Promise<CreatorApplication>;
+  logApplicationAction(
+    applicationId: string,
+    adminId: string,
+    action: string,
+    notes?: string
+  ): Promise<ApplicationLog>;
+  getApplicationLogs(applicationId: string): Promise<ApplicationLog[]>;
 }

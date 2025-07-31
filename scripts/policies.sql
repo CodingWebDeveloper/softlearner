@@ -10,7 +10,19 @@ FOR SELECT USING (true);
 -- Allow only admin to add, update, delete categories
 DROP POLICY IF EXISTS "Allow only admin to modify categories" ON categories;
 CREATE POLICY "Allow only admin to modify categories" ON categories
-FOR ALL USING (auth.role() = 'admin') WITH CHECK (auth.role() = 'admin');
+FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+);
 
 -- Tags Policies
 -- Allow all users to view tags
@@ -20,7 +32,19 @@ FOR SELECT USING (true);
 -- Allow only admin to add, update, delete tags
 DROP POLICY IF EXISTS "Allow only admin to modify tags" ON tags;
 CREATE POLICY "Allow only admin to modify tags" ON tags
-FOR ALL USING (auth.role() = 'admin') WITH CHECK (auth.role() = 'admin');
+FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+);
 
 -- Course Tags Policies
 -- Allow all users to view course tags
@@ -36,7 +60,19 @@ FOR SELECT USING (true);
 -- Allow only admin or creator to add, update, delete courses
 DROP POLICY IF EXISTS "Allow admin or creator to modify courses" ON courses;
 CREATE POLICY "Allow admin or creator to modify courses" ON courses
-FOR ALL USING (auth.role() = 'admin' OR auth.uid() = creator_id) WITH CHECK (auth.role() = 'admin' OR auth.uid() = creator_id);
+FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  ) OR auth.uid() = creator_id
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  ) OR auth.uid() = creator_id
+);
 
 -- Users Policies
 -- Allow all users to view users
@@ -360,4 +396,98 @@ CREATE POLICY "Allow users to delete their own avatar" ON storage.objects
 FOR DELETE USING (
   bucket_id = 'avatars' 
   AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- =====================
+-- CREATOR APPLICATIONS POLICIES
+-- =====================
+
+-- Creator Applications Policies
+-- Allow users to view their own applications
+DROP POLICY IF EXISTS "Allow users to view their own applications" ON creator_applications;
+CREATE POLICY "Allow users to view their own applications" ON creator_applications
+FOR SELECT USING (auth.uid() = user_id);
+
+-- Allow users to create their own applications
+DROP POLICY IF EXISTS "Allow users to create their own applications" ON creator_applications;
+CREATE POLICY "Allow users to create their own applications" ON creator_applications
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Allow only admins to view all applications
+DROP POLICY IF EXISTS "Allow admins to view all applications" ON creator_applications;
+CREATE POLICY "Allow admins to view all applications" ON creator_applications
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+);
+
+-- Allow only admins to update application status
+DROP POLICY IF EXISTS "Allow admins to update application status" ON creator_applications;
+CREATE POLICY "Allow admins to update application status" ON creator_applications
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+);
+
+-- Application Logs Policies
+-- Allow users to view logs for their own applications
+DROP POLICY IF EXISTS "Allow users to view logs for their own applications" ON application_logs;
+CREATE POLICY "Allow users to view logs for their own applications" ON application_logs
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM creator_applications ca
+    WHERE ca.id = application_logs.application_id
+    AND ca.user_id = auth.uid()
+  )
+);
+
+-- Allow only admins to view all application logs
+DROP POLICY IF EXISTS "Allow admins to view all application logs" ON application_logs;
+CREATE POLICY "Allow admins to view all application logs" ON application_logs
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+);
+
+-- Allow only admins to create application logs
+DROP POLICY IF EXISTS "Allow admins to create application logs" ON application_logs;
+CREATE POLICY "Allow admins to create application logs" ON application_logs
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+);
+
+-- Allow admins to update user roles (for creator role assignment)
+DROP POLICY IF EXISTS "Allow admins to update user roles" ON users;
+CREATE POLICY "Allow admins to update user roles" ON users
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  )
 );

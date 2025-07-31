@@ -2,11 +2,11 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../database/database.types";
 import { IBookmarksDAL } from "../di/interfaces/dal.interfaces";
 import { Bookmark } from "@/services/interfaces/service.interfaces";
-import { DATABASE_ERROR_CODES } from "@/constants/database-constants";
+import { DATABASE_ERROR_CODES } from "@/lib/constants/database-constants";
 import {
   BOOKMARK_ERRORS,
   DATABASE_TABLES,
-} from "@/constants/bookmarks-constants";
+} from "@/lib/constants/bookmarks-constants";
 
 export class BookmarksDAL implements IBookmarksDAL {
   constructor(private supabase: SupabaseClient<Database>) {}

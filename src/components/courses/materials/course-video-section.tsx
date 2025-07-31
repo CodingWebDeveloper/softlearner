@@ -18,7 +18,7 @@ import CategoryIcon from "@mui/icons-material/Category";
 import { CategoryChip } from "@/components/styles/courses/course-details.styles";
 import CompleteCard from "./complete-card";
 import DownloadIcon from "@mui/icons-material/Download";
-import { RESOURCE_TYPES } from "@/constants/database-constants";
+import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
 
 interface CourseVideoSectionProps {
   course: FullCourse;

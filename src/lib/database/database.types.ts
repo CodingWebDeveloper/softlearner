@@ -90,6 +90,18 @@ export type Database = {
         Insert: UserResource;
         Update: Partial<UserResource>;
       };
+      creator_applications: {
+        Row: CreatorApplication;
+        Insert: Omit<CreatorApplication, "id" | "created_at" | "updated_at">;
+        Update: Partial<
+          Omit<CreatorApplication, "id" | "created_at" | "updated_at">
+        >;
+      };
+      application_logs: {
+        Row: ApplicationLog;
+        Insert: Omit<ApplicationLog, "id" | "created_at">;
+        Update: Partial<Omit<ApplicationLog, "id" | "created_at">>;
+      };
     };
     Views: {
       [_ in never]: never;
@@ -133,6 +145,7 @@ export interface User {
   bio?: string;
   created_at: string;
   updated_at: string;
+  role: "admin" | "creator" | "student";
 }
 
 // Update Course interface
@@ -303,3 +316,30 @@ export type PreviewResource = {
   created_at: string;
   updated_at: string;
 };
+
+// Creator Application interface
+export interface CreatorApplication {
+  id: string;
+  user_id: string;
+  bio: string;
+  content_type: string;
+  portfolio_links: string[];
+  experience_level: "beginner" | "intermediate" | "advanced" | "expert";
+  motivation: string;
+  status: "pending" | "approved" | "rejected";
+  admin_notes?: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Application Log interface
+export interface ApplicationLog {
+  id: string;
+  application_id: string;
+  admin_id: string;
+  action: string;
+  notes?: string;
+  created_at: string;
+}

@@ -188,6 +188,33 @@ CREATE TABLE IF NOT EXISTS user_resources (
   PRIMARY KEY (user_id, resource_id)
 );
 
+-- Create Creator Applications table
+CREATE TABLE IF NOT EXISTS creator_applications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  bio TEXT NOT NULL,
+  content_type TEXT NOT NULL,
+  portfolio_links TEXT[],
+  experience_level TEXT CHECK (experience_level IN ('beginner', 'intermediate', 'advanced', 'expert')),
+  motivation TEXT NOT NULL,
+  status TEXT CHECK (status IN ('pending', 'approved', 'rejected')) DEFAULT 'pending',
+  admin_notes TEXT,
+  reviewed_by UUID REFERENCES users(id),
+  reviewed_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create Application Logs table for auditing
+CREATE TABLE IF NOT EXISTS application_logs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  application_id UUID REFERENCES creator_applications(id) ON DELETE CASCADE,
+  admin_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  action TEXT NOT NULL,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Enable Row Level Security on all custom tables (NOT auth.users)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
@@ -204,6 +231,8 @@ ALTER TABLE user_answers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_resources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE creator_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE application_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
 -- Create indexes for performance
@@ -232,6 +261,11 @@ CREATE INDEX IF NOT EXISTS idx_course_tags_course_id ON course_tags(course_id);
 CREATE INDEX IF NOT EXISTS idx_course_tags_tag_id ON course_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_user_resources_user_id ON user_resources(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_resources_resource_id ON user_resources(resource_id);
+CREATE INDEX IF NOT EXISTS idx_creator_applications_user_id ON creator_applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_creator_applications_status ON creator_applications(status);
+CREATE INDEX IF NOT EXISTS idx_creator_applications_created_at ON creator_applications(created_at);
+CREATE INDEX IF NOT EXISTS idx_application_logs_application_id ON application_logs(application_id);
+CREATE INDEX IF NOT EXISTS idx_application_logs_admin_id ON application_logs(admin_id);
 CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
 
 -- Create function to update updated_at column
@@ -285,4 +319,7 @@ CREATE TRIGGER update_tags_updated_at BEFORE UPDATE ON tags
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS update_creator_applications_updated_at ON creator_applications;
+CREATE TRIGGER update_creator_applications_updated_at BEFORE UPDATE ON creator_applications
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

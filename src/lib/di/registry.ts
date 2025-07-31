@@ -13,6 +13,7 @@ import { PaymentsDAL } from "../dal/payments.dal";
 import { BookmarksDAL } from "../dal/bookmarks.dal";
 import { TestsDAL } from "../dal/tests.dal";
 import { UsersDAL } from "../dal/users.dal";
+import { CreatorApplicationsDAL } from "../dal/creator-applications.dal";
 
 // Service imports
 import { CategoriesService } from "@/services/categories.service";
@@ -25,6 +26,7 @@ import { PaymentsService } from "@/services/payments.service";
 import { BookmarksService } from "@/services/bookmarks.service";
 import { TestsService } from "@/services/tests.service";
 import { UsersService } from "@/services/users.service";
+import { CreatorApplicationsService } from "@/services/creator-applications.service";
 
 // Interface imports
 import {
@@ -38,6 +40,7 @@ import {
   IBookmarksDAL,
   ITestsDAL,
   IUsersDAL,
+  ICreatorApplicationsDAL,
 } from "./interfaces/dal.interfaces";
 
 import {
@@ -51,6 +54,7 @@ import {
   IBookmarksService,
   ITestsService,
   IUsersService,
+  ICreatorApplicationsService,
 } from "@/services/interfaces/service.interfaces";
 
 // Token constants for dependency injection
@@ -67,6 +71,7 @@ export const DI_TOKENS = {
   BOOKMARKS_DAL: "BOOKMARKS_DAL",
   TESTS_DAL: "TESTS_DAL",
   USERS_DAL: "USERS_DAL",
+  CREATOR_APPLICATIONS_DAL: "CREATOR_APPLICATIONS_DAL",
 
   // Service tokens
   CATEGORIES_SERVICE: "CATEGORIES_SERVICE",
@@ -79,6 +84,7 @@ export const DI_TOKENS = {
   BOOKMARKS_SERVICE: "BOOKMARKS_SERVICE",
   TESTS_SERVICE: "TESTS_SERVICE",
   USERS_SERVICE: "USERS_SERVICE",
+  CREATOR_APPLICATIONS_SERVICE: "CREATOR_APPLICATIONS_SERVICE",
 
   // Core dependencies
   SUPABASE: "SUPABASE",
@@ -144,6 +150,11 @@ export function registerDALs(
     DI_TOKENS.USERS_DAL,
     (c) => new UsersDAL(c.resolve(DI_TOKENS.SUPABASE))
   );
+
+  container.register<ICreatorApplicationsDAL>(
+    DI_TOKENS.CREATOR_APPLICATIONS_DAL,
+    (c) => new CreatorApplicationsDAL(c.resolve(DI_TOKENS.SUPABASE))
+  );
 }
 
 /**
@@ -205,5 +216,13 @@ export function registerServices(
   container.register<IUsersService>(
     DI_TOKENS.USERS_SERVICE,
     (c) => new UsersService(c.resolve(DI_TOKENS.USERS_DAL))
+  );
+
+  container.register<ICreatorApplicationsService>(
+    DI_TOKENS.CREATOR_APPLICATIONS_SERVICE,
+    (c) =>
+      new CreatorApplicationsService(
+        c.resolve(DI_TOKENS.CREATOR_APPLICATIONS_DAL)
+      )
   );
 }
