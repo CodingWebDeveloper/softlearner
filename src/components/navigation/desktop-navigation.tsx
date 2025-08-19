@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { List, Collapse } from "@mui/material";
+import { List, Collapse, ListSubheader } from "@mui/material";
 import { School as SchoolIcon } from "@mui/icons-material";
 import {
   Home as HomeIcon,
@@ -19,6 +19,9 @@ import {
   LocalOffer as TagIcon,
   Assessment as AssessmentIcon,
   Security as SecurityIcon,
+  OndemandVideo as VideoIcon,
+  Analytics as AnalyticsIcon,
+  Payments as PaymentsIcon,
 } from "@mui/icons-material";
 import {
   SidebarContainer,
@@ -61,6 +64,13 @@ interface NavigationItem {
 }
 
 interface AdminActionItem {
+  label: string;
+  icon: React.ReactNode;
+  path: string;
+  description?: string;
+}
+
+interface CreatorActionItem {
   label: string;
   icon: React.ReactNode;
   path: string;
@@ -171,6 +181,27 @@ export const DesktopNavigation = ({
     },
   ];
 
+  const creatorActionItems: CreatorActionItem[] = [
+    {
+      label: "My Courses",
+      icon: <VideoIcon />,
+      path: "/creator/courses",
+      description: "Manage your created courses",
+    },
+    {
+      label: "Analytics",
+      icon: <AnalyticsIcon />,
+      path: "/creator/analytics",
+      description: "View course performance",
+    },
+    {
+      label: "Earnings",
+      icon: <PaymentsIcon />,
+      path: "/creator/earnings",
+      description: "Track your earnings",
+    },
+  ];
+
   const filteredItems = navigationItems.filter((item) => {
     if (user) {
       return item.showWhenAuthenticated;
@@ -180,6 +211,7 @@ export const DesktopNavigation = ({
   });
 
   const isAdmin = userProfile?.role === ROLES.ADMIN;
+  const isCreator = userProfile?.role === ROLES.CREATOR;
 
   const handleSignOut = async () => {
     await signOut();
@@ -215,6 +247,51 @@ export const DesktopNavigation = ({
               </SidebarListItemButton>
             </SidebarListItem>
           ))}
+
+          {/* Creator Actions Section */}
+          {isCreator && (
+            <>
+              <FooterDivider />
+              <List
+                component="nav"
+                aria-labelledby="creator-actions-subheader"
+                subheader={
+                  <ListSubheader
+                    component="div"
+                    id="creator-actions-subheader"
+                    sx={{ bgcolor: "transparent", color: "text.secondary" }}
+                  >
+                    Creator Actions
+                  </ListSubheader>
+                }
+              >
+                <SidebarListItem disablePadding>
+                  <SidebarListItemButton
+                    selected={pathname === "/creator"}
+                    onClick={() => onNavigation("/creator")}
+                    aria-label="Creator Dashboard"
+                  >
+                    <SidebarListItemIcon>
+                      <VideoIcon />
+                    </SidebarListItemIcon>
+                    <SidebarListItemText primary="Dashboard" />
+                  </SidebarListItemButton>
+                </SidebarListItem>
+                {creatorActionItems.map((item) => (
+                  <SidebarListItem key={item.path} disablePadding>
+                    <SidebarListItemButton
+                      selected={pathname === item.path}
+                      onClick={() => onNavigation(item.path)}
+                      aria-label={item.label}
+                    >
+                      <SidebarListItemIcon>{item.icon}</SidebarListItemIcon>
+                      <SidebarListItemText primary={item.label} />
+                    </SidebarListItemButton>
+                  </SidebarListItem>
+                ))}
+              </List>
+            </>
+          )}
 
           {/* Admin Actions Section */}
           {isAdmin && (

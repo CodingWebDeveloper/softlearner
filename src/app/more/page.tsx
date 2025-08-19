@@ -12,6 +12,7 @@ import {
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   AdminPanelSettings as AdminIcon,
+  OndemandVideo as VideoIcon,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useSupabase } from "@/contexts/supabase-context";
@@ -20,7 +21,7 @@ import { ROLES } from "@/utils/constants";
 
 const MorePage = () => {
   const router = useRouter();
-  const { signOut, user } = useSupabase();
+  const { signOut, userProfile } = useSupabase();
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -44,8 +45,19 @@ const MorePage = () => {
       path: "/settings",
       onClick: () => handleNavigation("/settings"),
     },
+    // Creator dashboard - only show for creator users
+    ...(userProfile?.role === ROLES.CREATOR
+      ? [
+          {
+            label: "Creator Dashboard",
+            icon: <VideoIcon />,
+            path: "/creator",
+            onClick: () => handleNavigation("/creator"),
+          },
+        ]
+      : []),
     // Admin dashboard - only show for admin users
-    ...(user?.user_metadata?.role === ROLES.ADMIN
+    ...(userProfile?.role === ROLES.ADMIN
       ? [
           {
             label: "Admin Dashboard",
