@@ -45,17 +45,7 @@ const MorePage = () => {
       path: "/settings",
       onClick: () => handleNavigation("/settings"),
     },
-    // Creator dashboard - only show for creator users
-    ...(userProfile?.role === ROLES.CREATOR
-      ? [
-          {
-            label: "Creator Dashboard",
-            icon: <VideoIcon />,
-            path: "/creator",
-            onClick: () => handleNavigation("/creator"),
-          },
-        ]
-      : []),
+
     // Admin dashboard - only show for admin users
     ...(userProfile?.role === ROLES.ADMIN
       ? [

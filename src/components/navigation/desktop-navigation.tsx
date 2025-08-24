@@ -265,18 +265,6 @@ export const DesktopNavigation = ({
                   </ListSubheader>
                 }
               >
-                <SidebarListItem disablePadding>
-                  <SidebarListItemButton
-                    selected={pathname === "/creator"}
-                    onClick={() => onNavigation("/creator")}
-                    aria-label="Creator Dashboard"
-                  >
-                    <SidebarListItemIcon>
-                      <VideoIcon />
-                    </SidebarListItemIcon>
-                    <SidebarListItemText primary="Dashboard" />
-                  </SidebarListItemButton>
-                </SidebarListItem>
                 {creatorActionItems.map((item) => (
                   <SidebarListItem key={item.path} disablePadding>
                     <SidebarListItemButton
