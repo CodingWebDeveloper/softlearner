@@ -14,6 +14,7 @@ import {
   MenuItem,
   InputAdornment,
   Stack,
+  Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
@@ -70,7 +71,7 @@ const validationSchema = Yup.object({
     "New Price must be greater than or equal to 0"
   ),
   category: Yup.string().required("Category is required"),
-  videoUrl: Yup.string().url("Must be a valid URL"),
+  videoUrl: Yup.string().required("Video URL is required"),
 });
 
 const GeneralForm = () => {
@@ -86,11 +87,14 @@ const GeneralForm = () => {
   };
 
   const handleSubmit = (values: typeof initialValues) => {
-    console.log({
-      ...values,
-      thumbnailFile,
-    });
-    // TODO: Implement form submission with file upload
+    const formData = new FormData();
+    formData.append("thumbnail", thumbnailFile as File);
+    formData.append("name", values.name);
+    formData.append("description", values.description);
+    formData.append("price", values.price);
+    formData.append("new_price", values.new_price);
+    formData.append("category", values.category);
+    formData.append("videoUrl", values.videoUrl);
   };
 
   return (
@@ -106,12 +110,26 @@ const GeneralForm = () => {
             errors,
             touched,
             handleChange,
+            handleBlur,
             handleSubmit,
             isSubmitting,
             isValid,
             resetForm,
           }) => (
             <form onSubmit={handleSubmit}>
+              {/* File Upload Section */}
+              <ThumbnailContainer>
+                <Typography variant="h6" gutterBottom>
+                  Upload Thumbnail
+                </Typography>
+                <UploadThumbnail onFileSelect={setThumbnailFile} />
+              </ThumbnailContainer>
+
+              {/* Main Details Section */}
+              <Typography variant="h6" gutterBottom>
+                Course Details
+              </Typography>
+
               <TextField
                 fullWidth
                 id="name"
@@ -132,46 +150,71 @@ const GeneralForm = () => {
                 rows={4}
                 value={values.description}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 error={touched.description && Boolean(errors.description)}
                 helperText={touched.description && errors.description}
               />
 
-              <TextField
-                fullWidth
-                id="price"
-                name="price"
-                label="Price"
-                type="number"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                }}
-                value={values.price}
-                onChange={handleChange}
-                error={touched.price && Boolean(errors.price)}
-                helperText={touched.price && errors.price}
-              />
+              {/* Pricing Section */}
+              <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+                Pricing
+              </Typography>
 
-              <TextField
-                fullWidth
-                id="new_price"
-                name="new_price"
-                label="New Price"
-                type="number"
-                value={values.new_price}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                }}
-                error={touched.new_price && Boolean(errors.new_price)}
-                helperText={touched.new_price && errors.new_price}
-              />
+              <Box
+                sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}
+              >
+                <TextField
+                  fullWidth
+                  id="price"
+                  name="price"
+                  label="Price"
+                  type="number"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ),
+                  }}
+                  value={values.price}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.price && Boolean(errors.price)}
+                  helperText={touched.price && errors.price}
+                />
+
+                <TextField
+                  fullWidth
+                  id="new_price"
+                  name="new_price"
+                  label="New Price"
+                  type="number"
+                  value={values.new_price}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ),
+                  }}
+                  error={touched.new_price && Boolean(errors.new_price)}
+                  helperText={
+                    (touched.new_price && errors.new_price) ||
+                    "Optional: Use this field to set a discounted price"
+                  }
+                />
+              </Box>
+
+              {/* Category and Video URL Section */}
+              <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+                Additional Details
+              </Typography>
 
               <FormControl fullWidth>
-                <InputLabel id="category-label">Category</InputLabel>
+                <InputLabel
+                  error={touched.category && Boolean(errors.category)}
+                  id="category-label"
+                >
+                  Category
+                </InputLabel>
                 <Select
                   labelId="category-label"
                   id="category"
@@ -179,6 +222,7 @@ const GeneralForm = () => {
                   value={values.category}
                   label="Category"
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   error={touched.category && Boolean(errors.category)}
                 >
                   <MenuItem value="web-development">Web Development</MenuItem>
@@ -194,27 +238,25 @@ const GeneralForm = () => {
                 fullWidth
                 id="videoUrl"
                 name="videoUrl"
-                label="Preview Video URL"
+                label="YouTube Preview Video URL"
+                placeholder="https://www.youtube.com/embed/VIDEO_ID"
                 value={values.videoUrl}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 error={touched.videoUrl && Boolean(errors.videoUrl)}
-                helperText={touched.videoUrl && errors.videoUrl}
+                helperText={
+                  (touched.videoUrl && errors.videoUrl) ||
+                  "Use the YouTube embed URL (click Share > Embed on YouTube and copy the URL from the iframe src)"
+                }
               />
 
-              <ThumbnailContainer>
-                <UploadThumbnail onFileSelect={setThumbnailFile} />
-              </ThumbnailContainer>
-
               <ButtonContainer>
-                <ResetButton variant="outlined" onClick={() => resetForm()}>
-                  Reset
-                </ResetButton>
                 <SaveButton
                   type="submit"
                   variant="contained"
-                  disabled={!isValid || isSubmitting}
+                  disabled={!isValid || !thumbnailFile || isSubmitting}
                 >
-                  Save
+                  Create
                 </SaveButton>
               </ButtonContainer>
             </form>

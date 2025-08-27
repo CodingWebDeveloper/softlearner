@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import GeneralForm from "@/components/creator/courses/create/general-form";
+import ResourcesForm from "@/components/creator/courses/create/resources-form";
 import {
   Container,
   Typography,
@@ -49,6 +50,13 @@ const StyledLink = styled("span")({
   },
 });
 
+function a11yProps(index: number) {
+  return {
+    id: `course-tab-${index}`,
+    "aria-controls": `course-tabpanel-${index}`,
+  };
+}
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -73,6 +81,7 @@ const TabPanel = (props: TabPanelProps) => {
 
 const CreateCoursePage = () => {
   const [currentTab, setCurrentTab] = useState(0);
+  const [isCourseCreated, setIsCourseCreated] = useState(false);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -103,34 +112,18 @@ const CreateCoursePage = () => {
             onChange={handleTabChange}
             aria-label="course creation tabs"
           >
-            <Tab label="General" />
-            <Tooltip
-              title="Will be enabled after creating the course"
-              arrow
-              placement="top"
-            >
-              <span>
-                <Tab label="Resources" disabled style={{ width: "100%" }} />
-              </span>
-            </Tooltip>
-            <Tooltip
-              title="Will be enabled after creating the course"
-              arrow
-              placement="top"
-            >
-              <span>
-                <Tab label="Quizzes" disabled style={{ width: "100%" }} />
-              </span>
-            </Tooltip>
-            <Tooltip
-              title="Will be enabled after creating the course"
-              arrow
-              placement="top"
-            >
-              <span>
-                <Tab label="Tags" disabled style={{ width: "100%" }} />
-              </span>
-            </Tooltip>
+            <Tab label="General" {...a11yProps(0)} />
+            <Tab
+              label="Resources"
+              disabled={!isCourseCreated}
+              {...a11yProps(1)}
+            />
+            <Tab label="Tags" disabled={!isCourseCreated} {...a11yProps(2)} />
+            <Tab
+              label="Quizzes"
+              disabled={!isCourseCreated}
+              {...a11yProps(3)}
+            />
           </StyledTabs>
 
           <TabPanel value={currentTab} index={0}>
@@ -138,18 +131,17 @@ const CreateCoursePage = () => {
           </TabPanel>
 
           <TabPanel value={currentTab} index={1}>
-            {/* Resources Component will go here */}
-            <Typography>Resources Management</Typography>
+            <ResourcesForm />
           </TabPanel>
 
           <TabPanel value={currentTab} index={2}>
-            {/* Quizzes Component will go here */}
-            <Typography>Quizzes Management</Typography>
+            {/* Tags Component will go here */}
+            <Typography>Tags Management</Typography>
           </TabPanel>
 
           <TabPanel value={currentTab} index={3}>
-            {/* Tags Component will go here */}
-            <Typography>Tags Management</Typography>
+            {/* Quizzes Component will go here */}
+            <Typography>Quizzes Management</Typography>
           </TabPanel>
         </Box>
       </Container>
