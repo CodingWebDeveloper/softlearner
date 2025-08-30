@@ -6,6 +6,9 @@ import {
   GetCoursesResult,
   BasicCourse,
   CourseCreator,
+  CreateCourseParams,
+  SimpleCourse,
+  User,
 } from "@/services/interfaces/service.interfaces";
 import { ORDER_STATUS } from "@/lib/constants/stripe-constants";
 import { FullCourse } from "@/services/interfaces/service.interfaces";
@@ -15,6 +18,11 @@ type CourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {
   category: Database["public"]["Tables"]["categories"]["Row"];
   reviews: { rating: number }[] | null;
   bookmarks?: { id: string }[] | null;
+};
+
+type SimpleCourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {
+  creator: User;
+  category: Database["public"]["Tables"]["categories"]["Row"];
 };
 
 type BookmarkWithCourse = Database["public"]["Tables"]["bookmarks"]["Row"] & {
@@ -56,6 +64,89 @@ type OrderWithCourse = Database["public"]["Tables"]["orders"]["Row"] & {
 
 export class CoursesDAL implements ICoursesDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
+
+  async createCourse(creatorId: string, params: CreateCourseParams): Promise<SimpleCourse> {
+    // Create course record first
+    const { data: courseData, error: courseError } = await this.supabase
+      .from("courses")
+      .insert({
+        name: params.name,
+        description: params.description,
+        video_url: params.video_url,
+        price: params.price,
+        new_price: params.new_price || null,
+        category_id: params.category_id,
+        creator_id: creatorId,
+        thumbnail_image_url: "",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select(`
+        *,
+        creator:creator_id(*),
+        category:category_id(*)
+      `)
+      .single();
+
+    if (courseError) {
+      throw new Error(`Error creating course: ${courseError.message}`);
+    }
+
+    if (!courseData) {
+      throw new Error("Course was created but no data was returned");
+    }
+
+    const course = courseData as unknown as SimpleCourseWithRelations;
+    await this.uploadCourseThumbnail(creatorId, course.id, params.thumbnail_image as File);
+
+    const basicCourse: SimpleCourse = {
+      id: course.id,
+      name: course.name,
+      description: course.description || "",
+      video_url: course.video_url || "",
+      price: course.price,
+      new_price: course.new_price || null,
+      thumbnail_image_url: course.thumbnail_image_url || "",
+      creator: course.creator as User,  
+      category: course.category,
+      currency: course.currency,
+      created_at: course.created_at,
+      updated_at: course.updated_at,
+    };
+
+    return basicCourse;
+  }
+
+  async uploadCourseThumbnail(creatorId: string, courseId: string, file: File): Promise<string> {
+    // Upload the thumbnail
+    const { data: uploadData, error: uploadError } = await this.supabase.storage
+      .from("course-thumbnails")
+      .upload(courseId, file);
+
+    if (uploadError) {
+      throw new Error(`Error uploading thumbnail: ${uploadError.message}`);
+    }
+
+    // Update the course with the new thumbnail path
+    const { error: updateError } = await this.supabase
+      .from("courses")
+      .update({
+        thumbnail_image_url: uploadData.path,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", courseId);
+
+    if (updateError) {
+      // If course update fails, clean up the uploaded file
+      await this.supabase.storage
+        .from("course-thumbnails")
+        .remove([uploadData.path])
+        .catch(console.error);
+      throw new Error(`Error updating course thumbnail: ${updateError.message}`);
+    }
+
+    return uploadData.path;
+  }
 
   async getCourses(params: GetCoursesParams): Promise<GetCoursesResult> {
     const {

@@ -6,10 +6,16 @@ import {
   BasicCourse,
   GetPurchasedCoursesResult,
   FullCourse,
+  CreateCourseParams,
+  SimpleCourse,
 } from "./interfaces/service.interfaces";
 
 export class CoursesService implements ICoursesService {
   constructor(private coursesDAL: ICoursesDAL) {}
+
+  async createCourse(creatorId: string, params: CreateCourseParams): Promise<SimpleCourse> {
+    return this.coursesDAL.createCourse(creatorId, params);
+  }
 
   async getCourses(params: GetCoursesParams): Promise<GetCoursesResult> {
     return this.coursesDAL.getCourses(params);

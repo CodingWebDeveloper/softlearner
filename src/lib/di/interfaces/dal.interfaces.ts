@@ -35,9 +35,13 @@ import {
   GetCreatorApplicationsParams,
   GetCreatorApplicationsResult,
   ApplicationLog,
+  CreateCourseParams,
+  SimpleCourse,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
+  createCourse(creatorId: string, params: CreateCourseParams): Promise<SimpleCourse>;
+  uploadCourseThumbnail(creatorId: string, courseId: string, file: File): Promise<string>;
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string, userId?: string): Promise<BasicCourse | null>;
   isEnrolled(userId: string, courseId: string): Promise<boolean>;

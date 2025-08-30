@@ -13,7 +13,7 @@ export interface BasicResource {
   completed?: boolean;
 }
 
-type User = {
+export type User = {
   id: string;
   email: string | null;
   full_name: string | null;
@@ -66,6 +66,31 @@ export interface CheckoutSessionResponse {
 export interface GetTagsParams {
   search?: string;
   limit?: number;
+}
+
+export interface CreateCourseParams {
+  name: string;
+  description: string;
+  video_url: string;
+  price: number;
+  new_price?: number | null;
+  category_id: string;
+  thumbnail_image?: File;
+}
+
+export interface SimpleCourse{
+  id: string;
+  name: string;
+  description: string;
+  video_url: string;
+  price: number;
+  new_price: number | null;
+  currency: string;
+  category: Category;
+  creator: User;
+  thumbnail_image_url: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface BasicCourse {
@@ -145,6 +170,7 @@ export interface ICategoriesService {
 }
 
 export interface ICoursesService {
+  createCourse(creatorId: string, params: CreateCourseParams): Promise<SimpleCourse>;
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string): Promise<BasicCourse | null>;
   isEnrolled(userId: string, courseId: string): Promise<boolean>;

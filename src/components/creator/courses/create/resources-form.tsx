@@ -55,7 +55,11 @@ const validationSchema = Yup.object({
   }),
 });
 
-const ResourcesForm = () => {
+interface ResourceFormProps {
+  courseId: string | null;
+}
+
+const ResourcesForm = ({ courseId }: ResourceFormProps) => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<FileType>("downloadable");

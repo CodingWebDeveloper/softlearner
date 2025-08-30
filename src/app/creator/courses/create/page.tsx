@@ -10,7 +10,6 @@ import {
   Breadcrumbs,
   Tab,
   Tabs,
-  Tooltip,
 } from "@mui/material";
 import Link from "next/link";
 import { styled } from "@mui/material/styles";
@@ -81,7 +80,7 @@ const TabPanel = (props: TabPanelProps) => {
 
 const CreateCoursePage = () => {
   const [currentTab, setCurrentTab] = useState(0);
-  const [isCourseCreated, setIsCourseCreated] = useState(false);
+  const [courseId, setCourseId] = useState<string | null>(null);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -113,25 +112,17 @@ const CreateCoursePage = () => {
             aria-label="course creation tabs"
           >
             <Tab label="General" {...a11yProps(0)} />
-            <Tab
-              label="Resources"
-              disabled={!isCourseCreated}
-              {...a11yProps(1)}
-            />
-            <Tab label="Tags" disabled={!isCourseCreated} {...a11yProps(2)} />
-            <Tab
-              label="Quizzes"
-              disabled={!isCourseCreated}
-              {...a11yProps(3)}
-            />
+            <Tab label="Resources" disabled={!courseId} {...a11yProps(1)} />
+            <Tab label="Tags" disabled={!courseId} {...a11yProps(2)} />
+            <Tab label="Quizzes" disabled={!courseId} {...a11yProps(3)} />
           </StyledTabs>
 
           <TabPanel value={currentTab} index={0}>
-            <GeneralForm />
+            <GeneralForm setCourseId={setCourseId} />
           </TabPanel>
 
           <TabPanel value={currentTab} index={1}>
-            <ResourcesForm />
+            <ResourcesForm courseId={courseId} />
           </TabPanel>
 
           <TabPanel value={currentTab} index={2}>

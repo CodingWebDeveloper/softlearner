@@ -22,6 +22,54 @@ const getPurchasedCoursesInput = z.object({
 });
 
 export const coursesRouter = router({
+  createCourse: protectedProcedure
+    .input(z.instanceof(FormData))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+
+        const formData = input  ;
+        const courseData = {
+          name: formData.get("name") as string,
+          description: formData.get("description") as string,
+          video_url: formData.get("video_url") as string,
+          price: Number(formData.get("price")),
+          new_price: formData.get("new_price") ? Number(formData.get("new_price")) : null,
+          category_id: formData.get("category_id") as string,
+          thumbnail_image: formData.get("thumbnail_image") as File || undefined
+        };
+
+        // Validate the extracted data
+        if (!courseData.name || courseData.name.length === 0) {
+          throw new Error("Name is required");
+        }
+        if (!courseData.description || courseData.description.length === 0) {
+          throw new Error("Description is required");
+        }
+        if (!courseData.video_url || !courseData.video_url.startsWith("http")) {
+          throw new Error("Valid video URL is required");
+        }
+        if (isNaN(courseData.price) || courseData.price < 0) {
+          throw new Error("Valid price is required");
+        }
+        if (courseData.new_price !== null && (isNaN(courseData.new_price) || courseData.new_price < 0)) {
+          throw new Error("New price must be a valid number");
+        }
+        if (!courseData.category_id) {
+          throw new Error("Category ID is required");
+        }
+
+        return await coursesService.createCourse(ctx.user.id, courseData);
+      } catch (error) {
+        throw new Error(
+          `Failed to create course: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
   getCourses: protectedProcedure
     .input(getCoursesInput)
     .query(async ({ ctx, input }) => {
