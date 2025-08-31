@@ -1,5 +1,5 @@
 import { IResourcesDAL } from "@/lib/di/interfaces/dal.interfaces";
-import { IResourcesService } from "./interfaces/service.interfaces";
+import { CreateResourceParams, IResourcesService, SimpleResource } from "./interfaces/service.interfaces";
 import { PreviewResource } from "@/lib/database/database.types";
 import { BasicResource } from "./interfaces/service.interfaces";
 
@@ -36,5 +36,9 @@ export class ResourcesService implements IResourcesService {
     resourceId: string
   ): Promise<boolean> {
     return this.resourcesDAL.getResourceCompletionStatus(userId, resourceId);
+  }
+
+  async createResource(params: CreateResourceParams): Promise<SimpleResource> {
+    return this.resourcesDAL.createResource(params);
   }
 }

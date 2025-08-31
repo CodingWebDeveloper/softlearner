@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { trpc } from "@/lib/trpc/client";
+import { useSnackbar } from "notistack";
 import {
   TextField,
   Stack,
@@ -10,6 +12,7 @@ import {
   Box,
   Radio,
   FormControlLabel,
+  CircularProgress,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -63,6 +66,17 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<FileType>("downloadable");
+  const { enqueueSnackbar } = useSnackbar();
+  const createResourceMutation = trpc.resources.createResource.useMutation({
+    onSuccess: () => {
+      enqueueSnackbar("Resource added successfully!", { variant: "success" });
+    },
+    onError: (error) => {
+      enqueueSnackbar(error.message || "Failed to create resource", {
+        variant: "error",
+      });
+    },
+  });
 
   const initialValues = {
     title: "",
@@ -83,20 +97,56 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
     setSelectedFile(null);
   };
 
-  const handleSubmit = (
+  const handleSubmit = async (
     values: typeof initialValues,
-    { resetForm }: { resetForm: () => void }
+    {
+      resetForm,
+      setSubmitting,
+    }: { resetForm: () => void; setSubmitting: (isSubmitting: boolean) => void }
   ) => {
-    const newResource: Resource = {
-      title: values.title,
-      description: values.description,
-      type: fileType,
-      duration: values.duration,
-      ...(fileType === "video" ? { url: values.url } : { file: selectedFile }),
-    };
-    setResources([...resources, newResource]);
-    setSelectedFile(null);
-    resetForm();
+    try {
+      const formData = new FormData();
+      formData.append("title", values.title);
+      formData.append("description", values.description);
+      formData.append("type", fileType);
+      formData.append("duration", values.duration);
+      formData.append("course_id", courseId || "");
+
+      if (fileType === "video") {
+        formData.append("url", values.url);
+      } else if (selectedFile) {
+        formData.append("file", selectedFile);
+      }
+
+      // Call the API to create the resource
+      await createResourceMutation.mutateAsync(formData);
+
+      // Add to local state only after successful creation
+      const newResource: Resource = {
+        title: values.title,
+        description: values.description,
+        type: fileType,
+        duration: values.duration,
+        ...(fileType === "video"
+          ? { url: values.url }
+          : { file: selectedFile }),
+      };
+      setResources([...resources, newResource]);
+
+      // Reset form
+      setSelectedFile(null);
+      resetForm();
+    } catch (error) {
+      console.error("Failed to create resource:", error);
+      enqueueSnackbar(
+        error instanceof Error ? error.message : "Failed to create resource",
+        {
+          variant: "error",
+        }
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDeleteResource = (index: number) => {
@@ -104,9 +154,20 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
     setResources(updatedResources);
   };
 
+  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
+      const file = event.target.files[0];
+      if (file.size > MAX_FILE_SIZE) {
+        enqueueSnackbar("File size must be less than 20MB", {
+          variant: "error",
+          anchorOrigin: { vertical: "top", horizontal: "center" },
+        });
+        event.target.value = ""; // Reset input
+        return;
+      }
+      setSelectedFile(file);
     }
   };
 
@@ -187,7 +248,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                 id="resource-file"
                 onChange={handleFileChange}
               />
-              <label htmlFor="resource-file">
+              <label>
                 <Box
                   sx={{
                     display: "flex",
@@ -202,9 +263,13 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                     gutterBottom
                     color="textSecondary"
                   >
-                    {selectedFile ? selectedFile.name : "Max 120 MB"}
+                    {selectedFile ? selectedFile.name : "Max 20 MB"}
                   </Typography>
-                  <UploadButton component="span" startIcon={<FileUploadIcon />}>
+                  <UploadButton
+                    component="label"
+                    htmlFor="resource-file"
+                    startIcon={<FileUploadIcon />}
+                  >
                     Upload File
                   </UploadButton>
                 </Box>
@@ -325,7 +390,11 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                   }
                   startIcon={<AddIcon />}
                 >
-                  Add Resource
+                  {isSubmitting ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : (
+                    "Add Resource"
+                  )}
                 </AddResourceButton>
               </form>
             )}

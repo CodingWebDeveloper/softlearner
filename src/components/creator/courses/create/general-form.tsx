@@ -121,7 +121,6 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
             isValid,
           }) => (
             <>
-              {errors && <pre>{JSON.stringify(errors, null, 2)}</pre>}
               <form onSubmit={handleSubmit}>
                 {/* File Upload Section */}
                 <ThumbnailContainer>

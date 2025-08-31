@@ -1,6 +1,19 @@
 import { Category, Tag, PreviewResource } from "@/lib/database/database.types";
 import { ResourceType } from "@/lib/constants/database-constants";
 
+
+export interface SimpleResource {
+  id: string;
+  name: string;
+  url: string;
+  short_summary?: string;
+  type: ResourceType;
+  order_index?: number;
+  duration?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BasicResource {
   id: string;
   name: string;
@@ -198,6 +211,17 @@ export interface ITagsService {
   deleteTag(id: string): Promise<void>;
 }
 
+export interface CreateResourceParams {
+  name: string;
+  short_summary?: string;
+  type: ResourceType;
+  course_id: string;
+  url?: string;
+  file?: File;
+  order_index?: number;
+  duration?: string;
+}
+
 export interface IResourcesService {
   getResourcesByCourseId(courseId: string): Promise<PreviewResource[]>;
   getResourceMaterialsByCourseId(
@@ -216,6 +240,7 @@ export interface IResourcesService {
     userId: string,
     resourceId: string
   ): Promise<boolean>;
+  createResource(params: CreateResourceParams): Promise<SimpleResource>;
 }
 
 export interface IReviewsService {

@@ -37,6 +37,8 @@ import {
   ApplicationLog,
   CreateCourseParams,
   SimpleCourse,
+  CreateResourceParams,
+  SimpleResource,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -91,6 +93,7 @@ export interface IResourcesDAL {
     userId: string,
     resourceId: string
   ): Promise<boolean>;
+  createResource(params: CreateResourceParams): Promise<SimpleResource>;
 }
 
 export interface IReviewsDAL {

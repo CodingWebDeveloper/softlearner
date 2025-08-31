@@ -80,7 +80,9 @@ const TabPanel = (props: TabPanelProps) => {
 
 const CreateCoursePage = () => {
   const [currentTab, setCurrentTab] = useState(0);
-  const [courseId, setCourseId] = useState<string | null>(null);
+  const [courseId, setCourseId] = useState<string | null>(
+    "7a7e3752-5c0d-4595-ab5b-8bf172250701"
+  );
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);

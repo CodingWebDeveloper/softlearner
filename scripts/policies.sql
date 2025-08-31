@@ -91,6 +91,45 @@ DROP POLICY IF EXISTS "Allow all users to view resources" ON resources;
 CREATE POLICY "Allow all users to view resources" ON resources
 FOR SELECT USING (true);
 
+-- Allow course creators to create resources for their courses
+DROP POLICY IF EXISTS "Allow creators to create resources" ON resources;
+CREATE POLICY "Allow creators to create resources" ON resources
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND c.creator_id = auth.uid()
+  )
+);
+
+-- Allow course creators to update their course resources
+DROP POLICY IF EXISTS "Allow creators to update resources" ON resources;
+CREATE POLICY "Allow creators to update resources" ON resources
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND c.creator_id = auth.uid()
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND c.creator_id = auth.uid()
+  )
+);
+
+-- Allow course creators to delete their course resources
+DROP POLICY IF EXISTS "Allow creators to delete resources" ON resources;
+CREATE POLICY "Allow creators to delete resources" ON resources
+FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND c.creator_id = auth.uid()
+  )
+);
+
 -- Reviews Policies
 -- Allow all users to view reviews
 DROP POLICY IF EXISTS "Allow all users to view reviews" ON reviews;
