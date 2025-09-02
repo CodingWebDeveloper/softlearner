@@ -283,6 +283,47 @@ export class ResourcesDAL implements IResourcesDAL {
     return resource as SimpleResource;
   }
 
+  async updateResourcesOrder(
+    courseId: string,
+    orderUpdates: { id: string; order_index: number }[]
+  ): Promise<SimpleResource[]> {
+    try {
+      const data: SimpleResource[] = [];
+      // Update all resources in a single transaction
+      for (const { id, order_index } of orderUpdates) {
+        const { error, data: updatedResource } = await this.supabase
+          .from("resources")
+          .update({
+            order_index,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", id)          // update only this resource
+          .eq("course_id", courseId) // make sure it's in the right course
+          .select()              // Get the updated data back
+          .single();            // Get a single row
+    
+        if (error) {
+          console.error("Failed to update resource:", id, error);
+          throw new Error(`Failed to update resource ${id}: ${error.message}`);
+        }
+
+        if (!updatedResource) {
+          throw new Error(`Failed to update resource ${id}: No data returned`);
+        }
+
+        data.push(updatedResource as SimpleResource);
+      }
+
+      return data as SimpleResource[];
+    } catch (error) {
+      throw new Error(
+        `Failed to update resources order: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }
+
   async patchResource(
     resourceId: string,
     updates: PatchResourceParams

@@ -6,6 +6,7 @@ import {
   ListItem,
   Paper,
   RadioGroup,
+  Typography,
 } from "@mui/material";
 
 export const FormContainer = styled("div")(({ theme }) => ({
@@ -114,6 +115,45 @@ export const AddResourceButton = styled(Button)(({ theme }) => ({
     boxShadow: theme.shadows[2],
   },
   transition: "all 0.2s ease-in-out",
+}));
+
+export const SaveOrderButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  backgroundColor: theme.palette.custom.accent.teal,
+  padding: theme.spacing(1.5, 4),
+  borderRadius: theme.spacing(1),
+  "&:hover": {
+    backgroundColor: theme.palette.custom.accent.tealDark,
+    transform: "translateY(-2px)",
+    boxShadow: theme.shadows[2],
+  },
+  transition: "all 0.2s ease-in-out",
+}));
+
+export const SectionTitle = styled(Typography)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  color: theme.palette.custom.accent.teal,
+}));
+
+export const ResourceDetailsGrid = styled(Box)(({ theme }) => ({
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: theme.spacing(2),
+}));
+
+export const UploadBox = styled(Box)({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  cursor: "pointer",
+});
+
+export const SaveOrderBox = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  display: "flex",
+  justifyContent: "flex-end",
 }));
 
 export const DeleteButton = styled(IconButton)(({ theme }) => ({

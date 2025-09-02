@@ -5,6 +5,8 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { updateResourceOrder } from "@/lib/store/features/resourcesSlice";
+import { Skeleton, Stack } from "@mui/material";
+import { ResourceItem } from "@/components/styles/creator/resources-form.styles";
 import {
   DndContext,
   closestCenter,
@@ -35,8 +37,25 @@ import {
 } from "@/components/styles/creator/resources-list.styles";
 import { SimpleResource } from "@/services/interfaces/service.interfaces";
 import ResourceCard from "./resource-card";
-import { trpc } from "@/lib/trpc/client";
-import { useSnackbar } from "notistack";
+// Removed unused imports
+
+const ResourceSkeleton = () => {
+  return (
+    <ResourceItem>
+      <Stack spacing={1} width="100%" sx={{ p: 1 }}>
+        {/* Title */}
+        <Skeleton variant="text" width="40%" height={24} />
+
+        {/* Description */}
+        <Skeleton variant="text" width="80%" height={20} />
+        <Skeleton variant="text" width="70%" height={20} />
+
+        {/* Type label */}
+        <Skeleton variant="text" width="20%" height={16} />
+      </Stack>
+    </ResourceItem>
+  );
+};
 
 interface ResourcesListProps {
   resources: SimpleResource[];
@@ -79,13 +98,8 @@ const SortableItem = ({ resource, onDelete }: SortableItemProps) => {
   );
 };
 
-const ResourcesList = ({
-  isLoading,
-  resources,
-  courseId,
-}: ResourcesListProps) => {
+const ResourcesList = ({ isLoading, resources }: ResourcesListProps) => {
   const dispatch = useAppDispatch();
-  const { enqueueSnackbar } = useSnackbar();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -121,7 +135,20 @@ const ResourcesList = ({
     [dispatch, resources]
   );
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <ResourcesContainer>
+        <ResourcesHeader variant="h6" gutterBottom>
+          <InsertDriveFileIcon /> Added Resources
+        </ResourcesHeader>
+        <ResourceList>
+          {[1, 2, 3].map((i) => (
+            <ResourceSkeleton key={i} />
+          ))}
+        </ResourceList>
+      </ResourcesContainer>
+    );
+  }
 
   return (
     <ResourcesContainer>

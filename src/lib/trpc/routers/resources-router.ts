@@ -27,6 +27,7 @@ export const resourcesRouter = router({
           type: resourceType,
           course_id: formData.get("course_id") as string,
           duration: formData.get("duration") as string,
+          order_index: parseInt(formData.get("order_index") as string),
           url: type === RESOURCE_TYPES.VIDEO ? formData.get("url") as string : undefined,
           file: type === RESOURCE_TYPES.DOWNLOADABLE_FILE ? formData.get("file") as File : undefined
         };
@@ -43,6 +44,10 @@ export const resourcesRouter = router({
         }
         if (!resourceData.duration || !resourceData.duration.match(/^([0-9]+:)?[0-5]?[0-9]:[0-5][0-9]$/)) {
           throw new Error("Duration must be in format HH:MM:SS or MM:SS");
+        }
+
+        if (!resourceData.order_index || resourceData.order_index < 0) {
+          throw new Error("Order index is required and must be greater than 0");
         }
 
         // Type-specific validations
@@ -174,6 +179,36 @@ export const resourcesRouter = router({
       } catch (error) {
         throw new Error(
           `Failed to get resource completion status: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  updateResourcesOrder: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        orderUpdates: z.array(
+          z.object({
+            id: z.string(),
+            order_index: z.number(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const resourcesService = ctx.container.resolve<IResourcesService>(
+          DI_TOKENS.RESOURCES_SERVICE
+        );
+        return await resourcesService.updateResourcesOrder(
+          input.courseId,
+          input.orderUpdates
+        );
+      } catch (error) {
+        throw new Error(
+          `${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );

@@ -10,6 +10,7 @@ import {
   addResource,
   selectOrderedResources,
 } from "@/lib/store/features/resourcesSlice";
+import SaveIcon from "@mui/icons-material/Save";
 import type { SimpleResource } from "@/services/interfaces/service.interfaces";
 import {
   TextField,
@@ -35,10 +36,19 @@ import {
   StyledRadioGroup,
   TypeOption,
   AddResourceButton,
+  SaveOrderButton,
+  SectionTitle,
+  ResourceDetailsGrid,
+  UploadBox,
+  SaveOrderBox,
 } from "@/components/styles/creator/resources-form.styles";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import {
+  RESOURCE_TYPES,
+  ResourceType,
+} from "@/lib/constants/database-constants";
 
-type FileType = "video" | "downloadable";
+type FileType = ResourceType;
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Name is required"),
@@ -50,7 +60,7 @@ const validationSchema = Yup.object({
       "Duration must be in format HH:MM:SS or MM:SS"
     ),
   url: Yup.string().when("type", {
-    is: "video",
+    is: RESOURCE_TYPES.VIDEO,
     then: (schema) => schema.required("YouTube URL is required"),
     otherwise: (schema) => schema.optional(),
   }),
@@ -63,23 +73,39 @@ interface ResourceFormProps {
 const ResourcesForm = ({ courseId }: ResourceFormProps) => {
   const dispatch = useAppDispatch();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileType, setFileType] = useState<FileType>("downloadable");
+  const [fileType, setFileType] = useState<FileType>("downloadable file");
   const { enqueueSnackbar } = useSnackbar();
 
-  const resources = useAppSelector(selectOrderedResources);
+  const resources = useAppSelector(selectOrderedResources) as SimpleResource[];
 
-  const { isLoading, data: resourcesData } =
+  const { data: resourcesData, isPending: isLoadingResources } =
     trpc.resources.getAllResourcesByCourseId.useQuery(
       { courseId: courseId || "" },
       { enabled: !!courseId }
     );
 
+  const {
+    mutateAsync: updateResourcesOrder,
+    isPending: isLoadingUpdateResourcesOrder,
+  } = trpc.resources.updateResourcesOrder.useMutation({
+    onSuccess: () => {
+      enqueueSnackbar("Resource order saved successfully!", {
+        variant: "success",
+      });
+    },
+    onError: (error: Error) => {
+      enqueueSnackbar(error.message || "Failed to save resource order", {
+        variant: "error",
+      });
+    },
+  });
+
   const createResourceMutation = trpc.resources.createResource.useMutation({
-    onSuccess: (newResource) => {
-      dispatch(addResource(newResource as unknown as SimpleResource));
+    onSuccess: (newResource: SimpleResource) => {
+      dispatch(addResource(newResource));
       enqueueSnackbar("Resource added successfully!", { variant: "success" });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       enqueueSnackbar(error.message || "Failed to create resource", {
         variant: "error",
       });
@@ -119,12 +145,9 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
       formData.append("type", fileType);
       formData.append("duration", values.duration);
       formData.append("course_id", courseId || "");
-      formData.append(
-        "order_index",
-        (resourcesData?.length || 0 + 1).toString()
-      );
+      formData.append("order_index", ((resources?.length || 0) + 1).toString());
 
-      if (fileType === "video") {
+      if (fileType === RESOURCE_TYPES.VIDEO) {
         formData.append("url", values.url);
       } else if (selectedFile) {
         formData.append("file", selectedFile);
@@ -164,9 +187,24 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
     }
   };
 
+  const handleSaveOrder = async () => {
+    if (!courseId || !resources) return;
+
+    const orderUpdates = resources.map(
+      (resource: SimpleResource, index: number) => ({
+        id: resource.id,
+        order_index: index,
+      })
+    );
+
+    await updateResourcesOrder({
+      courseId,
+      orderUpdates,
+    });
+  };
+
   useEffect(() => {
     if (resourcesData) {
-      console.log(resourcesData);
       dispatch(setResources([...resourcesData]));
     }
   }, [resourcesData, dispatch]);
@@ -175,18 +213,9 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
     <FormContainer>
       <Stack spacing={4}>
         <Box sx={{ mb: 4 }}>
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              color: "custom.accent.teal",
-            }}
-          >
+          <SectionTitle variant="h6" gutterBottom>
             <FileUploadIcon /> File Type
-          </Typography>
+          </SectionTitle>
 
           <StyledRadioGroup
             name="fileType"
@@ -194,11 +223,15 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
             onChange={handleFileTypeChange}
           >
             <TypeOption
-              className={fileType === "downloadable" ? "selected" : ""}
-              onClick={() => handleTypeOptionClick("downloadable")}
+              className={
+                fileType === RESOURCE_TYPES.DOWNLOADABLE_FILE ? "selected" : ""
+              }
+              onClick={() =>
+                handleTypeOptionClick(RESOURCE_TYPES.DOWNLOADABLE_FILE)
+              }
             >
               <FormControlLabel
-                value="downloadable"
+                value={RESOURCE_TYPES.DOWNLOADABLE_FILE}
                 control={<Radio />}
                 label={
                   <Box>
@@ -216,11 +249,11 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
               />
             </TypeOption>
             <TypeOption
-              className={fileType === "video" ? "selected" : ""}
-              onClick={() => handleTypeOptionClick("video")}
+              className={fileType === RESOURCE_TYPES.VIDEO ? "selected" : ""}
+              onClick={() => handleTypeOptionClick(RESOURCE_TYPES.VIDEO)}
             >
               <FormControlLabel
-                value="video"
+                value={RESOURCE_TYPES.VIDEO}
                 control={<Radio />}
                 label={
                   <Box>
@@ -239,7 +272,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
             </TypeOption>
           </StyledRadioGroup>
 
-          {fileType === "downloadable" && (
+          {fileType === RESOURCE_TYPES.DOWNLOADABLE_FILE && (
             <UploadContainer>
               <input
                 type="file"
@@ -249,14 +282,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                 onChange={handleFileChange}
               />
               <label>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    cursor: "pointer",
-                  }}
-                >
+                <UploadBox>
                   <CloudUploadIcon className="upload-icon" />
                   <Typography
                     variant="body1"
@@ -272,25 +298,16 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                   >
                     Upload File
                   </UploadButton>
-                </Box>
+                </UploadBox>
               </label>
             </UploadContainer>
           )}
         </Box>
 
         <Box>
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              color: "custom.accent.teal",
-            }}
-          >
+          <SectionTitle variant="h6" gutterBottom>
             <InsertDriveFileIcon /> Resource Details
-          </Typography>
+          </SectionTitle>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -320,7 +337,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                   helperText={touched.name && errors.name}
                 />
 
-                {fileType === "video" && (
+                {fileType === RESOURCE_TYPES.VIDEO && (
                   <TextField
                     fullWidth
                     id="url"
@@ -338,13 +355,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                   />
                 )}
 
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 2,
-                  }}
-                >
+                <ResourceDetailsGrid>
                   <TextField
                     fullWidth
                     id="short_summary"
@@ -380,7 +391,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                       },
                     }}
                   />
-                </Box>
+                </ResourceDetailsGrid>
 
                 <AddResourceButton
                   type="submit"
@@ -388,7 +399,8 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                   disabled={
                     !isValid ||
                     isSubmitting ||
-                    (fileType === "downloadable" && !selectedFile)
+                    (fileType === RESOURCE_TYPES.DOWNLOADABLE_FILE &&
+                      !selectedFile)
                   }
                   startIcon={<AddIcon />}
                 >
@@ -403,11 +415,31 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
           </Formik>
         </Box>
 
-        <ResourcesList
-          resources={resources}
-          isLoading={isLoading}
-          courseId={courseId || ""}
-        />
+        <Box>
+          <ResourcesList
+            resources={resources}
+            isLoading={isLoadingResources}
+            courseId={courseId || ""}
+          />
+          {resources?.length > 0 && (
+            <SaveOrderBox>
+              <SaveOrderButton
+                variant="contained"
+                onClick={handleSaveOrder}
+                disabled={isLoadingUpdateResourcesOrder}
+                startIcon={
+                  isLoadingUpdateResourcesOrder ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : (
+                    <SaveIcon />
+                  )
+                }
+              >
+                Save current order
+              </SaveOrderButton>
+            </SaveOrderBox>
+          )}
+        </Box>
       </Stack>
     </FormContainer>
   );

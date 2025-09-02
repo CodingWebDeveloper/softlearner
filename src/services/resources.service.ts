@@ -52,4 +52,11 @@ export class ResourcesService implements IResourcesService {
   ): Promise<SimpleResource> {
     return this.resourcesDAL.patchResource(resourceId, params);
   }
+
+  async updateResourcesOrder(
+    courseId: string,
+    orderUpdates: { id: string; order_index: number }[]
+  ): Promise<SimpleResource[]> {
+    return this.resourcesDAL.updateResourcesOrder(courseId, orderUpdates);
+  }
 }

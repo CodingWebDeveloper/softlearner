@@ -97,6 +97,10 @@ export interface IResourcesDAL {
   ): Promise<boolean>;
   createResource(params: CreateResourceParams): Promise<SimpleResource>;
   patchResource(resourceId: string, params: PatchResourceParams): Promise<SimpleResource>;
+  updateResourcesOrder(
+    courseId: string,
+    orderUpdates: { id: string; order_index: number }[]
+  ): Promise<SimpleResource[]>;
 }
 
 export interface IReviewsDAL {

@@ -4,6 +4,9 @@ import { ListItemText } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import VideoFileIcon from "@mui/icons-material/VideoFile";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import { IconButton } from "@mui/material";
 import {
   ResourceItem,
   DeleteButton,
@@ -19,6 +22,10 @@ import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
 interface ResourceCardProps {
   resource: SimpleResource;
   onDelete?: (id: string) => void;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
+  isFirst?: boolean;
+  isLast?: boolean;
   showDelete?: boolean;
 }
 
