@@ -10,6 +10,10 @@ export class ResourcesService implements IResourcesService {
     return this.resourcesDAL.getResourcesByCourseId(courseId);
   }
 
+  async getAllResourcesByCourseId(courseId: string): Promise<SimpleResource[]> {
+    return this.resourcesDAL.getAllResourcesByCourseId(courseId);
+  }
+
   async getResourceMaterialsByCourseId(
     courseId: string,
     userId?: string
@@ -40,5 +44,12 @@ export class ResourcesService implements IResourcesService {
 
   async createResource(params: CreateResourceParams): Promise<SimpleResource> {
     return this.resourcesDAL.createResource(params);
+  }
+
+  async patchResource(
+    resourceId: string,
+    params: Partial<CreateResourceParams>
+  ): Promise<SimpleResource> {
+    return this.resourcesDAL.patchResource(resourceId, params);
   }
 }

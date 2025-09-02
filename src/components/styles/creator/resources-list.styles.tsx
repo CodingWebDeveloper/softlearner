@@ -12,22 +12,25 @@ export const ResourcesHeader = styled(Typography)(({ theme }) => ({
   color: theme.palette.custom.accent.teal,
 }));
 
-export const ResourceTitle = styled(Typography)({
-  fontWeight: 600,
-  marginBottom: 8,
-});
+export const ResourceTitle = styled(Typography)`
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+`;
 
-export const ResourceDescription = styled(Typography)({
-  whiteSpace: "pre-wrap",
-  wordBreak: "break-word",
-});
+export const ResourceDescription = styled(Typography)`
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: block;
+`;
 
 export const ResourceTypeLabel = styled(Typography)(({ theme }) => ({
-  display: "flex",
+  display: "block",
   alignItems: "center",
   marginTop: theme.spacing(1),
   color: theme.palette.custom.accent.teal,
   "& .MuiSvgIcon-root": {
     marginRight: theme.spacing(0.5),
+    verticalAlign: "middle",
   },
 }));

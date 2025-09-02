@@ -2,7 +2,9 @@ import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 import { IResourcesService } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
-import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
+import { RESOURCE_TYPES, ResourceType } from "@/lib/constants/database-constants";
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
 
 export const resourcesRouter = router({
   createResource: protectedProcedure
@@ -14,19 +16,19 @@ export const resourcesRouter = router({
         );
 
         const formData = input;
-        const type = formData.get("type") as "video" | "downloadable";
+        const type = formData.get("type") as ResourceType;
         
         // Map form type to RESOURCE_TYPES
-        const resourceType = type === "video" ? RESOURCE_TYPES.VIDEO : RESOURCE_TYPES.DOWNLOADABLE_FILE;
+        const resourceType = type === RESOURCE_TYPES.VIDEO ? RESOURCE_TYPES.VIDEO : RESOURCE_TYPES.DOWNLOADABLE_FILE;
 
         const resourceData = {
-          name: formData.get("title") as string,
-          short_summary: formData.get("description") as string,
+          name: formData.get("name") as string,
+          short_summary: formData.get("short_summary") as string,
           type: resourceType,
           course_id: formData.get("course_id") as string,
           duration: formData.get("duration") as string,
-          url: type === "video" ? formData.get("url") as string : undefined,
-          file: type === "downloadable" ? formData.get("file") as File : undefined
+          url: type === RESOURCE_TYPES.VIDEO ? formData.get("url") as string : undefined,
+          file: type === RESOURCE_TYPES.DOWNLOADABLE_FILE ? formData.get("file") as File : undefined
         };
 
         // Validate the extracted data
@@ -45,16 +47,15 @@ export const resourcesRouter = router({
 
         // Type-specific validations
         
-        if (type === "video" && (!resourceData.url || !resourceData.url.startsWith("http"))) {
+        if (type === RESOURCE_TYPES.VIDEO && (!resourceData.url || !resourceData.url.startsWith("http"))) {
           throw new Error("Valid video URL is required");
         }
-        if (type === "downloadable") {
+        if (type === RESOURCE_TYPES.DOWNLOADABLE_FILE) {
           if (!resourceData.file) {
             throw new Error("File is required for downloadable resources");
           }
-          const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
           if (resourceData.file.size > MAX_FILE_SIZE) {
-            throw new Error("File size must be less than 20MB");
+            throw new Error(`File size must be less than ${MAX_FILE_SIZE}MB`);
           }
         }
 
@@ -83,7 +84,22 @@ export const resourcesRouter = router({
         );
       }
     }),
-
+  getAllResourcesByCourseId: protectedProcedure
+    .input(z.object({ courseId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      try {
+        const resourcesService = ctx.container.resolve<IResourcesService>(
+          DI_TOKENS.RESOURCES_SERVICE
+        );
+        return await resourcesService.getAllResourcesByCourseId(input.courseId);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch resources: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
   getResourceMaterialsByCourseId: protectedProcedure
     .input(z.object({ courseId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -158,6 +174,77 @@ export const resourcesRouter = router({
       } catch (error) {
         throw new Error(
           `Failed to get resource completion status: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  patchResource: protectedProcedure
+    .input(z.instanceof(FormData))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const resourcesService = ctx.container.resolve<IResourcesService>(
+          DI_TOKENS.RESOURCES_SERVICE
+        );
+
+        const formData = input;
+        const resourceId = formData.get("id") as string;
+        if (!resourceId) {
+          throw new Error("Resource ID is required");
+        }
+
+        // Build update object only from provided fields
+        const updates: Record<string, unknown> = {};
+
+        // Handle basic fields
+        const name = formData.get("name");
+        if (name !== null) updates.name = name;
+
+        const shortSummary = formData.get("short_summary");
+        if (shortSummary !== null) updates.short_summary = shortSummary;
+
+        const duration = formData.get("duration");
+        if (duration !== null) {
+          const durationStr = duration.toString();
+          if (durationStr && !durationStr.match(/^([0-9]+:)?[0-5]?[0-9]:[0-5][0-9]$/)) {
+            throw new Error("Duration must be in format HH:MM:SS or MM:SS");
+          }
+          updates.duration = durationStr;
+        }
+
+        const orderIndex = formData.get("order_index");
+        if (orderIndex !== null) {
+          const index = Number(orderIndex);
+          if (!isNaN(index)) updates.order_index = index;
+        }
+
+        // Handle type-specific fields
+        const type = formData.get("type") as ResourceType | null;
+        if (type) {
+          if (type === RESOURCE_TYPES.VIDEO) {
+            const url = formData.get("url");
+            if (url !== null) {
+              if (!url.toString().startsWith("http")) {
+                throw new Error("Valid video URL is required");
+              }
+              updates.url = url;
+            }
+          } else if (type === RESOURCE_TYPES.DOWNLOADABLE_FILE) {
+            const file = formData.get("file") as File | null;
+            if (file) {
+              if (file.size > MAX_FILE_SIZE) {
+                throw new Error(`File size must be less than ${MAX_FILE_SIZE}MB`);
+              }
+              updates.file = file;
+            }
+          }
+        }
+
+        return await resourcesService.patchResource(resourceId, updates);
+      } catch (error) {
+        throw new Error(
+          `Failed to update resource: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );

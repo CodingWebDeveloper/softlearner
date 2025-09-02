@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../database/database.types";
 import { IResourcesDAL } from "../di/interfaces/dal.interfaces";
 import { PreviewResource } from "../database/database.types";
-import { BasicResource, CreateResourceParams, SimpleResource } from "@/services/interfaces/service.interfaces";
+import { BasicResource, CreateResourceParams, PatchResourceParams, SimpleResource } from "@/services/interfaces/service.interfaces";
 import { RESOURCE_TYPES } from "../constants/database-constants";
 
 function formatIntervalToDuration(interval: string | null): string | undefined {
@@ -52,6 +52,26 @@ export class ResourcesDAL implements IResourcesDAL {
       ...resource,
       duration: formatIntervalToDuration(resource.duration || null),
     }));
+  }
+
+  async getAllResourcesByCourseId(courseId: string): Promise<SimpleResource[]> {
+    if (!courseId) return [];
+
+    const { data, error } = await this.supabase
+      .from("resources")
+      .select(
+        "id, name, short_summary, type, course_id, order_index, duration, created_at, updated_at, url"
+      )
+      .eq("course_id", courseId)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw new Error(`Error fetching resources: ${error.message}`);
+    }
+
+    if (!data) return [];
+
+    return data as SimpleResource[];
   }
 
   async getResourceMaterialsByCourseId(
@@ -261,5 +281,92 @@ export class ResourcesDAL implements IResourcesDAL {
     }
 
     return resource as SimpleResource;
+  }
+
+  async patchResource(
+    resourceId: string,
+    updates: PatchResourceParams
+  ): Promise<SimpleResource> {
+    // Get the current resource
+    const { data: currentResource, error: fetchError } = await this.supabase
+      .from("resources")
+      .select("*")
+      .eq("id", resourceId)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Error fetching resource: ${fetchError.message}`);
+    }
+
+    if (!currentResource) {
+      throw new Error("Resource not found");
+    }
+
+    // Build update data only from provided fields
+    const updateData: Record<string, unknown> = {};
+
+    // Only include fields that are provided and different from current values
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.short_summary !== undefined) updateData.short_summary = updates.short_summary;
+    if (updates.type !== undefined) updateData.type = updates.type;
+    if (updates.order_index !== undefined) updateData.order_index = updates.order_index;
+    if (updates.duration !== undefined) updateData.duration = updates.duration;
+
+    // Handle URL updates for video resources
+    if (updates.type === RESOURCE_TYPES.VIDEO && updates.url !== undefined) {
+      updateData.url = updates.url;
+    }
+
+    // Only perform database update if there are fields to update
+    let updatedResource = currentResource;
+    if (Object.keys(updateData).length > 0) {
+      const { data: updated, error: updateError } = await this.supabase
+        .from("resources")
+        .update(updateData)
+        .eq("id", resourceId)
+        .select()
+        .single();
+
+      if (updateError) {
+        throw new Error(`Error updating resource: ${updateError.message}`);
+      }
+
+      updatedResource = updated;
+    }
+
+    // Handle file update for downloadable resources
+    if (updates.type === RESOURCE_TYPES.DOWNLOADABLE_FILE && updates.file) {
+      const filePath = `${currentResource.course_id}/${resourceId}`;
+
+      // Delete existing file if any
+      await this.supabase.storage
+        .from("course-resources")
+        .remove([filePath]);
+
+      // Upload new file
+      const { data: uploadedResourceData, error: uploadError } = await this.supabase.storage
+        .from("course-resources")
+        .upload(filePath, updates.file);
+
+      if (uploadError) {
+        throw new Error(`Error uploading file: ${uploadError.message}`);
+      }
+
+      // Update the resource with the new file URL
+      const { data: resourceWithFile, error: fileUpdateError } = await this.supabase
+        .from("resources")
+        .update({ url: uploadedResourceData.path })
+        .eq("id", resourceId)
+        .select()
+        .single();
+
+      if (fileUpdateError) {
+        throw new Error(`Error updating resource with file URL: ${fileUpdateError.message}`);
+      }
+
+      return resourceWithFile as SimpleResource;
+    }
+
+    return updatedResource as SimpleResource;
   }
 }

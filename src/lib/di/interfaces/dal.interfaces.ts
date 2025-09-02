@@ -38,6 +38,7 @@ import {
   CreateCourseParams,
   SimpleCourse,
   CreateResourceParams,
+  PatchResourceParams,
   SimpleResource,
 } from "@/services/interfaces/service.interfaces";
 
@@ -77,6 +78,7 @@ export interface ITagsDAL {
 
 export interface IResourcesDAL {
   getResourcesByCourseId(courseId: string): Promise<PreviewResource[]>;
+  getAllResourcesByCourseId(courseId: string): Promise<SimpleResource[]>;
   getResourceMaterialsByCourseId(
     courseId: string,
     userId?: string
@@ -94,6 +96,7 @@ export interface IResourcesDAL {
     resourceId: string
   ): Promise<boolean>;
   createResource(params: CreateResourceParams): Promise<SimpleResource>;
+  patchResource(resourceId: string, params: PatchResourceParams): Promise<SimpleResource>;
 }
 
 export interface IReviewsDAL {

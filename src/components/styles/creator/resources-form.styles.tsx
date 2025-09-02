@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   IconButton,
-  List,
   ListItem,
   Paper,
   RadioGroup,
@@ -16,25 +15,61 @@ export const FormContainer = styled("div")(({ theme }) => ({
   },
 }));
 
-export const ResourceList = styled(List)(({ theme }) => ({
+export const ResourceList = styled("div")(({ theme }) => ({
+  minHeight: 100,
+  transition: "background-color 0.2s ease",
+  "&[data-rbd-droppable-state='hover']": {
+    backgroundColor: theme.palette.action.hover,
+  },
   width: "100%",
   marginTop: theme.spacing(2),
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-  gap: theme.spacing(2),
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(1),
 }));
+
+export const DraggableWrapper = styled("div")<{ isDragging: boolean }>(
+  ({ theme, isDragging }) => ({
+    width: "100%",
+    padding: theme.spacing(1),
+    background: isDragging ? theme.palette.background.paper : "transparent",
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: isDragging ? theme.shadows[3] : "none",
+  })
+);
+
+export const DragHandleWrapper = styled("div")({
+  cursor: "grab",
+  display: "flex",
+  alignItems: "center",
+  "&:hover": {
+    opacity: 0.7,
+  },
+});
+
+export const ResourceWrapper = styled("div")({
+  flexGrow: 1,
+});
+
+export const ResourceItemContainer = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  width: "100%",
+});
 
 export const ResourceItem = styled(ListItem)(({ theme }) => ({
   display: "flex",
-  flexDirection: "column",
-  alignItems: "flex-start",
-  padding: theme.spacing(2),
+  flexDirection: "row",
+  alignItems: "center",
+  width: "100%",
   backgroundColor: theme.palette.custom.background.card,
   borderRadius: theme.spacing(1),
+  padding: theme.spacing(2),
+  boxShadow: theme.shadows[1],
   transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
   "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: theme.shadows[4],
+    boxShadow: theme.shadows[2],
   },
 }));
 

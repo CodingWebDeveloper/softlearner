@@ -8,7 +8,7 @@ export interface SimpleResource {
   url: string;
   short_summary?: string;
   type: ResourceType;
-  order_index?: number;
+  order_index: number;
   duration?: string;
   created_at: string;
   updated_at: string;
@@ -222,8 +222,19 @@ export interface CreateResourceParams {
   duration?: string;
 }
 
+export interface PatchResourceParams {
+  name?: string;
+  short_summary?: string;
+  type?: ResourceType;
+  url?: string;
+  file?: File;
+  order_index?: number;
+  duration?: string;
+}
+
 export interface IResourcesService {
   getResourcesByCourseId(courseId: string): Promise<PreviewResource[]>;
+  getAllResourcesByCourseId(courseId: string): Promise<SimpleResource[]>;
   getResourceMaterialsByCourseId(
     courseId: string,
     userId?: string
@@ -241,6 +252,7 @@ export interface IResourcesService {
     resourceId: string
   ): Promise<boolean>;
   createResource(params: CreateResourceParams): Promise<SimpleResource>;
+  patchResource(resourceId: string, params: PatchResourceParams): Promise<SimpleResource>;
 }
 
 export interface IReviewsService {

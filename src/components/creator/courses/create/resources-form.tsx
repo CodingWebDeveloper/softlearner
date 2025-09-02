@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { trpc } from "@/lib/trpc/client";
 import { useSnackbar } from "notistack";
+import {
+  setResources,
+  addResource,
+  selectOrderedResources,
+} from "@/lib/store/features/resourcesSlice";
+import type { SimpleResource } from "@/services/interfaces/service.interfaces";
 import {
   TextField,
   Stack,
@@ -30,21 +36,13 @@ import {
   TypeOption,
   AddResourceButton,
 } from "@/components/styles/creator/resources-form.styles";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 
 type FileType = "video" | "downloadable";
 
-interface Resource {
-  title: string;
-  description: string;
-  type: FileType;
-  duration: string;
-  url?: string;
-  file?: File | null;
-}
-
 const validationSchema = Yup.object({
-  title: Yup.string().required("Title is required"),
-  description: Yup.string().required("Description is required"),
+  name: Yup.string().required("Name is required"),
+  short_summary: Yup.string().required("Short summary is required"),
   duration: Yup.string()
     .required("Duration is required")
     .matches(
@@ -63,12 +61,22 @@ interface ResourceFormProps {
 }
 
 const ResourcesForm = ({ courseId }: ResourceFormProps) => {
-  const [resources, setResources] = useState<Resource[]>([]);
+  const dispatch = useAppDispatch();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<FileType>("downloadable");
   const { enqueueSnackbar } = useSnackbar();
+
+  const resources = useAppSelector(selectOrderedResources);
+
+  const { isLoading, data: resourcesData } =
+    trpc.resources.getAllResourcesByCourseId.useQuery(
+      { courseId: courseId || "" },
+      { enabled: !!courseId }
+    );
+
   const createResourceMutation = trpc.resources.createResource.useMutation({
-    onSuccess: () => {
+    onSuccess: (newResource) => {
+      dispatch(addResource(newResource as unknown as SimpleResource));
       enqueueSnackbar("Resource added successfully!", { variant: "success" });
     },
     onError: (error) => {
@@ -79,8 +87,8 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
   });
 
   const initialValues = {
-    title: "",
-    description: "",
+    name: "",
+    short_summary: "",
     duration: "",
     url: "",
     type: fileType,
@@ -106,11 +114,15 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
   ) => {
     try {
       const formData = new FormData();
-      formData.append("title", values.title);
-      formData.append("description", values.description);
+      formData.append("name", values.name);
+      formData.append("short_summary", values.short_summary);
       formData.append("type", fileType);
       formData.append("duration", values.duration);
       formData.append("course_id", courseId || "");
+      formData.append(
+        "order_index",
+        (resourcesData?.length || 0 + 1).toString()
+      );
 
       if (fileType === "video") {
         formData.append("url", values.url);
@@ -118,22 +130,8 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
         formData.append("file", selectedFile);
       }
 
-      // Call the API to create the resource
       await createResourceMutation.mutateAsync(formData);
 
-      // Add to local state only after successful creation
-      const newResource: Resource = {
-        title: values.title,
-        description: values.description,
-        type: fileType,
-        duration: values.duration,
-        ...(fileType === "video"
-          ? { url: values.url }
-          : { file: selectedFile }),
-      };
-      setResources([...resources, newResource]);
-
-      // Reset form
       setSelectedFile(null);
       resetForm();
     } catch (error) {
@@ -149,11 +147,6 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
     }
   };
 
-  const handleDeleteResource = (index: number) => {
-    const updatedResources = resources.filter((_, i) => i !== index);
-    setResources(updatedResources);
-  };
-
   const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,12 +157,19 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
           variant: "error",
           anchorOrigin: { vertical: "top", horizontal: "center" },
         });
-        event.target.value = ""; // Reset input
+        event.target.value = "";
         return;
       }
       setSelectedFile(file);
     }
   };
+
+  useEffect(() => {
+    if (resourcesData) {
+      console.log(resourcesData);
+      dispatch(setResources([...resourcesData]));
+    }
+  }, [resourcesData, dispatch]);
 
   return (
     <FormContainer>
@@ -310,14 +310,14 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
               <form onSubmit={handleSubmit}>
                 <TextField
                   fullWidth
-                  id="title"
-                  name="title"
-                  label="Resource Title"
-                  value={values.title}
+                  id="name"
+                  name="name"
+                  label="Resource Name"
+                  value={values.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.title && Boolean(errors.title)}
-                  helperText={touched.title && errors.title}
+                  error={touched.name && Boolean(errors.name)}
+                  helperText={touched.name && errors.name}
                 />
 
                 {fileType === "video" && (
@@ -347,16 +347,18 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                 >
                   <TextField
                     fullWidth
-                    id="description"
-                    name="description"
+                    id="short_summary"
+                    name="short_summary"
                     label="Description"
                     multiline
                     rows={3}
-                    value={values.description}
+                    value={values.short_summary}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    error={touched.description && Boolean(errors.description)}
-                    helperText={touched.description && errors.description}
+                    error={
+                      touched.short_summary && Boolean(errors.short_summary)
+                    }
+                    helperText={touched.short_summary && errors.short_summary}
                   />
                   <TextField
                     fullWidth
@@ -401,7 +403,11 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
           </Formik>
         </Box>
 
-        <ResourcesList resources={resources} onDelete={handleDeleteResource} />
+        <ResourcesList
+          resources={resources}
+          isLoading={isLoading}
+          courseId={courseId || ""}
+        />
       </Stack>
     </FormContainer>
   );
