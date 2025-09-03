@@ -222,14 +222,13 @@ export interface CreateResourceParams {
   duration?: string;
 }
 
-export interface PatchResourceParams {
-  name?: string;
-  short_summary?: string;
-  type?: ResourceType;
+export interface UpdateResourceParams {
+  name: string;
+  short_summary: string;
+  type: ResourceType;
   url?: string;
   file?: File;
-  order_index?: number;
-  duration?: string;
+  duration: string;
 }
 
 export interface IResourcesService {
@@ -252,7 +251,10 @@ export interface IResourcesService {
     resourceId: string
   ): Promise<boolean>;
   createResource(params: CreateResourceParams): Promise<SimpleResource>;
-  patchResource(resourceId: string, params: PatchResourceParams): Promise<SimpleResource>;
+  updateResource(resourceId: string, params: UpdateResourceParams): Promise<SimpleResource>;
+  updateResourcesOrder(courseId: string, orderUpdates: { id: string; order_index: number }[]): Promise<SimpleResource[]>;
+  downloadResourceFile(resourceId: string): Promise<Blob>;
+  deleteResource(resourceId: string): Promise<void>;
 }
 
 export interface IReviewsService {

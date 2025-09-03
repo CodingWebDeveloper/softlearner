@@ -1,5 +1,5 @@
 import { IResourcesDAL } from "@/lib/di/interfaces/dal.interfaces";
-import { CreateResourceParams, IResourcesService, SimpleResource } from "./interfaces/service.interfaces";
+import { CreateResourceParams, IResourcesService, SimpleResource, UpdateResourceParams } from "./interfaces/service.interfaces";
 import { PreviewResource } from "@/lib/database/database.types";
 import { BasicResource } from "./interfaces/service.interfaces";
 
@@ -46,11 +46,11 @@ export class ResourcesService implements IResourcesService {
     return this.resourcesDAL.createResource(params);
   }
 
-  async patchResource(
+  async updateResource(
     resourceId: string,
-    params: Partial<CreateResourceParams>
+    params: UpdateResourceParams
   ): Promise<SimpleResource> {
-    return this.resourcesDAL.patchResource(resourceId, params);
+    return this.resourcesDAL.updateResource(resourceId, params);
   }
 
   async updateResourcesOrder(
@@ -58,5 +58,13 @@ export class ResourcesService implements IResourcesService {
     orderUpdates: { id: string; order_index: number }[]
   ): Promise<SimpleResource[]> {
     return this.resourcesDAL.updateResourcesOrder(courseId, orderUpdates);
+  }
+
+  async downloadResourceFile(resourceId: string): Promise<Blob> {
+    return this.resourcesDAL.downloadResourceFile(resourceId);
+  }
+
+  async deleteResource(resourceId: string): Promise<void> {
+    return this.resourcesDAL.deleteResource(resourceId);
   }
 }

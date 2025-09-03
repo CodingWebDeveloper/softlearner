@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../database/database.types";
 import { IResourcesDAL } from "../di/interfaces/dal.interfaces";
 import { PreviewResource } from "../database/database.types";
-import { BasicResource, CreateResourceParams, PatchResourceParams, SimpleResource } from "@/services/interfaces/service.interfaces";
+import { BasicResource, CreateResourceParams, SimpleResource, UpdateResourceParams } from "@/services/interfaces/service.interfaces";
 import { RESOURCE_TYPES } from "../constants/database-constants";
 
 function formatIntervalToDuration(interval: string | null): string | undefined {
@@ -228,7 +228,6 @@ export class ResourcesDAL implements IResourcesDAL {
   async createResource(params: CreateResourceParams): Promise<SimpleResource> {
     const { name, short_summary, type, course_id, url, file, order_index, duration } = params;
 
-    // First create the resource record
     const { data: resource, error: resourceError } = await this.supabase
       .from("resources")
       .insert({
@@ -251,7 +250,6 @@ export class ResourcesDAL implements IResourcesDAL {
       throw new Error("Failed to create resource");
     }
 
-    // If it's a downloadable file, upload it to storage
     if (type === RESOURCE_TYPES.DOWNLOADABLE_FILE && file) {
       const filePath = `${course_id}/${resource.id}`;
 
@@ -260,12 +258,10 @@ export class ResourcesDAL implements IResourcesDAL {
         .upload(filePath, file);
 
       if (uploadError) {
-        // If file upload fails, delete the resource record
         await this.supabase.from("resources").delete().eq("id", resource.id);
         throw new Error(`Error uploading file: ${uploadError.message}`);
       }
 
-      // Update the resource with the file URL
       const { data: updatedResource, error: updateError } = await this.supabase
         .from("resources")
         .update({ url: uploadedResourceData.path })
@@ -283,50 +279,9 @@ export class ResourcesDAL implements IResourcesDAL {
     return resource as SimpleResource;
   }
 
-  async updateResourcesOrder(
-    courseId: string,
-    orderUpdates: { id: string; order_index: number }[]
-  ): Promise<SimpleResource[]> {
-    try {
-      const data: SimpleResource[] = [];
-      // Update all resources in a single transaction
-      for (const { id, order_index } of orderUpdates) {
-        const { error, data: updatedResource } = await this.supabase
-          .from("resources")
-          .update({
-            order_index,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", id)          // update only this resource
-          .eq("course_id", courseId) // make sure it's in the right course
-          .select()              // Get the updated data back
-          .single();            // Get a single row
-    
-        if (error) {
-          console.error("Failed to update resource:", id, error);
-          throw new Error(`Failed to update resource ${id}: ${error.message}`);
-        }
-
-        if (!updatedResource) {
-          throw new Error(`Failed to update resource ${id}: No data returned`);
-        }
-
-        data.push(updatedResource as SimpleResource);
-      }
-
-      return data as SimpleResource[];
-    } catch (error) {
-      throw new Error(
-        `Failed to update resources order: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }
-
-  async patchResource(
+  async updateResource(
     resourceId: string,
-    updates: PatchResourceParams
+    updates: UpdateResourceParams
   ): Promise<SimpleResource> {
     // Get the current resource
     const { data: currentResource, error: fetchError } = await this.supabase
@@ -343,39 +298,39 @@ export class ResourcesDAL implements IResourcesDAL {
       throw new Error("Resource not found");
     }
 
-    // Build update data only from provided fields
-    const updateData: Record<string, unknown> = {};
-
-    // Only include fields that are provided and different from current values
-    if (updates.name !== undefined) updateData.name = updates.name;
-    if (updates.short_summary !== undefined) updateData.short_summary = updates.short_summary;
-    if (updates.type !== undefined) updateData.type = updates.type;
-    if (updates.order_index !== undefined) updateData.order_index = updates.order_index;
-    if (updates.duration !== undefined) updateData.duration = updates.duration;
-
-    // Handle URL updates for video resources
-    if (updates.type === RESOURCE_TYPES.VIDEO && updates.url !== undefined) {
-      updateData.url = updates.url;
+    // Handle file deletion if type changed from file to video
+    if (
+      currentResource.type === RESOURCE_TYPES.DOWNLOADABLE_FILE &&
+      updates.type === RESOURCE_TYPES.VIDEO
+    ) {
+      const filePath = `${currentResource.course_id}/${resourceId}`;
+      await this.supabase.storage
+        .from("course-resources")
+        .remove([filePath]);
     }
 
-    // Only perform database update if there are fields to update
-    let updatedResource = currentResource;
-    if (Object.keys(updateData).length > 0) {
-      const { data: updated, error: updateError } = await this.supabase
-        .from("resources")
-        .update(updateData)
-        .eq("id", resourceId)
-        .select()
-        .single();
+    // Build update data
+    const updateData = {
+      name: updates.name,
+      short_summary: updates.short_summary,
+      type: updates.type,
+      duration: updates.duration,
+      url: updates.type === RESOURCE_TYPES.VIDEO ? updates.url : "",
+    };
 
-      if (updateError) {
-        throw new Error(`Error updating resource: ${updateError.message}`);
-      }
+    // Update the resource
+    const { data: updatedResource, error: updateError } = await this.supabase
+      .from("resources")
+      .update(updateData)
+      .eq("id", resourceId)
+      .select()
+      .single();
 
-      updatedResource = updated;
+    if (updateError) {
+      throw new Error(`Error updating resource: ${updateError.message}`);
     }
 
-    // Handle file update for downloadable resources
+    // Handle file upload for downloadable resources
     if (updates.type === RESOURCE_TYPES.DOWNLOADABLE_FILE && updates.file) {
       const filePath = `${currentResource.course_id}/${resourceId}`;
 
@@ -409,5 +364,119 @@ export class ResourcesDAL implements IResourcesDAL {
     }
 
     return updatedResource as SimpleResource;
+  }
+
+  async updateResourcesOrder(
+    courseId: string,
+    orderUpdates: { id: string; order_index: number }[]
+  ): Promise<SimpleResource[]> {
+    try {
+      const data: SimpleResource[] = [];
+      for (const { id, order_index } of orderUpdates) {
+        const { error, data: updatedResource } = await this.supabase
+          .from("resources")
+          .update({
+            order_index,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", id)
+          .eq("course_id", courseId)
+          .select()
+          .single();
+    
+        if (error) {
+          console.error("Failed to update resource:", id, error);
+          throw new Error(`Failed to update resource ${id}: ${error.message}`);
+        }
+
+        if (!updatedResource) {
+          throw new Error(`Failed to update resource ${id}: No data returned`);
+        }
+
+        data.push(updatedResource as SimpleResource);
+      }
+
+      return data as SimpleResource[];
+    } catch (error) {
+      throw new Error(
+        `Failed to update resources order: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }
+
+  async deleteResource(resourceId: string): Promise<void> {
+    // Get the resource to check type and get file path
+    const { data: resource, error: fetchError } = await this.supabase
+      .from("resources")
+      .select("*")
+      .eq("id", resourceId)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Error fetching resource: ${fetchError.message}`);
+    }
+
+    if (!resource) {
+      throw new Error("Resource not found");
+    }
+
+    // If it's a downloadable file, delete the file first
+    if (resource.type === RESOURCE_TYPES.DOWNLOADABLE_FILE && resource.url) {
+      await this.supabase.storage
+        .from("course-resources")
+        .remove([resource.url]);
+    }
+
+    // Delete the resource record
+    const { error: deleteError } = await this.supabase
+      .from("resources")
+      .delete()
+      .eq("id", resourceId);
+
+    if (deleteError) {
+      throw new Error(`Error deleting resource: ${deleteError.message}`);
+    }
+  }
+
+  async downloadResourceFile(resourceId: string): Promise<Blob> {
+    // Get the resource to check type and get file path
+    const { data: resource, error: fetchError } = await this.supabase
+      .from("resources")
+      .select("*")
+      .eq("id", resourceId)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Error fetching resource: ${fetchError.message}`);
+    }
+
+    if (!resource) {
+      throw new Error("Resource not found");
+    }
+
+    if (resource.type !== RESOURCE_TYPES.DOWNLOADABLE_FILE) {
+      throw new Error("Resource is not a downloadable file");
+    }
+
+    if (!resource.url) {
+      throw new Error("Resource file URL is missing");
+    }
+
+    // Download the file
+    const { data, error: downloadError } = await this.supabase.storage
+      .from("course-resources")
+      .download(resource.url);
+
+    if (downloadError) {
+      throw new Error(`Error downloading file: ${downloadError.message}`);
+    }
+
+    if (!data) {
+      throw new Error("File not found");
+    }
+
+    return data;
   }
 }

@@ -106,6 +106,7 @@ export const StyledRadioGroup = styled(RadioGroup)(({ theme }) => ({
 
 export const AddResourceButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(2),
+  textTransform: "none",
   backgroundColor: theme.palette.custom.accent.teal,
   padding: theme.spacing(1.5, 4),
   borderRadius: theme.spacing(1),
@@ -119,6 +120,7 @@ export const AddResourceButton = styled(Button)(({ theme }) => ({
 
 export const SaveOrderButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(2),
+  textTransform: "capitalize",
   backgroundColor: theme.palette.custom.accent.teal,
   padding: theme.spacing(1.5, 4),
   borderRadius: theme.spacing(1),
@@ -156,10 +158,32 @@ export const SaveOrderBox = styled(Box)(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
+export const ButtonGroup = styled("div")(({ theme }) => ({
+  display: "flex",
+  gap: theme.spacing(1),
+}));
+
+export const EditButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.custom.accent.teal,
+  backgroundColor: "rgba(0, 0, 0, 0.1)",
+  "&:hover": {
+    backgroundColor: `${theme.palette.custom.accent.teal}20`,
+    transform: "scale(1.1)",
+  },
+  transition: "all 0.2s ease-in-out",
+}));
+
+export const DownloadButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.custom.accent.blue,
+  backgroundColor: "rgba(0, 0, 0, 0.1)",
+  "&:hover": {
+    backgroundColor: `${theme.palette.custom.accent.blue}20`,
+    transform: "scale(1.1)",
+  },
+  transition: "all 0.2s ease-in-out",
+}));
+
 export const DeleteButton = styled(IconButton)(({ theme }) => ({
-  position: "absolute",
-  top: theme.spacing(1),
-  right: theme.spacing(1),
   color: theme.palette.custom.accent.red,
   backgroundColor: "rgba(0, 0, 0, 0.1)",
   "&:hover": {

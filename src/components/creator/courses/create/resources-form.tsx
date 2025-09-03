@@ -10,7 +10,6 @@ import {
   addResource,
   selectOrderedResources,
 } from "@/lib/store/features/resourcesSlice";
-import SaveIcon from "@mui/icons-material/Save";
 import type { SimpleResource } from "@/services/interfaces/service.interfaces";
 import {
   TextField,
@@ -402,13 +401,15 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                     (fileType === RESOURCE_TYPES.DOWNLOADABLE_FILE &&
                       !selectedFile)
                   }
-                  startIcon={<AddIcon />}
+                  startIcon={
+                    isSubmitting ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : (
+                      <AddIcon />
+                    )
+                  }
                 >
-                  {isSubmitting ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : (
-                    "Add Resource"
-                  )}
+                  Add Resource
                 </AddResourceButton>
               </form>
             )}
@@ -428,10 +429,8 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                 onClick={handleSaveOrder}
                 disabled={isLoadingUpdateResourcesOrder}
                 startIcon={
-                  isLoadingUpdateResourcesOrder ? (
+                  isLoadingUpdateResourcesOrder && (
                     <CircularProgress color="inherit" size={20} />
-                  ) : (
-                    <SaveIcon />
                   )
                 }
               >

@@ -65,10 +65,10 @@ interface ResourcesListProps {
 
 interface SortableItemProps {
   resource: SimpleResource;
-  onDelete: (id: string) => void;
+  courseId: string;
 }
 
-const SortableItem = ({ resource, onDelete }: SortableItemProps) => {
+const SortableItem = ({ resource, courseId }: SortableItemProps) => {
   const {
     attributes,
     listeners,
@@ -91,14 +91,18 @@ const SortableItem = ({ resource, onDelete }: SortableItemProps) => {
           <DragIndicatorIcon color="action" />
         </DragHandleWrapper>
         <ResourceWrapper>
-          <ResourceCard resource={resource} onDelete={onDelete} />
+          <ResourceCard resource={resource} courseId={courseId} />
         </ResourceWrapper>
       </ResourceItemContainer>
     </DraggableWrapper>
   );
 };
 
-const ResourcesList = ({ isLoading, resources }: ResourcesListProps) => {
+const ResourcesList = ({
+  isLoading,
+  resources,
+  courseId,
+}: ResourcesListProps) => {
   const dispatch = useAppDispatch();
 
   const sensors = useSensors(
@@ -107,10 +111,6 @@ const ResourcesList = ({ isLoading, resources }: ResourcesListProps) => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-
-  const handleDelete = (id: string) => {
-    console.log("delete", id);
-  };
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -169,7 +169,7 @@ const ResourcesList = ({ isLoading, resources }: ResourcesListProps) => {
               <SortableItem
                 key={resource.id}
                 resource={resource}
-                onDelete={handleDelete}
+                courseId={courseId}
               />
             ))}
           </ResourceList>

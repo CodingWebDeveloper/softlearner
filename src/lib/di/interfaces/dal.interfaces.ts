@@ -38,7 +38,7 @@ import {
   CreateCourseParams,
   SimpleCourse,
   CreateResourceParams,
-  PatchResourceParams,
+  UpdateResourceParams,
   SimpleResource,
 } from "@/services/interfaces/service.interfaces";
 
@@ -96,11 +96,13 @@ export interface IResourcesDAL {
     resourceId: string
   ): Promise<boolean>;
   createResource(params: CreateResourceParams): Promise<SimpleResource>;
-  patchResource(resourceId: string, params: PatchResourceParams): Promise<SimpleResource>;
+  updateResource(resourceId: string, params: UpdateResourceParams): Promise<SimpleResource>;
   updateResourcesOrder(
     courseId: string,
     orderUpdates: { id: string; order_index: number }[]
   ): Promise<SimpleResource[]>;
+  downloadResourceFile(resourceId: string): Promise<Blob>;
+  deleteResource(resourceId: string): Promise<void>;
 }
 
 export interface IReviewsDAL {

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
-import { IResourcesService } from "@/services/interfaces/service.interfaces";
+import { IResourcesService, UpdateResourceParams } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
 import { RESOURCE_TYPES, ResourceType } from "@/lib/constants/database-constants";
 
@@ -51,7 +51,6 @@ export const resourcesRouter = router({
         }
 
         // Type-specific validations
-        
         if (type === RESOURCE_TYPES.VIDEO && (!resourceData.url || !resourceData.url.startsWith("http"))) {
           throw new Error("Valid video URL is required");
         }
@@ -73,6 +72,51 @@ export const resourcesRouter = router({
         );
       }
     }),
+
+  updateResource: protectedProcedure
+    .input(z.instanceof(FormData))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const resourcesService = ctx.container.resolve<IResourcesService>(
+          DI_TOKENS.RESOURCES_SERVICE
+        );
+
+        const formData = input;
+        const resourceId = formData.get("id") as string;
+        const type = formData.get("type") as ResourceType;
+        const file = formData.get("file") as File | null;
+
+        if (!resourceId) {
+          throw new Error("Resource ID is required");
+        }
+
+        // Build update object
+        const updates: UpdateResourceParams = {
+          name: formData.get("name") as string,
+          short_summary: formData.get("short_summary") as string,
+          duration: formData.get("duration") as string,
+          type,
+        };
+
+        // Handle file based on type
+        if (type === RESOURCE_TYPES.DOWNLOADABLE_FILE && file) {
+          // Only validate file if it's provided
+          if (file.size > MAX_FILE_SIZE) {
+            throw new Error(`File size must be less than ${MAX_FILE_SIZE}MB`);
+          }
+          updates.file = file;
+        }
+
+        return await resourcesService.updateResource(resourceId, updates);
+      } catch (error) {
+        throw new Error(
+          `Failed to update resource: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
   getResourcesByCourseId: protectedProcedure
     .input(z.object({ courseId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -89,6 +133,7 @@ export const resourcesRouter = router({
         );
       }
     }),
+
   getAllResourcesByCourseId: protectedProcedure
     .input(z.object({ courseId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -105,6 +150,7 @@ export const resourcesRouter = router({
         );
       }
     }),
+
   getResourceMaterialsByCourseId: protectedProcedure
     .input(z.object({ courseId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -215,71 +261,48 @@ export const resourcesRouter = router({
       }
     }),
 
-  patchResource: protectedProcedure
-    .input(z.instanceof(FormData))
+  downloadResourceFile: protectedProcedure
+    .input(z.object({ resourceId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
         const resourcesService = ctx.container.resolve<IResourcesService>(
           DI_TOKENS.RESOURCES_SERVICE
         );
-
-        const formData = input;
-        const resourceId = formData.get("id") as string;
-        if (!resourceId) {
-          throw new Error("Resource ID is required");
-        }
-
-        // Build update object only from provided fields
-        const updates: Record<string, unknown> = {};
-
-        // Handle basic fields
-        const name = formData.get("name");
-        if (name !== null) updates.name = name;
-
-        const shortSummary = formData.get("short_summary");
-        if (shortSummary !== null) updates.short_summary = shortSummary;
-
-        const duration = formData.get("duration");
-        if (duration !== null) {
-          const durationStr = duration.toString();
-          if (durationStr && !durationStr.match(/^([0-9]+:)?[0-5]?[0-9]:[0-5][0-9]$/)) {
-            throw new Error("Duration must be in format HH:MM:SS or MM:SS");
-          }
-          updates.duration = durationStr;
-        }
-
-        const orderIndex = formData.get("order_index");
-        if (orderIndex !== null) {
-          const index = Number(orderIndex);
-          if (!isNaN(index)) updates.order_index = index;
-        }
-
-        // Handle type-specific fields
-        const type = formData.get("type") as ResourceType | null;
-        if (type) {
-          if (type === RESOURCE_TYPES.VIDEO) {
-            const url = formData.get("url");
-            if (url !== null) {
-              if (!url.toString().startsWith("http")) {
-                throw new Error("Valid video URL is required");
-              }
-              updates.url = url;
-            }
-          } else if (type === RESOURCE_TYPES.DOWNLOADABLE_FILE) {
-            const file = formData.get("file") as File | null;
-            if (file) {
-              if (file.size > MAX_FILE_SIZE) {
-                throw new Error(`File size must be less than ${MAX_FILE_SIZE}MB`);
-              }
-              updates.file = file;
-            }
-          }
-        }
-
-        return await resourcesService.patchResource(resourceId, updates);
+        
+        const blob = await resourcesService.downloadResourceFile(input.resourceId);
+        
+        // Convert Blob to base64 for transmission
+        const buffer = await blob.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString('base64');
+        
+        return {
+          data: base64,
+          type: blob.type,
+          size: blob.size,
+        };
       } catch (error) {
         throw new Error(
-          `Failed to update resource: ${
+          `Failed to download resource file: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  deleteResource: protectedProcedure
+    .input(z.object({ resourceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const resourcesService = ctx.container.resolve<IResourcesService>(
+          DI_TOKENS.RESOURCES_SERVICE
+        );
+        
+        await resourcesService.deleteResource(input.resourceId);
+        
+        return { success: true };
+      } catch (error) {
+        throw new Error(
+          `Failed to delete resource: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );
