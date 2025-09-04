@@ -25,6 +25,11 @@ const deleteTagInput = z.object({
   id: z.string(),
 });
 
+const createTagsByCourseInput = z.object({
+  courseId: z.string().min(1),
+  tagIds: z.array(z.string().min(1)),
+});
+
 export const tagsRouter = router({
   getTags: protectedProcedure
     .input(getTagsInput.optional())
@@ -106,6 +111,24 @@ export const tagsRouter = router({
       } catch (error) {
         throw new Error(
           `Failed to delete tag: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  createTagsByCourse: protectedProcedure
+    .input(createTagsByCourseInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const tagsService = ctx.container.resolve<ITagsService>(
+          DI_TOKENS.TAGS_SERVICE
+        );
+        await tagsService.createTagsByCourse(input.courseId, input.tagIds);
+        return { success: true };
+      } catch (error) {
+        throw new Error(
+          `Failed to update course tags: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );

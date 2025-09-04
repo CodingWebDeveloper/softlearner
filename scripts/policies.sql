@@ -52,6 +52,37 @@ DROP POLICY IF EXISTS "Allow all users to view course tags" ON course_tags;
 CREATE POLICY "Allow all users to view course tags" ON course_tags
 FOR SELECT USING (true);
 
+-- Allow course creators to manage tags for their courses
+DROP POLICY IF EXISTS "Allow creators to manage course tags" ON course_tags;
+CREATE POLICY "Allow creators to manage course tags" ON course_tags
+FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+);
+
 -- Courses Policies
 -- Allow all users to view courses
 DROP POLICY IF EXISTS "Allow all users to view courses" ON courses;

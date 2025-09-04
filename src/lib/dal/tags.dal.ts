@@ -7,6 +7,56 @@ import { GetTagsParams } from "@/services/interfaces/service.interfaces";
 export class TagsDAL implements ITagsDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
 
+  async createTagsByCourse(courseId: string, tagIds: string[]): Promise<void> {
+    // First get existing tag associations
+    const { data: existingTags, error: fetchError } = await this.supabase
+      .from("course_tags")
+      .select("tag_id")
+      .eq("course_id", courseId);
+
+    if (fetchError) {
+      throw new Error(`Error fetching existing course tags: ${fetchError.message}`);
+    }
+
+    const existingTagIds = existingTags?.map(tag => tag.tag_id) || [];
+
+    // Find tags to add (tags in tagIds but not in existingTagIds)
+    const tagsToAdd = tagIds.filter(id => !existingTagIds.includes(id));
+
+    // Find tags to remove (tags in existingTagIds but not in tagIds)
+    const tagsToRemove = existingTagIds.filter(id => !tagIds.includes(id));
+
+    // Start a transaction for both operations
+    if (tagsToAdd.length > 0) {
+      // Create new associations
+      const newCourseTags = tagsToAdd.map(tagId => ({
+        course_id: courseId,
+        tag_id: tagId
+      }));
+
+      const { error: insertError } = await this.supabase
+        .from("course_tags")
+        .insert(newCourseTags);
+
+      if (insertError) {
+        throw new Error(`Error creating course tags: ${insertError.message}`);
+      }
+    }
+
+    if (tagsToRemove.length > 0) {
+      // Remove old associations
+      const { error: deleteError } = await this.supabase
+        .from("course_tags")
+        .delete()
+        .eq("course_id", courseId)
+        .in("tag_id", tagsToRemove);
+
+      if (deleteError) {
+        throw new Error(`Error removing course tags: ${deleteError.message}`);
+      }
+    }
+  }
+
   async getTags(params: GetTagsParams = {}): Promise<Tag[]> {
     const { search, limit } = params;
 

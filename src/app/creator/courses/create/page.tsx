@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { styled } from "@mui/material/styles";
 import { PageContainer } from "@/components/styles/infrastructure/layout.styles";
+import CourseTagsForm from "@/components/creator/courses/course-tags-form";
 
 const StyledTabs = styled(Tabs)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.custom.background.tertiary}`,
@@ -128,8 +129,7 @@ const CreateCoursePage = () => {
           </TabPanel>
 
           <TabPanel value={currentTab} index={2}>
-            {/* Tags Component will go here */}
-            <Typography>Tags Management</Typography>
+            <CourseTagsForm courseId={courseId || ""} />
           </TabPanel>
 
           <TabPanel value={currentTab} index={3}>

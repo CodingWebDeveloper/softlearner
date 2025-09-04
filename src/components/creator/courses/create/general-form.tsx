@@ -6,46 +6,21 @@ import * as Yup from "yup";
 import UploadThumbnail from "./upload-thumbnail";
 import {
   TextField,
-  Button,
   Box,
   InputAdornment,
   Stack,
   Typography,
+  CircularProgress,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { trpc } from "@/lib/trpc/client";
 import { SimpleCourse } from "@/services/interfaces/service.interfaces";
 import CategoryInput from "./CategoryInput";
-
-const FormContainer = styled("div")(({ theme }) => ({
-  maxWidth: "800px",
-  "& .MuiTextField-root, & .MuiFormControl-root": {
-    marginBottom: theme.spacing(3),
-  },
-}));
-
-const ThumbnailContainer = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(3),
-}));
-
-const ButtonContainer = styled(Box)({
-  display: "flex",
-  justifyContent: "flex-end",
-  gap: 16,
-});
-
-const SaveButton = styled(Button)(({ theme }) => ({
-  paddingLeft: theme.spacing(4),
-  paddingRight: theme.spacing(4),
-  backgroundColor: theme.palette.custom.accent.teal,
-  "&:hover": {
-    backgroundColor: theme.palette.custom.accent.tealDark,
-  },
-  "&:disabled": {
-    backgroundColor: theme.palette.custom.background.tertiary,
-    color: theme.palette.custom.text.light,
-  },
-}));
+import { SaveOrderButton } from "@/components/styles/creator/resources-form.styles";
+import {
+  FormContainer,
+  ThumbnailContainer,
+  ButtonContainer,
+} from "@/components/styles/creator/general-form.styles";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Course name is required"),
@@ -236,13 +211,17 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
                 />
 
                 <ButtonContainer>
-                  <SaveButton
+                  <SaveOrderButton
                     type="submit"
                     variant="contained"
                     disabled={!isValid || !thumbnailFile || isSubmitting}
                   >
-                    Create
-                  </SaveButton>
+                    {isSubmitting ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </SaveOrderButton>
                 </ButtonContainer>
               </form>
             </>

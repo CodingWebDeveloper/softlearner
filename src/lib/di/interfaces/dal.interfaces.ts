@@ -74,6 +74,7 @@ export interface ITagsDAL {
   createTag(name: string): Promise<Tag>;
   updateTag(id: string, name: string): Promise<Tag>;
   deleteTag(id: string): Promise<void>;
+  createTagsByCourse(courseId: string, tagIds: string[]): Promise<void>;
 }
 
 export interface IResourcesDAL {
