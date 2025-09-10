@@ -1,4 +1,4 @@
-import { styled } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material";
 import { Dialog, DialogTitle, DialogContent, Button } from "@mui/material";
 
 export const StyledDialog = styled(Dialog)(({ theme }) => ({
@@ -56,27 +56,15 @@ export const ActionButton = styled(Button)(({ theme }) => ({
   padding: theme.spacing(1, 3),
   borderRadius: theme.spacing(0.5),
   transition: "all 0.2s ease-in-out",
-  "&.MuiButton-contained": {
-    backgroundColor: theme.palette.custom.accent.teal,
-    color: theme.palette.custom.text.white,
-    "&:hover": {
-      backgroundColor: theme.palette.custom.accent.tealDark,
-      transform: "translateY(-2px)",
-    },
+  textTransform: "none",
+  backgroundColor: theme.palette.custom.accent.teal,
+  color: theme.palette.custom.text.white,
+  "&:hover": {
+    backgroundColor: theme.palette.custom.accent.tealDark,
   },
-  "&.MuiButton-outlined": {
-    borderColor: theme.palette.custom.accent.teal,
-    color: theme.palette.custom.accent.teal,
-    "&:hover": {
-      backgroundColor: `${theme.palette.custom.accent.teal}10`,
-      borderColor: theme.palette.custom.accent.tealDark,
-    },
-  },
-  "&.MuiButton-text": {
-    color: theme.palette.custom.text.light,
-    "&:hover": {
-      backgroundColor: theme.palette.custom.background.tertiary,
-    },
+  "&.MuiButton-disabled": {
+    backgroundColor: theme.palette.custom.background.tertiary,
+    color: alpha(theme.palette.custom.background.tertiary, 0.3),
   },
 }));
 

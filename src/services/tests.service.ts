@@ -2,7 +2,10 @@ import { ITestsDAL } from "@/lib/di/interfaces/dal.interfaces";
 import {
   ITestsService,
   BasicTest,
+  CreateTestInput,
   FullTest,
+  FullQuestion,
+  SaveQuestionsInput,
   TestResult,
   TestWithProgress,
   TestSubmission,
@@ -17,6 +20,22 @@ export class TestsService implements ITestsService {
 
   async getTestById(id: string): Promise<FullTest | null> {
     return this.testsDAL.getTestById(id);
+  }
+
+  async getTestQuestions(testId: string): Promise<FullQuestion[]> {
+    return this.testsDAL.getTestQuestions(testId);
+  }
+
+  async updateTest(id: string, data: CreateTestInput): Promise<BasicTest> {
+    return this.testsDAL.updateTest(id, data);
+  }
+
+  async saveQuestions(data: SaveQuestionsInput): Promise<FullTest> {
+    return this.testsDAL.saveQuestions(data);
+  }
+
+  async createTest(courseId: string, data: CreateTestInput): Promise<BasicTest> {
+    return this.testsDAL.createTest(courseId, data);
   }
 
   async getTestResults(

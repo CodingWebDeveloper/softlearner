@@ -151,3 +151,22 @@ export const EmptyStateIcon = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   opacity: 0.8,
 }));
+
+export const StyledButton = styled(Button)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
+  textTransform: "none",
+  padding: theme.spacing(1, 3),
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.custom.accent.teal,
+  color: theme.palette.custom.text.white,
+  "&:hover": {
+    backgroundColor: theme.palette.custom.accent.tealDark,
+  },
+  "&.MuiButton-text": {
+    backgroundColor: "transparent",
+    color: theme.palette.custom.text.white,
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
+  },
+}));

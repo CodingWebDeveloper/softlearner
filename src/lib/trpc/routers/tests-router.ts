@@ -46,6 +46,24 @@ export const testsRouter = router({
       }
     }),
 
+  getTestQuestions: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input: testId }) => {
+      try {
+        const testsService = ctx.container.resolve<ITestsService>(
+          DI_TOKENS.TESTS_SERVICE
+        );
+
+        return await testsService.getTestQuestions(testId);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch test questions: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
   getTestMaterials: protectedProcedure
     .input(z.string().uuid())
     .query(async ({ ctx, input: courseId }) => {
@@ -85,6 +103,95 @@ export const testsRouter = router({
       } catch (error) {
         throw new Error(
           `Failed to create score: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  updateTest: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        data: z.object({
+          title: z.string().min(3).max(100),
+          description: z.string().max(500),
+        }),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const testsService = ctx.container.resolve<ITestsService>(
+          DI_TOKENS.TESTS_SERVICE
+        );
+
+        return await testsService.updateTest(input.id, input.data);
+      } catch (error) {
+        throw new Error(
+          `Failed to update test: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  saveQuestions: protectedProcedure
+    .input(
+      z.object({
+        testId: z.string().uuid(),
+        questions: z.array(
+          z.object({
+            id: z.string().uuid().optional(),
+            text: z.string().min(1, "Question text is required"),
+            type: z.enum(["single", "multiple"]),
+            points: z.number().min(1, "Points must be at least 1"),
+            options: z.array(
+              z.object({
+                id: z.string().uuid().optional(),
+                text: z.string().min(1, "Option text is required"),
+                isCorrect: z.boolean(),
+              })
+            ).min(2, "At least 2 options are required"),
+          })
+        ).min(1, "At least 1 question is required"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const testsService = ctx.container.resolve<ITestsService>(
+          DI_TOKENS.TESTS_SERVICE
+        );
+
+        return await testsService.saveQuestions(input);
+      } catch (error) {
+        throw new Error(
+          `Failed to save questions: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  createTest: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string().uuid(),
+        data: z.object({
+          title: z.string().min(3).max(100),
+          description: z.string().max(500),
+        }),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const testsService = ctx.container.resolve<ITestsService>(
+          DI_TOKENS.TESTS_SERVICE
+        );
+
+        return await testsService.createTest(input.courseId, input.data);
+      } catch (error) {
+        throw new Error(
+          `Failed to create test: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );

@@ -246,6 +246,73 @@ DROP POLICY IF EXISTS "Allow all users to view tests" ON tests;
 CREATE POLICY "Allow all users to view tests" ON tests
 FOR SELECT USING (true);
 
+-- Allow course creators to create tests for their courses
+DROP POLICY IF EXISTS "Allow creators to create tests" ON tests;
+CREATE POLICY "Allow creators to create tests" ON tests
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+);
+
+-- Allow course creators to update their course tests
+DROP POLICY IF EXISTS "Allow creators to update tests" ON tests;
+CREATE POLICY "Allow creators to update tests" ON tests
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+);
+
+-- Allow course creators to delete their course tests
+DROP POLICY IF EXISTS "Allow creators to delete tests" ON tests;
+CREATE POLICY "Allow creators to delete tests" ON tests
+FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = course_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+);
+
 -- Questions Policies
 -- Allow users to view questions only for courses they have purchased
 DROP POLICY IF EXISTS "Allow users to view questions for purchased courses" ON questions;
@@ -257,6 +324,77 @@ FOR SELECT USING (
     WHERE o.user_id = auth.uid()
     AND o.status = 'SUCCEEDED'
     AND t.id = questions.test_id
+  )
+);
+
+-- Allow course creators to create questions for their course tests
+DROP POLICY IF EXISTS "Allow creators to create questions" ON questions;
+CREATE POLICY "Allow creators to create questions" ON questions
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM tests t
+    JOIN courses c ON c.id = t.course_id
+    WHERE t.id = questions.test_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+);
+
+-- Allow course creators to update questions for their course tests
+DROP POLICY IF EXISTS "Allow creators to update questions" ON questions;
+CREATE POLICY "Allow creators to update questions" ON questions
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM tests t
+    JOIN courses c ON c.id = t.course_id
+    WHERE t.id = questions.test_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM tests t
+    JOIN courses c ON c.id = t.course_id
+    WHERE t.id = questions.test_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+);
+
+-- Allow course creators to delete questions for their course tests
+DROP POLICY IF EXISTS "Allow creators to delete questions" ON questions;
+CREATE POLICY "Allow creators to delete questions" ON questions
+FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM tests t
+    JOIN courses c ON c.id = t.course_id
+    WHERE t.id = questions.test_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
   )
 );
 
@@ -272,6 +410,81 @@ FOR SELECT USING (
     WHERE o.user_id = auth.uid()
     AND o.status = 'SUCCEEDED'
     AND q.id = answer_options.question_id
+  )
+);
+
+-- Allow course creators to create answer options for their course questions
+DROP POLICY IF EXISTS "Allow creators to create answer options" ON answer_options;
+CREATE POLICY "Allow creators to create answer options" ON answer_options
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM questions q
+    JOIN tests t ON t.id = q.test_id
+    JOIN courses c ON c.id = t.course_id
+    WHERE q.id = answer_options.question_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+);
+
+-- Allow course creators to update answer options for their course questions
+DROP POLICY IF EXISTS "Allow creators to update answer options" ON answer_options;
+CREATE POLICY "Allow creators to update answer options" ON answer_options
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM questions q
+    JOIN tests t ON t.id = q.test_id
+    JOIN courses c ON c.id = t.course_id
+    WHERE q.id = answer_options.question_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM questions q
+    JOIN tests t ON t.id = q.test_id
+    JOIN courses c ON c.id = t.course_id
+    WHERE q.id = answer_options.question_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
+  )
+);
+
+-- Allow course creators to delete answer options for their course questions
+DROP POLICY IF EXISTS "Allow creators to delete answer options" ON answer_options;
+CREATE POLICY "Allow creators to delete answer options" ON answer_options
+FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM questions q
+    JOIN tests t ON t.id = q.test_id
+    JOIN courses c ON c.id = t.course_id
+    WHERE q.id = answer_options.question_id
+    AND (
+      c.creator_id = auth.uid() OR
+      EXISTS (
+        SELECT 1 FROM users u
+        WHERE u.id = auth.uid()
+        AND u.role = 'admin'
+      )
+    )
   )
 );
 

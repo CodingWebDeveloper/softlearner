@@ -23,6 +23,8 @@ import {
   FullCourse,
   BasicResource,
   BasicTest,
+  CreateTestInput,
+  FullQuestion,
   FullTest,
   TestResult,
   TestSubmission,
@@ -40,6 +42,7 @@ import {
   CreateResourceParams,
   UpdateResourceParams,
   SimpleResource,
+  SaveQuestionsInput,
 } from "@/services/interfaces/service.interfaces";
 
 export interface ICoursesDAL {
@@ -157,7 +160,11 @@ export interface IBookmarksDAL {
 export interface ITestsDAL {
   getTests(courseId: string): Promise<BasicTest[]>;
   getTestById(id: string): Promise<FullTest | null>;
+  getTestQuestions(testId: string): Promise<FullQuestion[]>;
   getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
+  createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
+  saveQuestions(data: SaveQuestionsInput): Promise<FullTest>;
+  updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;
   createScore(
     testId: string,
     userId: string,

@@ -4,6 +4,7 @@ import reviewFiltersReducer from "./features/reviewFiltersSlice";
 import reviewVotesReducer from "./features/reviewVotesSlice";
 import resourceReducer from "./features/resourceSlice";
 import resourcesReducer from "./features/resourcesSlice";
+import questionsReducer from "./features/questionsSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -13,6 +14,7 @@ export const makeStore = () => {
       reviewVotes: reviewVotesReducer,
       resource: resourceReducer,
       resources: resourcesReducer,
+      questions: questionsReducer,
     },
   });
 };

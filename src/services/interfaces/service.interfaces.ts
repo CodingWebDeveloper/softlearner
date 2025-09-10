@@ -45,6 +45,8 @@ export type VoteType = "Up" | "Down";
 
 export type UserRole = "student" | "creator" | "admin";
 
+export type QuestionType = "single" | "multiple";
+
 export interface Vote {
   id: string;
   user_id: string;
@@ -312,6 +314,11 @@ export type GetPurchasedCoursesResult = {
   totalRecords: number;
 };
 
+export interface CreateTestInput {
+  title: string;
+  description: string;
+}
+
 export interface BasicTest {
   id: string;
   title: string;
@@ -326,11 +333,30 @@ export interface BasicAnswerOption {
   text: string;
 }
 
+export interface BasicAnswerOption {
+  id: string;
+  text: string;
+  is_correct: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BasicQuestion {
   id: string;
   text: string;
   type: "single" | "multiple";
   points: number;
+  options: BasicAnswerOption[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FullQuestion {
+  id: string;
+  text: string;
+  type: QuestionType;
+  points: number;
+  test_id: string;
   options: BasicAnswerOption[];
   created_at: string;
   updated_at: string;
@@ -354,10 +380,29 @@ export interface TestWithProgress extends BasicTest {
   progress: number;
 }
 
+export interface SaveQuestionsInput {
+  testId: string;
+  questions: {
+    id?: string;
+    text: string;
+    type: "single" | "multiple";
+    points: number;
+    options: {
+      id?: string;
+      text: string;
+      isCorrect: boolean;
+    }[];
+  }[];
+}
+
 export interface ITestsService {
   getTests(courseId: string): Promise<BasicTest[]>;
   getTestById(id: string): Promise<FullTest | null>;
+  getTestQuestions(testId: string): Promise<FullQuestion[]>;
   getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
+  createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
+  updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;
+  saveQuestions(data: SaveQuestionsInput): Promise<FullTest>;
   createScore(
     testId: string,
     userId: string,
