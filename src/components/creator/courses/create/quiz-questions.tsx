@@ -146,10 +146,12 @@ const QuizQuestions = ({ testId }: QuizQuestionsProps) => {
           text: q.text,
           type: q.type,
           points: q.points,
+          status: q.status,
           options: q.options.map((o) => ({
             id: o.id,
             text: o.text,
             isCorrect: o.isCorrect,
+            status: o.status,
           })),
         })),
       });
@@ -183,10 +185,12 @@ const QuizQuestions = ({ testId }: QuizQuestionsProps) => {
         text: q.text,
         type: q.type as "single" | "multiple",
         points: Number(q.points),
+        status: "INITIAL" as const, // Questions loaded from DB are INITIAL
         options: q.options.map((o) => ({
           id: o.id,
           text: o.text,
           isCorrect: o.is_correct,
+          status: "INITIAL" as const, // Options loaded from DB are INITIAL
         })),
       }));
       dispatch(initializeQuestions({ questions: formattedQuestions, testId }));

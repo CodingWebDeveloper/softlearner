@@ -47,6 +47,8 @@ export type UserRole = "student" | "creator" | "admin";
 
 export type QuestionType = "single" | "multiple";
 
+export type Status = "NEW" | "UPDATED" | "DELETED" | "INITIAL";
+
 export interface Vote {
   id: string;
   user_id: string;
@@ -380,19 +382,25 @@ export interface TestWithProgress extends BasicTest {
   progress: number;
 }
 
-export interface SaveQuestionsInput {
+export interface QuestionsInput {
   testId: string;
-  questions: {
-    id?: string;
-    text: string;
-    type: "single" | "multiple";
-    points: number;
-    options: {
-      id?: string;
-      text: string;
-      isCorrect: boolean;
-    }[];
-  }[];
+  questions: QuestionInput[];
+}
+
+export interface QuestionInput {
+  id?: string;
+  text: string;
+  type: "single" | "multiple";
+  points: number;
+  status: Status;
+  options: OptionInput[];
+}
+
+export interface OptionInput {
+  id?: string;
+  text: string;
+  isCorrect: boolean;
+  status: Status;
 }
 
 export interface ITestsService {
@@ -402,7 +410,7 @@ export interface ITestsService {
   getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
   createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
   updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;
-  saveQuestions(data: SaveQuestionsInput): Promise<FullTest>;
+  saveQuestions(data: QuestionsInput): Promise<FullTest>;
   createScore(
     testId: string,
     userId: string,
