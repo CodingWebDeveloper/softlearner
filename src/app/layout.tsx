@@ -4,8 +4,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from "../providers/theme-provider";
 import { SupabaseProvider } from "../contexts/supabase-context";
-import ClientOnly from "@/components/client-only";
-import LoadingFallback from "../components/loading-fallback";
 import StoreProvider from "../providers/store-provider";
 import TrpcProvider from "../providers/trpc-provider";
 import SnackbarProvider from "../providers/snackbar-provider";

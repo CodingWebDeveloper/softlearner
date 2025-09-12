@@ -6,19 +6,16 @@ import QuizCard from "./quiz-card";
 import QuizDialog, { QuizFormValues } from "./quiz-dialog";
 import QuizQuestions from "./quiz-questions";
 import { BasicTest } from "@/services/interfaces/service.interfaces";
-import {
-  Typography,
-  Box,
-  CircularProgress,
-  Alert,
-  Snackbar,
-} from "@mui/material";
+import { Box, CircularProgress, Alert, Snackbar } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import {
   HeaderContainer,
   LoadingContainer,
 } from "@/components/styles/creator/quiz-management.styles";
-import { StyledButton } from "@/components/styles/infrastructure/layout.styles";
+import {
+  LightText,
+  StyledButton,
+} from "@/components/styles/infrastructure/layout.styles";
 
 interface QuizManagementProps {
   courseId: string | null;
@@ -156,9 +153,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
   return (
     <Box>
       <HeaderContainer>
-        <Typography variant="h5" component="h2">
-          Course Quizzes
-        </Typography>
+        <LightText variant="h5">Course Quizzes</LightText>
         <StyledButton
           startIcon={<AddIcon />}
           onClick={handleAddQuiz}
@@ -176,7 +171,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
             alignItems="center"
             mb={3}
           >
-            <Typography variant="h5">{selectedQuiz.title}</Typography>
+            <LightText variant="h5">{selectedQuiz.title}</LightText>
             <StyledButton variant="text" onClick={() => setSelectedQuiz(null)}>
               Back to Quizzes
             </StyledButton>

@@ -156,11 +156,12 @@ export const StyledButton = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(4),
   textTransform: "none",
   padding: theme.spacing(1, 3),
-  borderRadius: theme.shape.borderRadius,
+  borderRadius: 2,
   backgroundColor: theme.palette.custom.accent.teal,
   color: theme.palette.custom.text.white,
   "&:hover": {
-    backgroundColor: theme.palette.custom.accent.tealDark,
+    borderColor: theme.palette.custom.accent.tealDark,
+    backgroundColor: `${theme.palette.custom.accent.teal}10`,
   },
   "&.MuiButton-text": {
     backgroundColor: "transparent",

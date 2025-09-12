@@ -139,23 +139,27 @@ export const testsRouter = router({
     .input(
       z.object({
         testId: z.string().uuid(),
-        questions: z.array(
-          z.object({
-            id: z.string().uuid().optional(),
-            text: z.string().min(1, "Question text is required"),
-            type: z.enum(["single", "multiple"]),
-            points: z.number().min(1, "Points must be at least 1"),
-            status: z.enum(["NEW", "UPDATED", "DELETED", "INITIAL"]),
-            options: z.array(
-              z.object({
-                id: z.string().uuid().optional(),
-                text: z.string().min(1, "Option text is required"),
-                isCorrect: z.boolean(),
-                status: z.enum(["NEW", "UPDATED", "DELETED", "INITIAL"]),
-              })
-            ).min(2, "At least 2 options are required"),
-          })
-        ).min(1, "At least 1 question is required"),
+        questions: z
+          .array(
+            z.object({
+              id: z.string().uuid().optional(),
+              text: z.string().min(1, "Question text is required"),
+              type: z.enum(["single", "multiple"]),
+              points: z.number().min(1, "Points must be at least 1"),
+              status: z.enum(["NEW", "UPDATED", "INITIAL"]),
+              options: z
+                .array(
+                  z.object({
+                    id: z.string().uuid().optional(),
+                    text: z.string().min(1, "Option text is required"),
+                    isCorrect: z.boolean(),
+                    status: z.enum(["NEW", "UPDATED", "INITIAL"]),
+                  })
+                )
+                .min(2, "At least 2 options are required"),
+            })
+          )
+          .min(1, "At least 1 question is required"),
       })
     )
     .mutation(async ({ ctx, input }) => {

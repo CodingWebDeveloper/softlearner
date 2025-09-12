@@ -23,7 +23,7 @@ import {
 } from "@/components/styles/creator/resources-list.styles";
 import { SimpleResource } from "@/services/interfaces/service.interfaces";
 import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
-import EditResourceDialog from "../edit-resource-dialog";
+import EditResourceDialog from "./edit-resource-dialog";
 import { trpc } from "@/lib/trpc/client";
 
 interface ResourceCardProps {

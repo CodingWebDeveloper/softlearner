@@ -413,6 +413,19 @@ FOR SELECT USING (
   )
 );
 
+DROP POLICY IF EXISTS "Allow creators to view answer options" ON answer_options;
+CREATE POLICY "Allow creators to view answer options" ON answer_options
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1
+    FROM questions q
+    JOIN tests t ON q.test_id = t.id
+    JOIN courses c ON c.id = t.course_id
+    WHERE q.id = answer_options.question_id
+      AND c.creator_id = auth.uid()
+  )
+);
+
 -- Allow course creators to create answer options for their course questions
 DROP POLICY IF EXISTS "Allow creators to create answer options" ON answer_options;
 CREATE POLICY "Allow creators to create answer options" ON answer_options

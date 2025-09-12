@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import GeneralForm from "@/components/creator/courses/create/general-form";
-import ResourcesForm from "@/components/creator/courses/create/resources-form";
+import ResourcesForm from "@/components/creator/courses/create/resources-form/resources-form";
 import {
   Container,
   Typography,
@@ -15,7 +15,7 @@ import Link from "next/link";
 import { styled } from "@mui/material/styles";
 import { PageContainer } from "@/components/styles/infrastructure/layout.styles";
 import CourseTagsForm from "@/components/creator/courses/course-tags-form";
-import QuizManagement from "@/components/creator/courses/create/quiz-management";
+import QuizManagement from "@/components/creator/courses/create/quiz-form/quiz-management";
 
 const StyledTabs = styled(Tabs)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.custom.background.tertiary}`,

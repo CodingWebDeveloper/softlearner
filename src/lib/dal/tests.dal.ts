@@ -105,7 +105,9 @@ export class TestsDAL implements ITestsDAL {
         `
         *,
         answer_options (
-          *
+          id,
+          text,
+          is_correct
         )
       `
       )
@@ -193,7 +195,10 @@ export class TestsDAL implements ITestsDAL {
     };
   }
 
-  async createTest(courseId: string, data: CreateTestInput): Promise<BasicTest> {
+  async createTest(
+    courseId: string,
+    data: CreateTestInput
+  ): Promise<BasicTest> {
     const { data: test, error } = await this.supabase
       .from("tests")
       .insert({
@@ -225,32 +230,24 @@ export class TestsDAL implements ITestsDAL {
 
   async saveQuestions(data: QuestionsInput): Promise<FullTest> {
     const { testId, questions } = data;
-
+    console.log("questions", questions);
     try {
       for (const question of questions) {
         switch (question.status) {
           case "INITIAL":
-            // Skip untouched questions
-            continue;
-  
+            await this.processOptions(question.id as string, question.options);
+            break;
           case "NEW":
             await this.createQuestionWithOptions(testId, question);
             break;
-  
           case "UPDATED":
             if (question.id) {
               await this.updateQuestionWithOptions(question);
             }
             break;
-  
-          case "DELETED":
-            if (question.id) {
-              await this.deleteQuestion(question.id);
-            }
-            break;
         }
       }
-  
+
       // Return updated test
       const updatedTest = await this.getTestById(testId);
       if (!updatedTest) {
@@ -265,35 +262,31 @@ export class TestsDAL implements ITestsDAL {
       );
     }
   }
-  
-  private async createQuestionWithOptions(testId: string, question: QuestionInput) {
-    // Debug: Check if user is authenticated and get user info
-    const { data: { user }, error: userError } = await this.supabase.auth.getUser();
-    if (userError || !user) {
-      throw new Error(`User not authenticated: ${userError?.message || 'No user found'}`);
-    }
 
-    // Debug: Check if test exists and get course info
+  private async createQuestionWithOptions(
+    testId: string,
+    question: QuestionInput
+  ) {
     const { data: testData, error: testError } = await this.supabase
       .from("tests")
-      .select(`
+      .select(
+        `
         id,
         course_id,
         courses!inner (
           id,
           creator_id
         )
-      `)
+      `
+      )
       .eq("id", testId)
       .single();
 
     if (testError || !testData) {
-      throw new Error(`Test not found: ${testError?.message || 'Test not found'}`);
+      throw new Error(
+        `Test not found: ${testError?.message || "Test not found"}`
+      );
     }
-
-    console.log('Debug - User ID:', user.id);
-    console.log('Debug - Course Creator ID:', testData.courses.creator_id);
-    console.log('Debug - Test ID:', testId);
 
     const { data: newQuestion, error } = await this.supabase
       .from("questions")
@@ -307,28 +300,30 @@ export class TestsDAL implements ITestsDAL {
       .single();
 
     if (error) {
-      console.error('Debug - Question creation error:', error);
       throw new Error(`Error creating question: ${error.message}`);
     }
-  
-    const newOptions = question.options.filter((opt: OptionInput) => opt.status === "NEW");
+
+    const newOptions = question.options.filter(
+      (opt: OptionInput) => opt.status === "NEW"
+    );
     if (newOptions.length > 0) {
       const { error: optionsError } = await this.supabase
         .from("answer_options")
         .insert(
-          newOptions.map(opt => ({
+          newOptions.map((opt) => ({
             question_id: newQuestion.id,
             text: opt.text,
             is_correct: opt.isCorrect,
           }))
         );
-  
-      if (optionsError) throw new Error(`Error creating options: ${optionsError.message}`);
+
+      if (optionsError)
+        throw new Error(`Error creating options: ${optionsError.message}`);
     }
 
-    
+    return newQuestion;
   }
-  
+
   private async updateQuestionWithOptions(question: QuestionInput) {
     const { error } = await this.supabase
       .from("questions")
@@ -338,18 +333,18 @@ export class TestsDAL implements ITestsDAL {
         points: question.points,
       })
       .eq("id", question.id as string);
-  
+
     if (error) throw new Error(`Error updating question: ${error.message}`);
-  
-    await this.processOptions(question.id as string, question.options as OptionInput[]);
+
+    await this.processOptions(
+      question.id as string,
+      question.options as OptionInput[]
+    );
   }
-  
+
   private async processOptions(questionId: string, options: OptionInput[]) {
     for (const option of options) {
       switch (option.status) {
-        case "INITIAL":
-          continue;
-  
         case "NEW":
           await this.supabase.from("answer_options").insert({
             question_id: questionId,
@@ -357,7 +352,7 @@ export class TestsDAL implements ITestsDAL {
             is_correct: option.isCorrect,
           });
           break;
-  
+
         case "UPDATED":
           if (option.id) {
             await this.supabase
@@ -369,25 +364,18 @@ export class TestsDAL implements ITestsDAL {
               .eq("id", option.id as string);
           }
           break;
-  
-        case "DELETED":
-          if (option.id) {
-            await this.supabase.from("answer_options").delete().eq("id", option.id as string);
-          }
-          break;
       }
     }
   }
-  
+
   private async deleteQuestion(questionId: string) {
     const { error } = await this.supabase
       .from("questions")
       .delete()
       .eq("id", questionId);
-  
+
     if (error) throw new Error(`Error deleting question: ${error.message}`);
   }
-  
 
   async createScore(
     testId: string,
