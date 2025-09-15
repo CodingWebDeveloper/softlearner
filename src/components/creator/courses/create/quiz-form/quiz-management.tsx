@@ -6,7 +6,7 @@ import QuizCard from "./quiz-card";
 import QuizDialog, { QuizFormValues } from "./quiz-dialog";
 import QuizQuestions from "./quiz-questions";
 import { BasicTest } from "@/services/interfaces/service.interfaces";
-import { Box, CircularProgress, Alert, Snackbar } from "@mui/material";
+import { Box, CircularProgress, Alert, Snackbar, Skeleton, Card, CardContent } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import {
   HeaderContainer,
@@ -20,6 +20,21 @@ import {
 interface QuizManagementProps {
   courseId: string | null;
 }
+
+const QuizCardSkeleton = () => (
+  <Card>
+    <CardContent>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Skeleton variant="circular" width={32} height={32} />
+        <Skeleton variant="circular" width={24} height={24} />
+      </Box>
+      <Skeleton variant="text" sx={{ fontSize: '1.5rem', mb: 1 }} />
+      <Skeleton variant="text" sx={{ fontSize: '0.875rem', mb: 2 }} width="80%" />
+      <Skeleton variant="text" sx={{ fontSize: '0.875rem', mb: 1 }} width="60%" />
+      <Skeleton variant="text" sx={{ fontSize: '0.75rem' }} width="40%" />
+    </CardContent>
+  </Card>
+);
 
 const QuizManagement = ({ courseId }: QuizManagementProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -38,7 +53,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
 
   const {
     data: quizzes,
-    isLoading,
+    isPending: isLoadingQuizzes,
     error,
   } = trpc.tests.getTests.useQuery(courseId!, {
     enabled: !!courseId,
@@ -53,6 +68,25 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
   const updateTestMutation = trpc.tests.updateTest.useMutation({
     onSuccess: () => {
       utils.tests.getTests.invalidate(courseId!);
+    },
+  });
+
+  const deleteTestMutation = trpc.tests.deleteTest.useMutation({
+    onSuccess: () => {
+      utils.tests.getTests.invalidate(courseId!);
+      setSnackbar({
+        open: true,
+        message: "Quiz deleted successfully!",
+        severity: "success",
+      });
+    },
+    onError: (error) => {
+      setSnackbar({
+        open: true,
+        message: "Failed to delete quiz. Please try again.",
+        severity: "error",
+      });
+      console.error("Failed to delete quiz:", error);
     },
   });
 
@@ -122,6 +156,14 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
     }
   };
 
+  const handleDeleteQuiz = async (quizId: string) => {
+    try {
+      await deleteTestMutation.mutateAsync(quizId);
+    } catch (error) {
+      // Error handling is done in the mutation's onError callback
+    }
+  };
+
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
@@ -134,11 +176,27 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
     );
   }
 
-  if (isLoading) {
+  if (isLoadingQuizzes) {
     return (
-      <LoadingContainer>
-        <CircularProgress />
-      </LoadingContainer>
+      <Box>
+        <HeaderContainer>
+          <Skeleton variant="text" sx={{ fontSize: '2rem' }} width={200} />
+          <Skeleton variant="rectangular" width={120} height={36} sx={{ borderRadius: 1 }} />
+        </HeaderContainer>
+        <Box
+          display="grid"
+          gridTemplateColumns={{
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+          }}
+          gap={3}
+        >
+          {Array.from({ length: 6 }).map((_, index) => (
+            <QuizCardSkeleton key={index} />
+          ))}
+        </Box>
+      </Box>
     );
   }
 
@@ -196,6 +254,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
                   quiz={quiz}
                   onClick={handleQuizClick}
                   onAddQuestions={handleAddQuestions}
+                  onDelete={handleDeleteQuiz}
                 />
               ))}
             </Box>

@@ -18,6 +18,7 @@ import MoreIcon from "@mui/icons-material/More";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
+import ConfirmAlert from "@/components/confirm-alert";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.custom.background.secondary,
@@ -102,11 +103,13 @@ interface QuizCardProps {
   quiz: BasicTest;
   onClick: (quizId: string) => void;
   onAddQuestions: (quizId: string) => void;
+  onDelete: (quizId: string) => void;
 }
 
-const QuizCard = ({ quiz, onClick, onAddQuestions }: QuizCardProps) => {
+const QuizCard = ({ quiz, onClick, onAddQuestions, onDelete }: QuizCardProps) => {
   // States
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Handlers
   const handleAddQuestions = (e: React.MouseEvent) => {
@@ -120,6 +123,20 @@ const QuizCard = ({ quiz, onClick, onAddQuestions }: QuizCardProps) => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+    handleClose();
+  };
+
+  const handleDeleteConfirm = () => {
+    onDelete(quiz.id);
+    setShowDeleteConfirm(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
   };
 
   const open = Boolean(anchorEl);
@@ -188,11 +205,22 @@ const QuizCard = ({ quiz, onClick, onAddQuestions }: QuizCardProps) => {
           <StyledAddIcon />
           Add Questions
         </MenuItem>
-        <MenuItem onClick={handleClose} disableRipple>
+        <MenuItem onClick={handleDeleteClick} disableRipple>
           <DeleteIcon />
           Delete
         </MenuItem>
       </StyledMenu>
+      
+      <ConfirmAlert
+        open={showDeleteConfirm}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Quiz"
+        content={`Are you sure you want to delete "${quiz.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        label="delete-quiz"
+      />
     </StyledCard>
   );
 };

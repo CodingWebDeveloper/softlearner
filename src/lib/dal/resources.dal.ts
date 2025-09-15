@@ -298,27 +298,62 @@ export class ResourcesDAL implements IResourcesDAL {
       throw new Error("Resource not found");
     }
 
-    // Handle file deletion if type changed from file to video
-    if (
-      currentResource.type === RESOURCE_TYPES.DOWNLOADABLE_FILE &&
-      updates.type === RESOURCE_TYPES.VIDEO
-    ) {
-      const filePath = `${currentResource.course_id}/${resourceId}`;
-      await this.supabase.storage
-        .from("course-resources")
-        .remove([filePath]);
+    const filePath = `${currentResource.course_id}/${resourceId}`;
+    let finalUrl = currentResource.url;
+
+    if (currentResource.type === RESOURCE_TYPES.DOWNLOADABLE_FILE && updates.type === RESOURCE_TYPES.VIDEO) {
+      if (currentResource.url) {
+        await this.supabase.storage
+          .from("course-resources")
+          .remove([currentResource.url]);
+      }
+      finalUrl = updates.url || "";
+    } else if (currentResource.type === RESOURCE_TYPES.VIDEO && updates.type === RESOURCE_TYPES.DOWNLOADABLE_FILE) {
+      if (updates.file) {
+        const { data: uploadedResourceData, error: uploadError } = await this.supabase.storage
+          .from("course-resources")
+          .upload(filePath, updates.file);
+
+        if (uploadError) {
+          throw new Error(`Error uploading file: ${uploadError.message}`);
+        }
+
+        finalUrl = uploadedResourceData.path;
+      } else {
+        throw new Error("File is required when changing from video to file type");
+      }
+    } else if (currentResource.type === RESOURCE_TYPES.DOWNLOADABLE_FILE && updates.type === RESOURCE_TYPES.DOWNLOADABLE_FILE) {
+      if (updates.file) {
+        if (currentResource.url) {
+          await this.supabase.storage
+            .from("course-resources")
+            .remove([currentResource.url]);
+        }
+
+        const { data: uploadedResourceData, error: uploadError } = await this.supabase.storage
+          .from("course-resources")
+          .upload(filePath, updates.file);
+
+        if (uploadError) {
+          throw new Error(`Error uploading new file: ${uploadError.message}`);
+        }
+
+        finalUrl = uploadedResourceData.path;
+      }
+    } else if (currentResource.type === RESOURCE_TYPES.VIDEO && updates.type === RESOURCE_TYPES.VIDEO) {
+      if (updates.url !== undefined) {
+        finalUrl = updates.url;
+      }
     }
 
-    // Build update data
     const updateData = {
       name: updates.name,
       short_summary: updates.short_summary,
       type: updates.type,
       duration: updates.duration,
-      url: updates.type === RESOURCE_TYPES.VIDEO ? updates.url : "",
+      url: finalUrl,
     };
 
-    // Update the resource
     const { data: updatedResource, error: updateError } = await this.supabase
       .from("resources")
       .update(updateData)
@@ -330,37 +365,8 @@ export class ResourcesDAL implements IResourcesDAL {
       throw new Error(`Error updating resource: ${updateError.message}`);
     }
 
-    // Handle file upload for downloadable resources
-    if (updates.type === RESOURCE_TYPES.DOWNLOADABLE_FILE && updates.file) {
-      const filePath = `${currentResource.course_id}/${resourceId}`;
-
-      // Delete existing file if any
-      await this.supabase.storage
-        .from("course-resources")
-        .remove([filePath]);
-
-      // Upload new file
-      const { data: uploadedResourceData, error: uploadError } = await this.supabase.storage
-        .from("course-resources")
-        .upload(filePath, updates.file);
-
-      if (uploadError) {
-        throw new Error(`Error uploading file: ${uploadError.message}`);
-      }
-
-      // Update the resource with the new file URL
-      const { data: resourceWithFile, error: fileUpdateError } = await this.supabase
-        .from("resources")
-        .update({ url: uploadedResourceData.path })
-        .eq("id", resourceId)
-        .select()
-        .single();
-
-      if (fileUpdateError) {
-        throw new Error(`Error updating resource with file URL: ${fileUpdateError.message}`);
-      }
-
-      return resourceWithFile as SimpleResource;
+    if (!updatedResource) {
+      throw new Error("Failed to update resource");
     }
 
     return updatedResource as SimpleResource;

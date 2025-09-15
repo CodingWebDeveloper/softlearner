@@ -41,6 +41,10 @@ const CourseTagsForm = ({
   const [inputValue, setInputValue] = useState("");
   const [search, setSearch] = useState("");
   const [selectedTags, setSelectedTags] = useState<TagOption[]>(initialTags);
+  const [originalTags, setOriginalTags] = useState<TagOption[]>(initialTags);
+
+  // TRPC utils
+  const utils = trpc.useUtils();
 
   // Mutations
   const {
@@ -60,6 +64,31 @@ const CourseTagsForm = ({
   const tagOptions: TagOption[] = useMemo(() => tags || [], [tags]);
 
   const loading = isPendingTags || isPendingCourseTags;
+
+  // Check if there are changes to the tags
+  const hasChanges = useMemo(() => {
+    if (originalTags.length !== selectedTags.length) {
+      return true;
+    }
+    
+    // Check if all original tags are still present
+    const originalTagIds = new Set(originalTags.map(tag => tag.id));
+    const selectedTagIds = new Set(selectedTags.map(tag => tag.id));
+    
+    for (const tagId of originalTagIds) {
+      if (!selectedTagIds.has(tagId)) {
+        return true;
+      }
+    }
+    
+    for (const tagId of selectedTagIds) {
+      if (!originalTagIds.has(tagId)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }, [originalTags, selectedTags]);
 
   // Handlers
   const handleTagAdd = (newTag: TagOption | null) => {
@@ -82,6 +111,10 @@ const CourseTagsForm = ({
         courseId,
         tagIds: selectedTags.map((tag) => tag.id),
       });
+      
+      // Invalidate the course tags query to refetch the updated data
+      await utils.tags.getTagsByCourseId.invalidate({ courseId });
+      
       enqueueSnackbar("Course tags updated successfully", {
         variant: "success",
         anchorOrigin: {
@@ -112,8 +145,9 @@ const CourseTagsForm = ({
   }, [inputValue]);
 
   useEffect(() => {
-    if (courseTags && courseTags.length > 0) {
+    if (courseTags) {
       setSelectedTags(courseTags);
+      setOriginalTags(courseTags);
     }
   }, [courseTags]);
 
@@ -206,7 +240,7 @@ const CourseTagsForm = ({
         <SaveOrderButton
           variant="contained"
           onClick={handleSave}
-          disabled={isPendingCreateTagsByCourse}
+          disabled={isPendingCreateTagsByCourse || !hasChanges}
           sx={{
             backgroundColor: theme.palette.custom.accent.teal,
             "&:hover": {
