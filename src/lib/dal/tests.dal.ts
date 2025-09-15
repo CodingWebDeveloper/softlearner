@@ -4,9 +4,15 @@ import { ITestsDAL } from "../di/interfaces/dal.interfaces";
 import {
   BasicAnswerOption,
   BasicTest,
+  CreateTestInput,
   FullTest,
+  FullQuestion,
+  QuestionsInput,
   TestResult,
   TestSubmission,
+  QuestionType,
+  QuestionInput,
+  OptionInput,
 } from "@/services/interfaces/service.interfaces";
 
 type QuestionWithOptions = {
@@ -92,6 +98,38 @@ export class TestsDAL implements ITestsDAL {
     };
   }
 
+  async getTestQuestions(testId: string): Promise<FullQuestion[]> {
+    const { data, error } = await this.supabase
+      .from("questions")
+      .select(
+        `
+        *,
+        answer_options (
+          id,
+          text,
+          is_correct
+        )
+      `
+      )
+      .eq("test_id", testId)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      throw new Error(`Error fetching test questions: ${error.message}`);
+    }
+
+    return (data || []).map((question) => ({
+      id: question.id,
+      text: question.text,
+      type: question.type as QuestionType,
+      points: question.points,
+      test_id: question.test_id,
+      options: question.answer_options || [],
+      created_at: question.created_at,
+      updated_at: question.updated_at,
+    }));
+  }
+
   async getTestResults(
     courseId: string,
     userId: string
@@ -125,6 +163,228 @@ export class TestsDAL implements ITestsDAL {
         maxScore,
       };
     });
+  }
+
+  async updateTest(id: string, data: CreateTestInput): Promise<BasicTest> {
+    const { data: test, error } = await this.supabase
+      .from("tests")
+      .update({
+        title: data.title,
+        description: data.description,
+      })
+      .eq("id", id)
+      .select(
+        `
+        *,
+        questions:questions(count)
+      `
+      )
+      .single();
+
+    if (error) {
+      throw new Error(`Error updating test: ${error.message}`);
+    }
+
+    return {
+      id: test.id,
+      title: test.title,
+      description: test.description,
+      questionsCount: test.questions[0]?.count || 0,
+      created_at: test.created_at,
+      updated_at: test.updated_at,
+    };
+  }
+
+  async createTest(
+    courseId: string,
+    data: CreateTestInput
+  ): Promise<BasicTest> {
+    const { data: test, error } = await this.supabase
+      .from("tests")
+      .insert({
+        course_id: courseId,
+        title: data.title,
+        description: data.description,
+      })
+      .select(
+        `
+        *,
+        questions:questions(count)
+      `
+      )
+      .single();
+
+    if (error) {
+      throw new Error(`Error creating test: ${error.message}`);
+    }
+
+    return {
+      id: test.id,
+      title: test.title,
+      description: test.description,
+      questionsCount: test.questions[0]?.count || 0,
+      created_at: test.created_at,
+      updated_at: test.updated_at,
+    };
+  }
+
+  async saveQuestions(data: QuestionsInput): Promise<FullTest> {
+    const { testId, questions } = data;
+    console.log("questions", questions);
+    try {
+      for (const question of questions) {
+        switch (question.status) {
+          case "INITIAL":
+            await this.processOptions(question.id as string, question.options);
+            break;
+          case "NEW":
+            await this.createQuestionWithOptions(testId, question);
+            break;
+          case "UPDATED":
+            if (question.id) {
+              await this.updateQuestionWithOptions(question);
+            }
+            break;
+        }
+      }
+
+      // Return updated test
+      const updatedTest = await this.getTestById(testId);
+      if (!updatedTest) {
+        throw new Error("Failed to retrieve updated test");
+      }
+      return updatedTest;
+    } catch (error) {
+      throw new Error(
+        `Failed to save questions: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }
+
+  private async createQuestionWithOptions(
+    testId: string,
+    question: QuestionInput
+  ) {
+    const { data: testData, error: testError } = await this.supabase
+      .from("tests")
+      .select(
+        `
+        id,
+        course_id,
+        courses!inner (
+          id,
+          creator_id
+        )
+      `
+      )
+      .eq("id", testId)
+      .single();
+
+    if (testError || !testData) {
+      throw new Error(
+        `Test not found: ${testError?.message || "Test not found"}`
+      );
+    }
+
+    const { data: newQuestion, error } = await this.supabase
+      .from("questions")
+      .insert({
+        test_id: testId,
+        text: question.text,
+        type: question.type,
+        points: question.points,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Error creating question: ${error.message}`);
+    }
+
+    const newOptions = question.options.filter(
+      (opt: OptionInput) => opt.status === "NEW"
+    );
+    if (newOptions.length > 0) {
+      const { error: optionsError } = await this.supabase
+        .from("answer_options")
+        .insert(
+          newOptions.map((opt) => ({
+            question_id: newQuestion.id,
+            text: opt.text,
+            is_correct: opt.isCorrect,
+          }))
+        );
+
+      if (optionsError)
+        throw new Error(`Error creating options: ${optionsError.message}`);
+    }
+
+    return newQuestion;
+  }
+
+  private async updateQuestionWithOptions(question: QuestionInput) {
+    const { error } = await this.supabase
+      .from("questions")
+      .update({
+        text: question.text,
+        type: question.type,
+        points: question.points,
+      })
+      .eq("id", question.id as string);
+
+    if (error) throw new Error(`Error updating question: ${error.message}`);
+
+    await this.processOptions(
+      question.id as string,
+      question.options as OptionInput[]
+    );
+  }
+
+  private async processOptions(questionId: string, options: OptionInput[]) {
+    for (const option of options) {
+      switch (option.status) {
+        case "NEW":
+          await this.supabase.from("answer_options").insert({
+            question_id: questionId,
+            text: option.text,
+            is_correct: option.isCorrect,
+          });
+          break;
+
+        case "UPDATED":
+          if (option.id) {
+            await this.supabase
+              .from("answer_options")
+              .update({
+                text: option.text,
+                is_correct: option.isCorrect,
+              })
+              .eq("id", option.id as string);
+          }
+          break;
+      }
+    }
+  }
+
+  async deleteTest(id: string): Promise<void> {
+    const { error } = await this.supabase.from("tests").delete().eq("id", id);
+
+    if (error) {
+      throw new Error(`Error deleting test: ${error.message}`);
+    }
+  }
+
+  private async deleteQuestion(questionId: string) {
+    const { error } = await this.supabase
+      .from("questions")
+      .delete()
+      .eq("id", questionId);
+
+    if (error) {
+      throw new Error(`Error deleting question: ${error.message}`);
+    }
   }
 
   async createScore(

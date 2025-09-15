@@ -25,4 +25,8 @@ export class TagsService implements ITagsService {
   async deleteTag(id: string): Promise<void> {
     await this.tagsDAL.deleteTag(id);
   }
+
+  async createTagsByCourse(courseId: string, tagIds: string[]): Promise<void> {
+    await this.tagsDAL.createTagsByCourse(courseId, tagIds);
+  }
 }

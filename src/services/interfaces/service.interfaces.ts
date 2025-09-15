@@ -1,5 +1,16 @@
 import { Category, Tag, PreviewResource } from "@/lib/database/database.types";
 import { ResourceType } from "@/lib/constants/database-constants";
+export interface SimpleResource {
+  id: string;
+  name: string;
+  url: string;
+  short_summary?: string;
+  type: ResourceType;
+  order_index: number;
+  duration?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface BasicResource {
   id: string;
@@ -13,7 +24,7 @@ export interface BasicResource {
   completed?: boolean;
 }
 
-type User = {
+export type User = {
   id: string;
   email: string | null;
   full_name: string | null;
@@ -31,6 +42,10 @@ export type CourseCreator = {
 export type VoteType = "Up" | "Down";
 
 export type UserRole = "student" | "creator" | "admin";
+
+export type QuestionType = "single" | "multiple";
+
+export type Status = "NEW" | "UPDATED" | "DELETED" | "INITIAL";
 
 export interface Vote {
   id: string;
@@ -66,6 +81,31 @@ export interface CheckoutSessionResponse {
 export interface GetTagsParams {
   search?: string;
   limit?: number;
+}
+
+export interface CreateCourseParams {
+  name: string;
+  description: string;
+  video_url: string;
+  price: number;
+  new_price?: number | null;
+  category_id: string;
+  thumbnail_image?: File;
+}
+
+export interface SimpleCourse {
+  id: string;
+  name: string;
+  description: string;
+  video_url: string;
+  price: number;
+  new_price: number | null;
+  currency: string;
+  category: Category;
+  creator: User;
+  thumbnail_image_url: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface BasicCourse {
@@ -110,6 +150,11 @@ export interface GetCoursesResult {
   totalRecords: number;
 }
 
+export interface PaginatedResult<T> {
+  data: T[];
+  totalRecords: number;
+}
+
 export interface BasicReview {
   id: string;
   content: string;
@@ -145,6 +190,10 @@ export interface ICategoriesService {
 }
 
 export interface ICoursesService {
+  createCourse(
+    creatorId: string,
+    params: CreateCourseParams
+  ): Promise<SimpleCourse>;
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string): Promise<BasicCourse | null>;
   isEnrolled(userId: string, courseId: string): Promise<boolean>;
@@ -162,6 +211,21 @@ export interface ICoursesService {
     id: string,
     userId?: string
   ): Promise<FullCourse | null>;
+  getCoursesByCreator(
+    creatorId: string,
+    page?: number,
+    pageSize?: number,
+    sortBy?: "name" | "category" | "price" | "created_at" | "updated_at",
+    sortDir?: "asc" | "desc"
+  ): Promise<PaginatedResult<SimpleCourse>>;
+  updateCourse(
+    creatorId: string,
+    courseId: string,
+    params: CreateCourseParams
+  ): Promise<SimpleCourse>;
+  deleteCourse(creatorId: string, courseId: string): Promise<void>;
+  getCourseDataById(id: string): Promise<SimpleCourse | null>;
+  getThumbnail(thumbnailPath: string): Promise<Blob>;
 }
 
 export interface ITagsService {
@@ -170,10 +234,32 @@ export interface ITagsService {
   createTag(name: string): Promise<Tag>;
   updateTag(id: string, name: string): Promise<Tag>;
   deleteTag(id: string): Promise<void>;
+  createTagsByCourse(courseId: string, tagIds: string[]): Promise<void>;
+}
+
+export interface CreateResourceParams {
+  name: string;
+  short_summary?: string;
+  type: ResourceType;
+  course_id: string;
+  url?: string;
+  file?: File;
+  order_index?: number;
+  duration?: string;
+}
+
+export interface UpdateResourceParams {
+  name: string;
+  short_summary: string;
+  type: ResourceType;
+  url?: string;
+  file?: File;
+  duration: string;
 }
 
 export interface IResourcesService {
   getResourcesByCourseId(courseId: string): Promise<PreviewResource[]>;
+  getAllResourcesByCourseId(courseId: string): Promise<SimpleResource[]>;
   getResourceMaterialsByCourseId(
     courseId: string,
     userId?: string
@@ -190,6 +276,17 @@ export interface IResourcesService {
     userId: string,
     resourceId: string
   ): Promise<boolean>;
+  createResource(params: CreateResourceParams): Promise<SimpleResource>;
+  updateResource(
+    resourceId: string,
+    params: UpdateResourceParams
+  ): Promise<SimpleResource>;
+  updateResourcesOrder(
+    courseId: string,
+    orderUpdates: { id: string; order_index: number }[]
+  ): Promise<SimpleResource[]>;
+  downloadResourceFile(resourceId: string): Promise<Blob>;
+  deleteResource(resourceId: string): Promise<void>;
 }
 
 export interface IReviewsService {
@@ -246,6 +343,11 @@ export type GetPurchasedCoursesResult = {
   totalRecords: number;
 };
 
+export interface CreateTestInput {
+  title: string;
+  description: string;
+}
+
 export interface BasicTest {
   id: string;
   title: string;
@@ -260,11 +362,30 @@ export interface BasicAnswerOption {
   text: string;
 }
 
+export interface BasicAnswerOption {
+  id: string;
+  text: string;
+  is_correct: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BasicQuestion {
   id: string;
   text: string;
-  type: "single" | "multiple";
+  type: QuestionType;
   points: number;
+  options: BasicAnswerOption[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FullQuestion {
+  id: string;
+  text: string;
+  type: QuestionType;
+  points: number;
+  test_id: string;
   options: BasicAnswerOption[];
   created_at: string;
   updated_at: string;
@@ -288,10 +409,36 @@ export interface TestWithProgress extends BasicTest {
   progress: number;
 }
 
+export interface QuestionsInput {
+  testId: string;
+  questions: QuestionInput[];
+}
+
+export interface QuestionInput {
+  id?: string;
+  text: string;
+  type: "single" | "multiple";
+  points: number;
+  status: Status;
+  options: OptionInput[];
+}
+
+export interface OptionInput {
+  id?: string;
+  text: string;
+  isCorrect: boolean;
+  status: Status;
+}
+
 export interface ITestsService {
   getTests(courseId: string): Promise<BasicTest[]>;
   getTestById(id: string): Promise<FullTest | null>;
+  getTestQuestions(testId: string): Promise<FullQuestion[]>;
   getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
+  createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
+  updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;
+  deleteTest(id: string): Promise<void>;
+  saveQuestions(data: QuestionsInput): Promise<FullTest>;
   createScore(
     testId: string,
     userId: string,

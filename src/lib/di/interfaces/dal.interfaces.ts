@@ -23,6 +23,8 @@ import {
   FullCourse,
   BasicResource,
   BasicTest,
+  CreateTestInput,
+  FullQuestion,
   FullTest,
   TestResult,
   TestSubmission,
@@ -35,11 +37,32 @@ import {
   GetCreatorApplicationsParams,
   GetCreatorApplicationsResult,
   ApplicationLog,
+  CreateCourseParams,
+  SimpleCourse,
+  CreateResourceParams,
+  UpdateResourceParams,
+  SimpleResource,
+  QuestionsInput,
 } from "@/services/interfaces/service.interfaces";
 
+export interface PaginatedResult<T> {
+  data: T[];
+  totalRecords: number;
+}
+
 export interface ICoursesDAL {
+  createCourse(
+    creatorId: string,
+    params: CreateCourseParams
+  ): Promise<SimpleCourse>;
+  uploadCourseThumbnail(
+    creatorId: string,
+    courseId: string,
+    file: File
+  ): Promise<string>;
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string, userId?: string): Promise<BasicCourse | null>;
+  getCourseDataById(id: string): Promise<SimpleCourse | null>;
   isEnrolled(userId: string, courseId: string): Promise<boolean>;
   getBookmarkedCourses(
     userId: string,
@@ -55,6 +78,20 @@ export interface ICoursesDAL {
     id: string,
     userId?: string
   ): Promise<FullCourse | null>;
+  getCoursesByCreator(
+    creatorId: string,
+    page?: number,
+    pageSize?: number,
+    sortBy?: "name" | "category" | "price" | "created_at" | "updated_at",
+    sortDir?: "asc" | "desc"
+  ): Promise<PaginatedResult<SimpleCourse>>;
+  updateCourse(
+    creatorId: string,
+    courseId: string,
+    params: CreateCourseParams
+  ): Promise<SimpleCourse>;
+  deleteCourse(creatorId: string, courseId: string): Promise<void>;
+  getThumbnail(thumbnailPath: string): Promise<Blob>;
 }
 
 export interface ICategoriesDAL {
@@ -67,10 +104,12 @@ export interface ITagsDAL {
   createTag(name: string): Promise<Tag>;
   updateTag(id: string, name: string): Promise<Tag>;
   deleteTag(id: string): Promise<void>;
+  createTagsByCourse(courseId: string, tagIds: string[]): Promise<void>;
 }
 
 export interface IResourcesDAL {
   getResourcesByCourseId(courseId: string): Promise<PreviewResource[]>;
+  getAllResourcesByCourseId(courseId: string): Promise<SimpleResource[]>;
   getResourceMaterialsByCourseId(
     courseId: string,
     userId?: string
@@ -87,6 +126,17 @@ export interface IResourcesDAL {
     userId: string,
     resourceId: string
   ): Promise<boolean>;
+  createResource(params: CreateResourceParams): Promise<SimpleResource>;
+  updateResource(
+    resourceId: string,
+    params: UpdateResourceParams
+  ): Promise<SimpleResource>;
+  updateResourcesOrder(
+    courseId: string,
+    orderUpdates: { id: string; order_index: number }[]
+  ): Promise<SimpleResource[]>;
+  downloadResourceFile(resourceId: string): Promise<Blob>;
+  deleteResource(resourceId: string): Promise<void>;
 }
 
 export interface IReviewsDAL {
@@ -140,12 +190,17 @@ export interface IBookmarksDAL {
 export interface ITestsDAL {
   getTests(courseId: string): Promise<BasicTest[]>;
   getTestById(id: string): Promise<FullTest | null>;
+  getTestQuestions(testId: string): Promise<FullQuestion[]>;
   getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
+  createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
+  saveQuestions(data: QuestionsInput): Promise<FullTest>;
+  updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;
   createScore(
     testId: string,
     userId: string,
     submission: TestSubmission
   ): Promise<TestResult>;
+  deleteTest(id: string): Promise<void>;
 }
 
 export interface IUsersDAL {
