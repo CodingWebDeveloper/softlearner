@@ -200,6 +200,7 @@ export interface ITestsDAL {
     userId: string,
     submission: TestSubmission
   ): Promise<TestResult>;
+  deleteTest(id: string): Promise<void>;
 }
 
 export interface IUsersDAL {

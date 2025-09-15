@@ -3,6 +3,14 @@ import { ITestsService } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
 import { router, protectedProcedure } from "../trpc";
 
+const updateTestInput = z.object({
+  id: z.string().uuid(),
+  data: z.object({
+    title: z.string().min(3).max(100),
+    description: z.string().max(500),
+  }),
+});
+
 export const testsRouter = router({
   getTests: protectedProcedure
     .input(z.string().uuid())
@@ -134,7 +142,23 @@ export const testsRouter = router({
         );
       }
     }),
+  deleteTest: protectedProcedure
+    .input(z.string().uuid())
+    .mutation(async ({ ctx, input: courseId }) => {
+      try {
+        const testsService = ctx.container.resolve<ITestsService>(
+          DI_TOKENS.TESTS_SERVICE
+        );
 
+        return await testsService.deleteTest(courseId);
+      } catch (error) {
+        throw new Error(
+          `Failed to delete test: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
   saveQuestions: protectedProcedure
     .input(
       z.object({

@@ -437,6 +437,7 @@ export interface ITestsService {
   getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
   createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
   updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;
+  deleteTest(id: string): Promise<void>;
   saveQuestions(data: QuestionsInput): Promise<FullTest>;
   createScore(
     testId: string,

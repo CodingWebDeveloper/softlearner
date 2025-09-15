@@ -5,7 +5,7 @@ import {
   CreateTestInput,
   FullTest,
   FullQuestion,
-  SaveQuestionsInput,
+  QuestionsInput,
   TestResult,
   TestWithProgress,
   TestSubmission,
@@ -30,11 +30,18 @@ export class TestsService implements ITestsService {
     return this.testsDAL.updateTest(id, data);
   }
 
-  async saveQuestions(data: SaveQuestionsInput): Promise<FullTest> {
+  async deleteTest(id: string): Promise<void> {
+    return this.testsDAL.deleteTest(id);
+  }
+
+  async saveQuestions(data: QuestionsInput): Promise<FullTest> {
     return this.testsDAL.saveQuestions(data);
   }
 
-  async createTest(courseId: string, data: CreateTestInput): Promise<BasicTest> {
+  async createTest(
+    courseId: string,
+    data: CreateTestInput
+  ): Promise<BasicTest> {
     return this.testsDAL.createTest(courseId, data);
   }
 

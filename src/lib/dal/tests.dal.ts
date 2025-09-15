@@ -368,13 +368,23 @@ export class TestsDAL implements ITestsDAL {
     }
   }
 
+  async deleteTest(id: string): Promise<void> {
+    const { error } = await this.supabase.from("tests").delete().eq("id", id);
+
+    if (error) {
+      throw new Error(`Error deleting test: ${error.message}`);
+    }
+  }
+
   private async deleteQuestion(questionId: string) {
     const { error } = await this.supabase
       .from("questions")
       .delete()
       .eq("id", questionId);
 
-    if (error) throw new Error(`Error deleting question: ${error.message}`);
+    if (error) {
+      throw new Error(`Error deleting question: ${error.message}`);
+    }
   }
 
   async createScore(
