@@ -88,16 +88,37 @@ FOR ALL USING (
 DROP POLICY IF EXISTS "Allow all users to view courses" ON courses;
 CREATE POLICY "Allow all users to view courses" ON courses
 FOR SELECT USING (true);
--- Allow only admin or creator to add, update, delete courses
-DROP POLICY IF EXISTS "Allow admin or creator to modify courses" ON courses;
-CREATE POLICY "Allow admin or creator to modify courses" ON courses
-FOR ALL USING (
+-- Allow only admin or creator to add or update courses
+DROP POLICY IF EXISTS "Allow admin or creator to insert courses" ON courses;
+CREATE POLICY "Allow admin or creator to insert courses" ON courses
+FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  ) OR auth.uid() = creator_id
+);
+
+DROP POLICY IF EXISTS "Allow admin or creator to update courses" ON courses;
+CREATE POLICY "Allow admin or creator to update courses" ON courses
+FOR UPDATE USING (
   EXISTS (
     SELECT 1 FROM users u
     WHERE u.id = auth.uid()
     AND u.role = 'admin'
   ) OR auth.uid() = creator_id
 ) WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+    AND u.role = 'admin'
+  ) OR auth.uid() = creator_id
+);
+
+-- Allow admin or creator to delete courses
+DROP POLICY IF EXISTS "Allow admin or creator to delete courses" ON courses;
+CREATE POLICY "Allow admin or creator to delete courses" ON courses
+FOR DELETE USING (
   EXISTS (
     SELECT 1 FROM users u
     WHERE u.id = auth.uid()

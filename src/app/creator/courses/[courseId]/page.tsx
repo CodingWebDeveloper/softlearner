@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import GeneralForm from "@/components/creator/courses/create/general-form";
-import ResourcesForm from "@/components/creator/courses/create/resources-form/resources-form";
 import { Container, Box, Tab } from "@mui/material";
 import Link from "next/link";
 import {
@@ -10,6 +8,7 @@ import {
   PageContainer,
   WhiteText,
 } from "@/components/styles/infrastructure/layout.styles";
+import ResourcesForm from "@/components/creator/courses/create/resources-form/resources-form";
 import CourseTagsForm from "@/components/creator/courses/course-tags-form";
 import QuizManagement from "@/components/creator/courses/create/quiz-form/quiz-management";
 import {
@@ -20,6 +19,7 @@ import {
   TabPanelContent,
 } from "@/components/styles/creator/create-course.styles";
 import UpdateGeneralForm from "@/components/creator/courses/create/update-general-form";
+import { useParams } from "next/navigation";
 
 function a11yProps(index: number) {
   return {
@@ -50,9 +50,10 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-const CreateCoursePage = () => {
+const EditCoursePage = () => {
   const [currentTab, setCurrentTab] = useState(0);
-  const [courseId, setCourseId] = useState<string | null>(null);
+  const params = useParams<{ courseId: string }>();
+  const courseId = params?.courseId;
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -66,14 +67,14 @@ const CreateCoursePage = () => {
             <Link href="/creator/courses" style={{ textDecoration: "none" }}>
               <StyledLink>My Courses</StyledLink>
             </Link>
-            <LightText>Create Course</LightText>
+            <LightText>Edit Course</LightText>
           </StyledBreadcrumbs>
 
           <WhiteText variant="h4" gutterBottom>
-            Create Course
+            Edit Course
           </WhiteText>
           <LightText variant="body1">
-            Fill in the course details and content
+            Update your course details and content
           </LightText>
         </HeaderContainer>
 
@@ -81,20 +82,16 @@ const CreateCoursePage = () => {
           <StyledTabs
             value={currentTab}
             onChange={handleTabChange}
-            aria-label="course creation tabs"
+            aria-label="course edit tabs"
           >
             <Tab label="General" {...a11yProps(0)} />
-            <Tab label="Resources" disabled={!courseId} {...a11yProps(1)} />
-            <Tab label="Tags" disabled={!courseId} {...a11yProps(2)} />
-            <Tab label="Quizzes" disabled={!courseId} {...a11yProps(3)} />
+            <Tab label="Resources" {...a11yProps(1)} />
+            <Tab label="Tags" {...a11yProps(2)} />
+            <Tab label="Quizzes" {...a11yProps(3)} />
           </StyledTabs>
 
           <TabPanel value={currentTab} index={0}>
-            {courseId ? (
-              <UpdateGeneralForm courseId={courseId} />
-            ) : (
-              <GeneralForm setCourseId={setCourseId} />
-            )}
+            <UpdateGeneralForm courseId={courseId} />
           </TabPanel>
 
           <TabPanel value={currentTab} index={1}>
@@ -114,4 +111,4 @@ const CreateCoursePage = () => {
   );
 };
 
-export default CreateCoursePage;
+export default EditCoursePage;

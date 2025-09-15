@@ -1,7 +1,5 @@
 import { Category, Tag, PreviewResource } from "@/lib/database/database.types";
 import { ResourceType } from "@/lib/constants/database-constants";
-
-
 export interface SimpleResource {
   id: string;
   name: string;
@@ -95,7 +93,7 @@ export interface CreateCourseParams {
   thumbnail_image?: File;
 }
 
-export interface SimpleCourse{
+export interface SimpleCourse {
   id: string;
   name: string;
   description: string;
@@ -152,6 +150,11 @@ export interface GetCoursesResult {
   totalRecords: number;
 }
 
+export interface PaginatedResult<T> {
+  data: T[];
+  totalRecords: number;
+}
+
 export interface BasicReview {
   id: string;
   content: string;
@@ -187,7 +190,10 @@ export interface ICategoriesService {
 }
 
 export interface ICoursesService {
-  createCourse(creatorId: string, params: CreateCourseParams): Promise<SimpleCourse>;
+  createCourse(
+    creatorId: string,
+    params: CreateCourseParams
+  ): Promise<SimpleCourse>;
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string): Promise<BasicCourse | null>;
   isEnrolled(userId: string, courseId: string): Promise<boolean>;
@@ -205,6 +211,21 @@ export interface ICoursesService {
     id: string,
     userId?: string
   ): Promise<FullCourse | null>;
+  getCoursesByCreator(
+    creatorId: string,
+    page?: number,
+    pageSize?: number,
+    sortBy?: "name" | "category" | "price" | "created_at" | "updated_at",
+    sortDir?: "asc" | "desc"
+  ): Promise<PaginatedResult<SimpleCourse>>;
+  updateCourse(
+    creatorId: string,
+    courseId: string,
+    params: CreateCourseParams
+  ): Promise<SimpleCourse>;
+  deleteCourse(creatorId: string, courseId: string): Promise<void>;
+  getCourseDataById(id: string): Promise<SimpleCourse | null>;
+  getThumbnail(thumbnailPath: string): Promise<Blob>;
 }
 
 export interface ITagsService {
@@ -256,8 +277,14 @@ export interface IResourcesService {
     resourceId: string
   ): Promise<boolean>;
   createResource(params: CreateResourceParams): Promise<SimpleResource>;
-  updateResource(resourceId: string, params: UpdateResourceParams): Promise<SimpleResource>;
-  updateResourcesOrder(courseId: string, orderUpdates: { id: string; order_index: number }[]): Promise<SimpleResource[]>;
+  updateResource(
+    resourceId: string,
+    params: UpdateResourceParams
+  ): Promise<SimpleResource>;
+  updateResourcesOrder(
+    courseId: string,
+    orderUpdates: { id: string; order_index: number }[]
+  ): Promise<SimpleResource[]>;
   downloadResourceFile(resourceId: string): Promise<Blob>;
   deleteResource(resourceId: string): Promise<void>;
 }
@@ -346,7 +373,7 @@ export interface BasicAnswerOption {
 export interface BasicQuestion {
   id: string;
   text: string;
-  type: "single" | "multiple";
+  type: QuestionType;
   points: number;
   options: BasicAnswerOption[];
   created_at: string;

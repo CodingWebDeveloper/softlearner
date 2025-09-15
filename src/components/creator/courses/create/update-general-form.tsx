@@ -9,10 +9,10 @@ import {
   Box,
   InputAdornment,
   Stack,
+  Skeleton,
   CircularProgress,
 } from "@mui/material";
 import { trpc } from "@/lib/trpc/client";
-import { SimpleCourse } from "@/services/interfaces/service.interfaces";
 import CategoryInput from "./CategoryInput";
 import { SaveOrderButton } from "@/components/styles/creator/resources-form.styles";
 import {
@@ -21,6 +21,7 @@ import {
   ButtonContainer,
 } from "@/components/styles/creator/general-form.styles";
 import { WhiteText } from "@/components/styles/infrastructure/layout.styles";
+import { useSnackbar } from "notistack";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Course name is required"),
@@ -36,29 +37,49 @@ const validationSchema = Yup.object({
   videoUrl: Yup.string().required("Video URL is required"),
 });
 
-interface GeneralFormProps {
-  setCourseId: (courseId: string) => void;
+interface UpdateGeneralFormProps {
+  courseId: string;
 }
 
-const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
+const UpdateGeneralForm = ({ courseId }: UpdateGeneralFormProps) => {
+  // General hooks
+  const { enqueueSnackbar } = useSnackbar();
+  // States
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const { mutateAsync: createCourse } = trpc.courses.createCourse.useMutation();
+
+  // Mutations
+  const { mutateAsync: updateCourse } = trpc.courses.updateCourse.useMutation();
+
+  // Queries
+  const {
+    data: courseData,
+    isPending: isLoadingCourse,
+    error: errorCourse,
+  } = trpc.courses.getCourseDataById.useQuery(courseId);
+
+  const { data: thumbData, isPending: isLoadingThumbnail } =
+    trpc.courses.getThumbnail.useQuery(
+      { path: courseData?.thumbnail_image_url || "" },
+      { enabled: Boolean(courseData?.thumbnail_image_url) }
+    );
 
   const initialValues = {
-    name: "",
-    description: "",
-    price: "",
-    new_price: "",
-    categoryId: "",
-    videoUrl: "",
+    name: courseData?.name ?? "",
+    description: courseData?.description ?? "",
+    price: courseData ? String(courseData.price) : "",
+    new_price:
+      courseData?.new_price != null ? String(courseData.new_price) : "",
+    categoryId: courseData?.category?.id ?? "",
+    videoUrl: courseData?.video_url ?? "",
   };
 
+  // Handlers
   const handleSubmit = async (values: typeof initialValues) => {
     const formData = new FormData();
-
     if (thumbnailFile) {
       formData.append("thumbnail_image", thumbnailFile);
     }
+    formData.append("id", courseId);
     formData.append("name", values.name);
     formData.append("description", values.description);
     formData.append("price", values.price);
@@ -67,15 +88,52 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
     formData.append("video_url", values.videoUrl);
 
     try {
-      const course = (await createCourse(formData)) as SimpleCourse;
-      if (course?.id) {
-        setCourseId(course.id);
-      }
+      await updateCourse(formData);
+      enqueueSnackbar("Course created successfully", {
+        variant: "success",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
     } catch (error) {
-      console.error("Failed to create course:", error);
-      // TODO: Add toast/snackbar error notification
+      enqueueSnackbar(
+        error instanceof Error ? error.message : "Failed to update course",
+        {
+          variant: "error",
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
+        }
+      );
     }
   };
+
+  const renderLoading = () => (
+    <Stack spacing={2}>
+      <Skeleton variant="rectangular" height={140} />
+      <Skeleton variant="text" width={200} />
+      <Skeleton variant="rectangular" height={56} />
+      <Skeleton variant="rectangular" height={120} />
+      <Skeleton variant="text" width={200} />
+      <Skeleton variant="rectangular" height={56} />
+      <Skeleton variant="rectangular" height={56} />
+      <Skeleton variant="rectangular" height={56} />
+    </Stack>
+  );
+
+  if (isLoadingCourse) {
+    return <FormContainer>{renderLoading()}</FormContainer>;
+  }
+
+  if (errorCourse || !courseData) {
+    return (
+      <FormContainer>
+        <WhiteText variant="body1">Failed to load courseData data.</WhiteText>
+      </FormContainer>
+    );
+  }
+
+  const previewSrc = thumbData?.base64
+    ? `data:image/*;base64,${thumbData.base64}`
+    : null;
+
+  // Effects
 
   return (
     <FormContainer>
@@ -84,11 +142,13 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
           initialValues={initialValues}
           onSubmit={handleSubmit}
           validationSchema={validationSchema}
+          enableReinitialize
         >
           {({
             values,
             errors,
             touched,
+            dirty,
             handleChange,
             handleBlur,
             handleSubmit,
@@ -101,10 +161,13 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
                   <WhiteText variant="h6" gutterBottom>
                     Upload Thumbnail
                   </WhiteText>
-                  <UploadThumbnail onFileSelect={setThumbnailFile} />
+                  <UploadThumbnail
+                    isLoading={isLoadingThumbnail}
+                    previewSrc={previewSrc}
+                    onFileSelect={setThumbnailFile}
+                  />
                 </ThumbnailContainer>
 
-                {/* Main Details Section */}
                 <WhiteText variant="h6" gutterBottom>
                   Course Details
                 </WhiteText>
@@ -134,7 +197,6 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
                   helperText={touched.description && errors.description}
                 />
 
-                {/* Pricing Section */}
                 <WhiteText variant="h6" gutterBottom sx={{ mt: 3 }}>
                   Pricing
                 </WhiteText>
@@ -152,10 +214,12 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
                     name="price"
                     label="Price"
                     type="number"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">$</InputAdornment>
-                      ),
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">$</InputAdornment>
+                        ),
+                      },
                     }}
                     value={values.price}
                     onChange={handleChange}
@@ -173,10 +237,12 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
                     value={values.new_price}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">$</InputAdornment>
-                      ),
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">$</InputAdornment>
+                        ),
+                      },
                     }}
                     error={touched.new_price && Boolean(errors.new_price)}
                     helperText={
@@ -186,7 +252,6 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
                   />
                 </Box>
 
-                {/* Category and Video URL Section */}
                 <WhiteText variant="h6" gutterBottom sx={{ mt: 3 }}>
                   Additional Details
                 </WhiteText>
@@ -213,7 +278,9 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
                   <SaveOrderButton
                     type="submit"
                     variant="contained"
-                    disabled={!isValid || !thumbnailFile || isSubmitting}
+                    disabled={
+                      !isValid || (!dirty && !thumbnailFile) || isSubmitting
+                    }
                   >
                     {isSubmitting ? (
                       <CircularProgress color="inherit" size={20} />
@@ -231,4 +298,4 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
   );
 };
 
-export default GeneralForm;
+export default UpdateGeneralForm;

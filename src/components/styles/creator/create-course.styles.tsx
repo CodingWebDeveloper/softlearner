@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import { Box, Paper, Button } from "@mui/material";
+import { Box, Paper, Button, Tabs, Breadcrumbs } from "@mui/material";
 
 export const UploadContainer = styled(Paper)(({ theme }) => ({
   display: "flex",
@@ -89,4 +89,52 @@ export const SubmitButton = styled(Button)(({ theme }) => ({
   "&:hover": {
     backgroundColor: theme.palette.custom.accent.tealDark,
   },
+}));
+
+// New styled components for Create Course page structure
+export const HeaderContainer = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
+}));
+
+export const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+export const StyledTabs = styled(Tabs)(({ theme }) => ({
+  borderBottom: `1px solid ${theme.palette.custom.background.tertiary}`,
+  "& .MuiTab-root": {
+    textTransform: "none",
+    fontSize: "1rem",
+    fontWeight: 500,
+    minHeight: 48,
+    marginRight: theme.spacing(3),
+    color: theme.palette.custom.text.light,
+    "&.Mui-selected": {
+      color: theme.palette.custom.accent.teal,
+    },
+    "&.Mui-disabled": {
+      color: theme.palette.custom.accent.gray,
+    },
+    "&:hover": {
+      color: theme.palette.custom.accent.teal,
+    },
+  },
+  "& .MuiTabs-indicator": {
+    height: 3,
+    backgroundColor: theme.palette.custom.accent.teal,
+  },
+}));
+
+export const StyledLink = styled("span")({
+  textDecoration: "none",
+  cursor: "pointer",
+  color: "inherit",
+  "&:hover": {
+    textDecoration: "underline",
+  },
+});
+
+export const TabPanelContent = styled(Box)(({ theme }) => ({
+  paddingTop: theme.spacing(3),
+  paddingBottom: theme.spacing(3),
 }));

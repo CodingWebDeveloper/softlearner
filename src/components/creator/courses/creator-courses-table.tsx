@@ -14,13 +14,20 @@ import {
   IconButton,
   Tooltip,
   TableSortLabel,
-  Button,
   Box,
+  Skeleton,
+  CircularProgress,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import PublishIcon from "@mui/icons-material/Publish";
 import { styled } from "@mui/material/styles";
+import { SimpleCourse } from "@/services/interfaces/service.interfaces";
+import { StyledButton } from "@/components/styles/infrastructure/layout.styles";
+import { trpc } from "@/lib/trpc/client";
+import { useSnackbar } from "notistack";
+import ConfirmAlert from "@/components/confirm-alert";
 
 export interface CreatorCourse {
   id: string;
@@ -75,44 +82,8 @@ const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
   },
 }));
 
-// Mock data based on database schema
-const mockCourses: CreatorCourse[] = [
-  {
-    id: "1",
-    name: "Introduction to React",
-    category: "Web Development",
-    price: 49.99,
-    new_price: 39.99,
-    currency: "USD",
-    createdAt: "2024-03-15T10:00:00Z",
-    updatedAt: "2024-03-16T15:30:00Z",
-  },
-  {
-    id: "2",
-    name: "Advanced TypeScript",
-    category: "Programming",
-    price: 79.99,
-    new_price: 69.99,
-    currency: "USD",
-    createdAt: "2024-03-14T09:00:00Z",
-    updatedAt: "2024-03-15T11:20:00Z",
-  },
-  {
-    id: "3",
-    name: "Node.js Fundamentals",
-    category: "Backend Development",
-    price: 59.99,
-    new_price: 49.99,
-    currency: "USD",
-    createdAt: "2024-03-13T14:00:00Z",
-    updatedAt: "2024-03-14T16:45:00Z",
-  },
-];
-
-type Order = "asc" | "desc";
-
 interface HeadCell {
-  id: keyof CreatorCourse | "actions";
+  id: string;
   label: string;
   sortable: boolean;
 }
@@ -126,26 +97,94 @@ const headCells: HeadCell[] = [
   { id: "actions", label: "Actions", sortable: false },
 ];
 
-const CreatorCoursesTable = () => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [order, setOrder] = useState<Order>("desc");
-  const [orderBy, setOrderBy] = useState<keyof CreatorCourse>("createdAt");
+interface CreatorCoursesTableProps {
+  // Data
+  courses: SimpleCourse[];
+  total: number;
+  isLoading: boolean;
+  page: number;
+  pageSize: number;
+  setPage: (page: number) => void;
+  setPageSize: (pageSize: number) => void;
+  sortBy: "name" | "category" | "price" | "created_at" | "updated_at";
+  sortDir: "asc" | "desc";
+  onChangeSort: (columnId: string) => void;
+}
 
+const CreatorCoursesTable = ({
+  courses,
+  total,
+  isLoading,
+  page,
+  pageSize,
+  setPage,
+  setPageSize,
+  sortBy,
+  sortDir,
+  onChangeSort,
+}: CreatorCoursesTableProps) => {
   const router = useRouter();
+
+  // Snackbar
+  const { enqueueSnackbar } = useSnackbar();
+
+  // tRPC
+  const utils = trpc.useUtils();
+  const { mutateAsync: deleteCourse, isPending: isDeleting } =
+    trpc.courses.deleteCourse.useMutation({
+      onSuccess: async () => {
+        await utils.courses.getCreatorCourses.invalidate();
+      },
+    });
+
+  // Local state for confirm dialog
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
 
   const handleCreateCourse = () => {
     router.push("/creator/courses/create");
   };
 
   const handleEdit = (courseId: string) => {
-    // TODO: Implement edit functionality
-    console.log("Edit course:", courseId);
+    router.push(`/creator/courses/${courseId}`);
+  };
+
+  const handlePublish = (courseId: string) => {
+    console.log("Publish course:", courseId);
   };
 
   const handleDelete = (courseId: string) => {
-    // TODO: Implement delete functionality
-    console.log("Delete course:", courseId);
+    setSelectedCourseId(courseId);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmClose = () => {
+    setConfirmOpen(false);
+    setSelectedCourseId(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedCourseId) {
+      return;
+    }
+
+    try {
+      await deleteCourse({ id: selectedCourseId });
+      enqueueSnackbar("Course deleted successfully", {
+        variant: "success",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
+    } catch (error) {
+      enqueueSnackbar(
+        error instanceof Error ? error.message : "Failed to delete course",
+        {
+          variant: "error",
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
+        }
+      );
+    } finally {
+      handleConfirmClose();
+    }
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -155,7 +194,7 @@ const CreatorCoursesTable = () => {
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    setPageSize(parseInt(event.target.value, 10));
     setPage(0);
   };
 
@@ -174,53 +213,57 @@ const CreatorCoursesTable = () => {
     }).format(price);
   };
 
-  const handleRequestSort = (property: keyof CreatorCourse) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
+  // Sync internal UI state from parent props for visual sort indicator
+  const currentOrderBy = (() => {
+    switch (sortBy) {
+      case "created_at":
+        return "createdAt";
+      case "updated_at":
+        return "updatedAt";
+      default:
+        return sortBy;
+    }
+  })();
+
+  const handleRequestSort = (property: string) => {
+    onChangeSort(property);
   };
 
-  const sortData = (data: CreatorCourse[]) => {
-    return [...data].sort((a, b) => {
-      const aValue = a[orderBy];
-      const bValue = b[orderBy];
-
-      if (!aValue || !bValue) return 0;
-
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return order === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return order === "asc" ? aValue - bValue : bValue - aValue;
-      }
-
-      return 0;
-    });
+  const renderSkeletonRows = () => {
+    return Array.from({ length: Math.max(pageSize, 5) }).map((_, idx) => (
+      <TableRow key={`sk-${idx}`}>
+        <TableCell>
+          <Skeleton variant="text" width={160} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={120} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={80} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={140} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={140} />
+        </TableCell>
+        <TableCell align="center">
+          <Skeleton variant="circular" width={28} height={28} />
+        </TableCell>
+      </TableRow>
+    ));
   };
 
   return (
     <Paper elevation={0} sx={{ backgroundColor: "transparent" }}>
       <Box sx={{ mb: 3, display: "flex", justifyContent: "flex-end" }}>
-        <Button
+        <StyledButton
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleCreateCourse}
-          sx={{
-            borderRadius: 2,
-            textTransform: "none",
-            px: 3,
-            py: 1,
-            boxShadow: "none",
-            "&:hover": {
-              boxShadow: "none",
-            },
-          }}
         >
           Create Course
-        </Button>
+        </StyledButton>
       </Box>
       <StyledTableContainer>
         <Table stickyHeader>
@@ -233,11 +276,11 @@ const CreatorCoursesTable = () => {
                 >
                   {headCell.sortable ? (
                     <TableSortLabel
-                      active={orderBy === headCell.id}
-                      direction={orderBy === headCell.id ? order : "asc"}
-                      onClick={() =>
-                        handleRequestSort(headCell.id as keyof CreatorCourse)
+                      active={currentOrderBy === headCell.id}
+                      direction={
+                        currentOrderBy === headCell.id ? sortDir : "asc"
                       }
+                      onClick={() => handleRequestSort(headCell.id)}
                     >
                       {headCell.label}
                     </TableSortLabel>
@@ -249,62 +292,99 @@ const CreatorCoursesTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortData(mockCourses)
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((course) => (
-                <TableRow key={course.id}>
-                  <TableCell>{course.name}</TableCell>
-                  <TableCell>{course.category}</TableCell>
-                  <TableCell>
-                    {formatPrice(
-                      course.new_price || course.price,
-                      course.currency
-                    )}
-                  </TableCell>
-                  <TableCell>{formatDate(course.createdAt)}</TableCell>
-                  <TableCell>{formatDate(course.updatedAt)}</TableCell>
-                  <TableCell align="center">
-                    <Tooltip title="Edit course">
-                      <IconButton
-                        onClick={() => handleEdit(course.id)}
-                        size="small"
-                        sx={{
-                          mr: 1,
-                          "&:hover": {
-                            backgroundColor: "action.hover",
-                          },
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete course">
-                      <IconButton
-                        onClick={() => handleDelete(course.id)}
-                        size="small"
-                        sx={{
-                          "&:hover": {
-                            backgroundColor: "action.hover",
-                          },
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
+            {isLoading
+              ? renderSkeletonRows()
+              : courses.map((course) => (
+                  <TableRow key={course.id}>
+                    <TableCell>{course.name}</TableCell>
+                    <TableCell>{course.category.name}</TableCell>
+                    <TableCell>
+                      {formatPrice(
+                        course.new_price || course.price,
+                        course.currency
+                      )}
+                    </TableCell>
+                    <TableCell>{formatDate(course.created_at)}</TableCell>
+                    <TableCell>{formatDate(course.updated_at)}</TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="Edit course">
+                        <IconButton
+                          onClick={() => handleEdit(course.id)}
+                          size="small"
+                          sx={{
+                            mr: 1,
+                            "&:hover": {
+                              backgroundColor: "action.hover",
+                            },
+                          }}
+                          aria-label="Edit course"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Publish course">
+                        <IconButton
+                          onClick={() => handlePublish(course.id)}
+                          size="small"
+                          sx={{
+                            mr: 1,
+                            "&:hover": {
+                              backgroundColor: "action.hover",
+                            },
+                          }}
+                          aria-label="Publish course"
+                        >
+                          <PublishIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete course">
+                        <span>
+                          <IconButton
+                            onClick={() => handleDelete(course.id)}
+                            size="small"
+                            sx={{
+                              "&:hover": {
+                                backgroundColor: "action.hover",
+                              },
+                            }}
+                            disabled={
+                              isDeleting && selectedCourseId === course.id
+                            }
+                            aria-label="Delete course"
+                          >
+                            {isDeleting && selectedCourseId === course.id ? (
+                              <CircularProgress size={18} />
+                            ) : (
+                              <DeleteIcon />
+                            )}
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
           </TableBody>
         </Table>
       </StyledTableContainer>
       <TablePagination
         component="div"
-        count={mockCourses.length}
-        page={page}
+        count={total}
+        page={page - 1}
         onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
+        rowsPerPage={pageSize}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
+      />
+
+      <ConfirmAlert
+        open={confirmOpen}
+        onClose={handleConfirmClose}
+        onConfirm={handleConfirmDelete}
+        title="Delete course?"
+        content="This action cannot be undone. All related content may be affected."
+        confirmText={isDeleting ? "Deleting..." : "Yes, Delete"}
+        cancelText="Cancel"
+        label="delete-course"
       />
     </Paper>
   );
