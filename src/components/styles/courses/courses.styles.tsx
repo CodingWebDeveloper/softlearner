@@ -342,3 +342,16 @@ export const CourseCardRating = styled(Rating)(({ theme }) => ({
     color: theme.palette.custom.accent.yellow,
   },
 }));
+
+export const CourseCardImagePlaceholder = styled(Box)(({ theme }) => ({
+  width: "100%",
+  height: 160,
+  borderRadius: 2,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  bgcolor: theme.palette.custom.background.filter,
+  color: theme.palette.custom.text.light,
+  mb: theme.spacing(2),
+  mr: theme.spacing(3),
+}));

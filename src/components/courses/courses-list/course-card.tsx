@@ -1,6 +1,8 @@
 import { KeyboardEvent } from "react";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
+import Skeleton from "@mui/material/Skeleton";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import {
   CourseCard as StyledCourseCard,
   CardImage,
@@ -16,9 +18,11 @@ import {
   OldPrice,
   DiscountTag,
   CourseCardRating,
+  CourseCardImagePlaceholder,
 } from "@/components/styles/courses/courses.styles";
 import { BasicCourse } from "@/services/interfaces/service.interfaces";
 import BookmarkCard from "./bookmark-card";
+import { trpc } from "@/lib/trpc/client";
 
 interface CourseCardProps {
   course: BasicCourse;
@@ -28,9 +32,13 @@ interface CourseCardProps {
 const CourseCard = ({ course, handleNavigate }: CourseCardProps) => {
   // General hooks
   const theme = useTheme();
+  const { data: thumbnail, isPending: isLoadingThumbnail } =
+    trpc.courses.getThumbnail.useQuery(
+      { path: course.thumbnail_image_url },
+      { enabled: Boolean(course.thumbnail_image_url) }
+    );
 
   // Handlers
-
   const handleCardKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -46,6 +54,10 @@ const CourseCard = ({ course, handleNavigate }: CourseCardProps) => {
     ? Math.round(((course.price - course.new_price!) / course.price) * 100)
     : 0;
 
+  const base64Url = thumbnail?.base64
+    ? `data:image/jpeg;base64,${thumbnail.base64}`
+    : undefined;
+
   return (
     <StyledCourseCard
       tabIndex={0}
@@ -54,7 +66,15 @@ const CourseCard = ({ course, handleNavigate }: CourseCardProps) => {
       onKeyDown={handleCardKeyDown}
       role="button"
     >
-      <CardImage image={course.thumbnail_image_url} />
+      {isLoadingThumbnail ? (
+        <Skeleton variant="rounded" width="100%" height={160} />
+      ) : base64Url ? (
+        <CardImage image={base64Url} />
+      ) : (
+        <CourseCardImagePlaceholder>
+          <ImageOutlinedIcon sx={{ fontSize: 48 }} />
+        </CourseCardImagePlaceholder>
+      )}
       <StyledCardContent>
         <CardContentTop>
           <Typography
