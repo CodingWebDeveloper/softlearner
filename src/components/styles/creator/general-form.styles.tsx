@@ -1,4 +1,5 @@
-import { Box, styled } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { Box } from "@mui/material";
 
 export const FormContainer = styled("div")(({ theme }) => ({
   maxWidth: "800px",

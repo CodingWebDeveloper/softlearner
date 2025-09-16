@@ -1,17 +1,17 @@
 "use client";
 
-import { FC } from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import { FC, useState } from "react";
+import { Box, Typography, useTheme, Button, CircularProgress } from "@mui/material";
 import {
   VideoSection,
   VideoEmbed,
   InstructorBox,
   DownloadSection,
-  DownloadLink,
 } from "@/components/styles/courses/materials.styles";
 import BookmarkCard from "../courses-list/bookmark-card";
 import { FullCourse } from "@/services/interfaces/service.interfaces";
 import { useAppSelector } from "@/lib/store/hooks";
+import { trpc } from "@/lib/trpc/client";
 import { selectResource } from "@/lib/store/features/resourceSlice";
 import CourseTags from "../course-details/course-tags";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -32,6 +32,39 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
 
   // Selectors
   const selectedResource = useAppSelector(selectResource);
+
+  // tRPC hooks
+  const {mutateAsync: downloadResourceFile, isPending: isResourceLoading  } = trpc.resources.downloadResourceFile.useMutation();
+
+  const handleDownload = async () => {
+    if (!selectedResource) return;
+
+    try {
+      const result = await downloadResourceFile({
+        resourceId: selectedResource.id,
+      });
+
+      // Convert base64 back to blob
+      const binaryString = atob(result.data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: result.type });
+
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = selectedResource.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
 
   const renderContent = () => {
     if (!selectedResource) {
@@ -68,10 +101,24 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
 
     return (
       <DownloadSection>
-        <DownloadLink href={selectedResource.url} download>
-          <DownloadIcon />
-          Download Resource
-        </DownloadLink>
+        <Button
+          variant="contained"
+          onClick={handleDownload}
+          disabled={isResourceLoading }
+          startIcon={isResourceLoading ? <CircularProgress size={20} /> : <DownloadIcon />}
+          sx={{
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            '&:hover': {
+              backgroundColor: theme.palette.primary.dark,
+            },
+            '&:disabled': {
+              backgroundColor: theme.palette.action.disabled,
+            },
+          }}
+        >
+          {isResourceLoading ? 'Downloading...' : 'Download Resource'}
+        </Button>
       </DownloadSection>
     );
   };
