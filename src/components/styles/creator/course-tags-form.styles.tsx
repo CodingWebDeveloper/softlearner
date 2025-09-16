@@ -1,4 +1,5 @@
-import { Box, TextField, Chip, styled } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { Box, TextField, Chip } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 export const TagsFormContainer = styled(Box)(({ theme }) => ({

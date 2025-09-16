@@ -1,3 +1,4 @@
+import { styled } from "@mui/material/styles";
 import {
   Button,
   Dialog,
@@ -5,7 +6,7 @@ import {
   Divider,
   DialogContent,
   DialogTitle,
-  styled,
+  
 } from "@mui/material";
 
 export const ConfirmDialog = styled(Dialog)(({ theme }) => ({

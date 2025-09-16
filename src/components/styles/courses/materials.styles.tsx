@@ -114,7 +114,8 @@ export const ResourceMaterialItem = styled(ListItem, {
   shouldForwardProp: (prop) => prop !== "selected",
 })<{ selected?: boolean }>(({ theme, selected }) => ({
   cursor: "pointer",
-  padding: theme.spacing(1, 0),
+  padding: theme.spacing(1),
+  borderRadius: theme.shape.borderRadius,
   background: selected ? theme.palette.action.selected : "none",
 }));
 

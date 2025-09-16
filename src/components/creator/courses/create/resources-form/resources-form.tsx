@@ -41,12 +41,17 @@ import {
   ResourceDetailsGrid,
   UploadBox,
   SaveOrderBox,
+  FormSectionContainer,
+  IconTypography,
+  HiddenFileInput,
+  UploadLabel,
 } from "@/components/styles/creator/resources-form.styles";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
   RESOURCE_TYPES,
   ResourceType,
 } from "@/lib/constants/database-constants";
+import { MAX_FILE_SIZE } from "@/utils/constants";
 
 type FileType = ResourceType;
 
@@ -69,41 +74,6 @@ const validationSchema = Yup.object({
 interface ResourceFormProps {
   courseId: string | null;
 }
-
-const FileTypeSkeleton = () => (
-  <Box sx={{ mb: 4 }}>
-    <Skeleton variant="text" sx={{ fontSize: '1.5rem', mb: 2 }} width={150} />
-    <Stack spacing={2}>
-      <Box sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-        <Skeleton variant="text" sx={{ fontSize: '1.25rem', mb: 1 }} width={200} />
-        <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width={300} />
-      </Box>
-      <Box sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-        <Skeleton variant="text" sx={{ fontSize: '1.25rem', mb: 1 }} width={120} />
-        <Skeleton variant="text" sx={{ fontSize: '0.875rem' }} width={250} />
-      </Box>
-    </Stack>
-    <Box sx={{ mt: 3, p: 3, border: '2px dashed #e0e0e0', borderRadius: 1, textAlign: 'center' }}>
-      <Skeleton variant="circular" width={48} height={48} sx={{ mx: 'auto', mb: 2 }} />
-      <Skeleton variant="text" sx={{ fontSize: '1rem', mb: 2 }} width={100} />
-      <Skeleton variant="rectangular" width={120} height={36} sx={{ mx: 'auto', borderRadius: 1 }} />
-    </Box>
-  </Box>
-);
-
-const ResourceDetailsSkeleton = () => (
-  <Box>
-    <Skeleton variant="text" sx={{ fontSize: '1.5rem', mb: 2 }} width={180} />
-    <Stack spacing={3}>
-      <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
-      <Box display="grid" gridTemplateColumns={{ xs: '1fr', md: '1fr 200px' }} gap={2}>
-        <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 1 }} />
-        <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
-      </Box>
-      <Skeleton variant="rectangular" width={140} height={40} sx={{ borderRadius: 1 }} />
-    </Stack>
-  </Box>
-);
 
 const ResourcesForm = ({ courseId }: ResourceFormProps) => {
   const dispatch = useAppDispatch();
@@ -205,7 +175,6 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
     }
   };
 
-  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -244,33 +213,10 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
     }
   }, [resourcesData, dispatch]);
 
-  if (isLoadingResources) {
-    return (
-      <FormContainer>
-        <Stack spacing={4}>
-          <FileTypeSkeleton />
-          <ResourceDetailsSkeleton />
-          <Box>
-            <Skeleton variant="text" sx={{ fontSize: '1.5rem', mb: 2 }} width={180} />
-            <Stack spacing={2}>
-              {[1, 2, 3].map((i) => (
-                <Box key={i} sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-                  <Skeleton variant="text" sx={{ fontSize: '1.25rem', mb: 1 }} width="60%" />
-                  <Skeleton variant="text" sx={{ fontSize: '0.875rem', mb: 1 }} width="80%" />
-                  <Skeleton variant="text" sx={{ fontSize: '0.75rem' }} width="40%" />
-                </Box>
-              ))}
-            </Stack>
-          </Box>
-        </Stack>
-      </FormContainer>
-    );
-  }
-
   return (
     <FormContainer>
       <Stack spacing={4}>
-        <Box sx={{ mb: 4 }}>
+        <FormSectionContainer>
           <SectionTitle variant="h6" gutterBottom>
             <FileUploadIcon /> File Type
           </SectionTitle>
@@ -293,12 +239,9 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                 control={<Radio />}
                 label={
                   <Box>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                    >
+                    <IconTypography variant="subtitle1">
                       <InsertDriveFileIcon /> Downloadable File
-                    </Typography>
+                    </IconTypography>
                     <Typography variant="body2" color="textSecondary">
                       Upload a file for users to download
                     </Typography>
@@ -315,12 +258,9 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                 control={<Radio />}
                 label={
                   <Box>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                    >
+                    <IconTypography variant="subtitle1">
                       <VideoFileIcon /> Video
-                    </Typography>
+                    </IconTypography>
                     <Typography variant="body2" color="textSecondary">
                       Add a YouTube video URL
                     </Typography>
@@ -332,14 +272,13 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
 
           {fileType === RESOURCE_TYPES.DOWNLOADABLE_FILE && (
             <UploadContainer>
-              <input
+              <HiddenFileInput
                 type="file"
                 accept="*/*"
-                style={{ display: "none" }}
                 id="resource-file"
                 onChange={handleFileChange}
               />
-              <label>
+              <UploadLabel htmlFor="resource-file">
                 <UploadBox>
                   <CloudUploadIcon className="upload-icon" />
                   <Typography
@@ -350,19 +289,18 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                     {selectedFile ? selectedFile.name : "Max 20 MB"}
                   </Typography>
                   <UploadButton
-                    component="label"
-                    htmlFor="resource-file"
+                    component="span"
                     startIcon={<FileUploadIcon />}
                   >
                     Upload File
                   </UploadButton>
                 </UploadBox>
-              </label>
+              </UploadLabel>
             </UploadContainer>
           )}
-        </Box>
+        </FormSectionContainer>
 
-        <Box>
+        <FormSectionContainer>
           <SectionTitle variant="h6" gutterBottom>
             <InsertDriveFileIcon /> Resource Details
           </SectionTitle>
@@ -473,9 +411,9 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
               </form>
             )}
           </Formik>
-        </Box>
+        </FormSectionContainer>
 
-        <Box>
+        <FormSectionContainer>
           <ResourcesList
             resources={resources}
             isLoading={isLoadingResources}
@@ -497,7 +435,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
               </SaveOrderButton>
             </SaveOrderBox>
           )}
-        </Box>
+        </FormSectionContainer>
       </Stack>
     </FormContainer>
   );

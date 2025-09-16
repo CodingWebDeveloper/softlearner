@@ -1,4 +1,4 @@
-import { styled, alpha } from "@mui/material";
+import { styled, alpha } from "@mui/material/styles";
 import { Dialog, DialogTitle, DialogContent, Button } from "@mui/material";
 
 export const StyledDialog = styled(Dialog)(({ theme }) => ({
