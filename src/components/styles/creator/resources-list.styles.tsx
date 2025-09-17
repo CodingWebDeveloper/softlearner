@@ -12,17 +12,19 @@ export const ResourcesHeader = styled(Typography)(({ theme }) => ({
   color: theme.palette.custom.accent.teal,
 }));
 
-export const ResourceTitle = styled(Typography)`
-  font-weight: 600;
-  margin-bottom: 8px;
-  display: block;
-`;
+export const ResourceTitle = styled(Typography)(({ theme }) => ({
+  fontWeight: 600,
+  marginBottom: theme.spacing(1),
+  display: "block",
+  color: theme.palette.custom.text.white,
+}));
 
-export const ResourceDescription = styled(Typography)`
-  white-space: pre-wrap;
-  word-break: break-word;
-  display: block;
-`;
+export const ResourceDescription = styled(Typography)(({ theme }) => ({
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-word",
+  display: "block",
+  color: theme.palette.custom.text.light,
+}));
 
 export const ResourceTypeLabel = styled(Typography)(({ theme }) => ({
   display: "block",

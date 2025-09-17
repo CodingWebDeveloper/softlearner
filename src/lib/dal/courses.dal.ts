@@ -843,4 +843,72 @@ export class CoursesDAL implements ICoursesDAL {
       );
     }
   }
+
+  async getCourseProgressStatus(courseId: string): Promise<{
+    general: boolean;
+    resources: boolean;
+    tags: boolean;
+    quizzes: boolean;
+    publish: boolean;
+  }> {
+    // Ensure course exists and get publish status
+    const { data: course, error: courseError } = await this.supabase
+      .from("courses")
+      .select("id, is_published")
+      .eq("id", courseId)
+      .maybeSingle();
+
+    if (courseError) {
+      throw new Error(
+        `Error fetching course publish status: ${courseError.message}`
+      );
+    }
+
+    if (!course) {
+      throw new Error("Course not found");
+    }
+
+    const { data: resource, error: resourceError } = await this.supabase
+      .from("resources")
+      .select("id")
+      .eq("course_id", courseId)
+      .limit(1)
+      .maybeSingle();
+
+    if (resourceError) {
+      throw new Error(
+        `Error fetching course resources count: ${resourceError.message}`
+      );
+    }
+
+    const { data: quiz, error: quizError } = await this.supabase
+      .from("tests")
+      .select("id")
+      .eq("course_id", courseId)
+      .limit(1)
+      .maybeSingle();
+
+    if (quizError) {
+      throw new Error(`Error fetching course quiz: ${quizError.message}`);
+    }
+
+    const { data: tag, error: tagError } = await this.supabase
+      .from("course_tags")
+      .select("*")
+      .eq("course_id", courseId)
+      .limit(1)
+      .maybeSingle();
+
+    if (tagError) {
+      throw new Error(`Error fetching course tag: ${tagError.message}`);
+    }
+
+    return {
+      general: true,
+      resources: Boolean(resource),
+      tags: Boolean(tag),
+      quizzes: Boolean(quiz),
+      publish: Boolean(course.is_published),
+    };
+  }
 }

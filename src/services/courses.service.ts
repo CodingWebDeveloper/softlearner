@@ -9,6 +9,7 @@ import {
   CreateCourseParams,
   SimpleCourse,
   PaginatedResult,
+  CourseProgressStatus,
 } from "./interfaces/service.interfaces";
 
 export class CoursesService implements ICoursesService {
@@ -98,5 +99,9 @@ export class CoursesService implements ICoursesService {
     isPublished: boolean
   ): Promise<void> {
     return this.coursesDAL.togglePublishStatus(creatorId, courseId, isPublished);
+  }
+
+  async getCourseProgressStatus(courseId: string): Promise<CourseProgressStatus> {
+    return this.coursesDAL.getCourseProgressStatus(courseId);
   }
 }

@@ -232,6 +232,7 @@ export interface ICoursesService {
     courseId: string,
     isPublished: boolean
   ): Promise<void>;
+  getCourseProgressStatus(courseId: string): Promise<CourseProgressStatus>;
 }
 
 export interface ITagsService {
@@ -348,6 +349,15 @@ export type GetPurchasedCoursesResult = {
   data: PurchasedCourse[];
   totalRecords: number;
 };
+
+// Course progress status used for creator checklist and publishing readiness
+export interface CourseProgressStatus {
+  general: boolean;
+  resources: boolean;
+  tags: boolean;
+  quizzes: boolean;
+  publish: boolean;
+}
 
 export interface CreateTestInput {
   title: string;

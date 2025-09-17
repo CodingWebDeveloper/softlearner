@@ -43,6 +43,7 @@ import {
   UpdateResourceParams,
   SimpleResource,
   QuestionsInput,
+  CourseProgressStatus,
 } from "@/services/interfaces/service.interfaces";
 
 export interface PaginatedResult<T> {
@@ -97,6 +98,7 @@ export interface ICoursesDAL {
     courseId: string,
     isPublished: boolean
   ): Promise<void>;
+  getCourseProgressStatus(courseId: string): Promise<CourseProgressStatus>;
 }
 
 export interface ICategoriesDAL {

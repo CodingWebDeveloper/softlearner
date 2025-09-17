@@ -19,7 +19,6 @@ import {
   Radio,
   FormControlLabel,
   CircularProgress,
-  Skeleton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -80,6 +79,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<FileType>("downloadable file");
   const { enqueueSnackbar } = useSnackbar();
+  const utils = trpc.useUtils();
 
   const resources = useAppSelector(selectOrderedResources) as SimpleResource[];
 
@@ -106,8 +106,9 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
   });
 
   const createResourceMutation = trpc.resources.createResource.useMutation({
-    onSuccess: (newResource: SimpleResource) => {
+    onSuccess: async (newResource: SimpleResource) => {
       dispatch(addResource(newResource));
+      await utils.courses.getCourseProgressStatus.invalidate(courseId!);
       enqueueSnackbar("Resource added successfully!", { variant: "success" });
     },
     onError: (error: Error) => {
@@ -174,7 +175,6 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
       setSubmitting(false);
     }
   };
-
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -288,10 +288,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                   >
                     {selectedFile ? selectedFile.name : "Max 20 MB"}
                   </Typography>
-                  <UploadButton
-                    component="span"
-                    startIcon={<FileUploadIcon />}
-                  >
+                  <UploadButton component="span" startIcon={<FileUploadIcon />}>
                     Upload File
                   </UploadButton>
                 </UploadBox>

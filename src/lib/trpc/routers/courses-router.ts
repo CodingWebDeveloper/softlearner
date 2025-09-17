@@ -358,4 +358,22 @@ export const coursesRouter = router({
         );
       }
     }),
+
+  getCourseProgressStatus: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input: courseId }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+
+        return await coursesService.getCourseProgressStatus(courseId);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch course progress status: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 });

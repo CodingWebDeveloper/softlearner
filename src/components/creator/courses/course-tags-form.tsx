@@ -113,12 +113,12 @@ const CourseTagsForm = ({
   const handleSave = async () => {
     try {
       await createTagsByCourse({
-        courseId,
+        courseId: courseId!,
         tagIds: selectedTags.map((tag) => tag.id),
       });
 
-      // Invalidate the course tags query to refetch the updated data
-      await utils.tags.getTagsByCourseId.invalidate({ courseId });
+      await utils.tags.getTagsByCourseId.invalidate({ courseId: courseId! });
+      await utils.courses.getCourseProgressStatus.invalidate(courseId!);
 
       enqueueSnackbar("Course tags updated successfully", {
         variant: "success",
