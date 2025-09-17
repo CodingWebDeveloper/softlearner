@@ -352,6 +352,7 @@ export class ResourcesDAL implements IResourcesDAL {
       type: updates.type,
       duration: updates.duration,
       url: finalUrl,
+      updated_at: new Date().toISOString(),
     };
 
     const { data: updatedResource, error: updateError } = await this.supabase

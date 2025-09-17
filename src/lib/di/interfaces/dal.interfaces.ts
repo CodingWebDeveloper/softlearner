@@ -92,6 +92,11 @@ export interface ICoursesDAL {
   ): Promise<SimpleCourse>;
   deleteCourse(creatorId: string, courseId: string): Promise<void>;
   getThumbnail(thumbnailPath: string): Promise<Blob>;
+  togglePublishStatus(
+    creatorId: string,
+    courseId: string,
+    isPublished: boolean
+  ): Promise<void>;
 }
 
 export interface ICategoriesDAL {

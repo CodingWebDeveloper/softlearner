@@ -102,11 +102,13 @@ export const DashboardTitle = styled(Typography)<TypographyProps>(
   })
 );
 
-export const DashboardSubtitle = styled(Typography)<TypographyProps>(({ theme }) => ({
-  fontSize: "1.125rem",
-  color: theme.palette.custom.text.light,
-  fontWeight: 400,
-}));
+export const DashboardSubtitle = styled(Typography)<TypographyProps>(
+  ({ theme }) => ({
+    fontSize: "1.125rem",
+    color: theme.palette.custom.text.light,
+    fontWeight: 400,
+  })
+);
 
 export const DashboardContent = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -127,6 +129,7 @@ export const CourseCard = styled(Card)(({ theme }) => ({
   border: "1px solid rgba(255,255,255,0.1)",
   overflow: "hidden",
   transition: "all 150ms ease",
+  height: "100%",
   "&:hover": {
     backgroundColor: theme.palette.custom.background.tertiary,
     transform: "translateY(-2px)",
@@ -137,6 +140,9 @@ export const CourseCard = styled(Card)(({ theme }) => ({
 
 export const CourseCardContent = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
 }));
 
 export const CourseHeader = styled(Box)(({ theme }) => ({
@@ -215,6 +221,7 @@ export const CourseFooter = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(2),
   paddingTop: theme.spacing(2),
   borderTop: "1px solid rgba(255,255,255,0.1)",
+  marginBlockStart: "auto",
 }));
 
 export const LastAccessed = styled(Typography)<TypographyProps>(

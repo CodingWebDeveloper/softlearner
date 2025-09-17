@@ -24,6 +24,7 @@ type SimpleCourseWithRelations =
   Database["public"]["Tables"]["courses"]["Row"] & {
     creator: User;
     category: Database["public"]["Tables"]["categories"]["Row"];
+    is_published: boolean;
   };
 
 type BookmarkWithCourse = Database["public"]["Tables"]["bookmarks"]["Row"] & {
@@ -120,6 +121,7 @@ export class CoursesDAL implements ICoursesDAL {
       creator: course.creator as User,
       category: course.category,
       currency: course.currency,
+      is_published: course.is_published || false,
       created_at: course.created_at,
       updated_at: course.updated_at,
     };
@@ -182,6 +184,9 @@ export class CoursesDAL implements ICoursesDAL {
         bookmarks!course_id(id)`,
       { count: "exact" }
     );
+
+    // Only show published courses for public consumption
+    query = query.eq("is_published", true);
 
     if (userId) {
       query = query.eq("bookmarks.user_id", userId);
@@ -276,7 +281,8 @@ export class CoursesDAL implements ICoursesDAL {
         bookmarks!course_id(id)
       `
       )
-      .eq("id", id);
+      .eq("id", id)
+      .eq("is_published", true); // Only return published courses for public access
 
     if (userId) {
       query.eq("bookmarks.user_id", userId);
@@ -352,6 +358,7 @@ export class CoursesDAL implements ICoursesDAL {
       creator: course.creator as User,
       category: course.category,
       currency: course.currency,
+      is_published: course.is_published || false,
       created_at: course.created_at,
       updated_at: course.updated_at,
     };
@@ -403,6 +410,7 @@ export class CoursesDAL implements ICoursesDAL {
         { count: "exact" }
       )
       .eq("user_id", userId)
+      .eq("course.is_published", true)
       .range(from, to)
       .order("created_at", { ascending: false });
 
@@ -623,6 +631,7 @@ export class CoursesDAL implements ICoursesDAL {
         creator: course.creator as User,
         category: course.category,
         currency: course.currency,
+        is_published: course.is_published || false,
         created_at: course.created_at,
         updated_at: course.updated_at,
       };
@@ -662,7 +671,6 @@ export class CoursesDAL implements ICoursesDAL {
 
     let newThumbnailPath: string | undefined;
 
-    console.log(params.thumbnail_image);
     // If a new thumbnail is provided, replace it in storage
     if (params.thumbnail_image) {
       const currentPath = existing.thumbnail_image_url || "";
@@ -731,6 +739,7 @@ export class CoursesDAL implements ICoursesDAL {
       creator: updated.creator as User,
       category: updated.category,
       currency: updated.currency,
+      is_published: updated.is_published || false,
       created_at: updated.created_at,
       updated_at: updated.updated_at,
     };
@@ -793,5 +802,45 @@ export class CoursesDAL implements ICoursesDAL {
     }
 
     return data;
+  }
+
+  async togglePublishStatus(
+    creatorId: string,
+    courseId: string,
+    isPublished: boolean
+  ): Promise<void> {
+    // Verify ownership first
+    const { data: existing, error: fetchError } = await this.supabase
+      .from("courses")
+      .select("id, creator_id")
+      .eq("id", courseId)
+      .maybeSingle();
+
+    if (fetchError) {
+      throw new Error(`Error fetching course: ${fetchError.message}`);
+    }
+
+    if (!existing) {
+      throw new Error("Course not found");
+    }
+
+    if (existing.creator_id !== creatorId) {
+      throw new Error("You are not authorized to modify this course");
+    }
+
+    // Update the publish status
+    const { error: updateError } = await this.supabase
+      .from("courses")
+      .update({
+        is_published: isPublished,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", courseId);
+
+    if (updateError) {
+      throw new Error(
+        `Error updating course publish status: ${updateError.message}`
+      );
+    }
   }
 }

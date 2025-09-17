@@ -91,4 +91,12 @@ export class CoursesService implements ICoursesService {
   async getThumbnail(thumbnailPath: string): Promise<Blob> {
     return this.coursesDAL.getThumbnail(thumbnailPath);
   }
+
+  async togglePublishStatus(
+    creatorId: string,
+    courseId: string,
+    isPublished: boolean
+  ): Promise<void> {
+    return this.coursesDAL.togglePublishStatus(creatorId, courseId, isPublished);
+  }
 }

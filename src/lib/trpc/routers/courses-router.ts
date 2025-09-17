@@ -327,4 +327,35 @@ export const coursesRouter = router({
         );
       }
     }),
+
+  togglePublishStatus: protectedProcedure
+    .input(z.object({ 
+      courseId: z.string().uuid(),
+      isPublished: z.boolean()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+
+        await coursesService.togglePublishStatus(
+          ctx.user.id,
+          input.courseId,
+          input.isPublished
+        );
+
+        return { 
+          success: true, 
+          isPublished: input.isPublished,
+          message: input.isPublished ? "Course published successfully" : "Course unpublished successfully"
+        };
+      } catch (error) {
+        throw new Error(
+          `Failed to update course publish status: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 });

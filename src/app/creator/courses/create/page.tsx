@@ -20,6 +20,7 @@ import {
   TabPanelContent,
 } from "@/components/styles/creator/create-course.styles";
 import UpdateGeneralForm from "@/components/creator/courses/create/update-general-form";
+import CourseSettings from "@/components/creator/courses/course-settings";
 
 function a11yProps(index: number) {
   return {
@@ -87,6 +88,7 @@ const CreateCoursePage = () => {
             <Tab label="Resources" disabled={!courseId} {...a11yProps(1)} />
             <Tab label="Tags" disabled={!courseId} {...a11yProps(2)} />
             <Tab label="Quizzes" disabled={!courseId} {...a11yProps(3)} />
+            <Tab label="Settings" disabled={!courseId} {...a11yProps(4)} />
           </StyledTabs>
 
           <TabPanel value={currentTab} index={0}>
@@ -102,11 +104,14 @@ const CreateCoursePage = () => {
           </TabPanel>
 
           <TabPanel value={currentTab} index={2}>
-            <CourseTagsForm courseId={courseId || ""} />
+            <CourseTagsForm courseId={courseId} />
           </TabPanel>
 
           <TabPanel value={currentTab} index={3}>
             <QuizManagement courseId={courseId} />
+          </TabPanel>
+          <TabPanel value={currentTab} index={4}>
+            <CourseSettings courseId={courseId} />
           </TabPanel>
         </Box>
       </Container>

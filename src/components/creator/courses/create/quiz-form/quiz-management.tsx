@@ -6,12 +6,16 @@ import QuizCard from "./quiz-card";
 import QuizDialog, { QuizFormValues } from "./quiz-dialog";
 import QuizQuestions from "./quiz-questions";
 import { BasicTest } from "@/services/interfaces/service.interfaces";
-import { Box, CircularProgress, Alert, Snackbar, Skeleton, Card, CardContent } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
 import {
-  HeaderContainer,
-  LoadingContainer,
-} from "@/components/styles/creator/quiz-management.styles";
+  Box,
+  Alert,
+  Snackbar,
+  Skeleton,
+  Card,
+  CardContent,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import { HeaderContainer } from "@/components/styles/creator/quiz-management.styles";
 import {
   LightText,
   StyledButton,
@@ -24,14 +28,27 @@ interface QuizManagementProps {
 const QuizCardSkeleton = () => (
   <Card>
     <CardContent>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
         <Skeleton variant="circular" width={32} height={32} />
         <Skeleton variant="circular" width={24} height={24} />
       </Box>
-      <Skeleton variant="text" sx={{ fontSize: '1.5rem', mb: 1 }} />
-      <Skeleton variant="text" sx={{ fontSize: '0.875rem', mb: 2 }} width="80%" />
-      <Skeleton variant="text" sx={{ fontSize: '0.875rem', mb: 1 }} width="60%" />
-      <Skeleton variant="text" sx={{ fontSize: '0.75rem' }} width="40%" />
+      <Skeleton variant="text" sx={{ fontSize: "1.5rem", mb: 1 }} />
+      <Skeleton
+        variant="text"
+        sx={{ fontSize: "0.875rem", mb: 2 }}
+        width="80%"
+      />
+      <Skeleton
+        variant="text"
+        sx={{ fontSize: "0.875rem", mb: 1 }}
+        width="60%"
+      />
+      <Skeleton variant="text" sx={{ fontSize: "0.75rem" }} width="40%" />
     </CardContent>
   </Card>
 );
@@ -56,7 +73,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
     isPending: isLoadingQuizzes,
     error,
   } = trpc.tests.getTests.useQuery(courseId!, {
-    enabled: !!courseId,
+    enabled: Boolean(courseId),
   });
 
   const createTestMutation = trpc.tests.createTest.useMutation({
@@ -160,7 +177,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
     try {
       await deleteTestMutation.mutateAsync(quizId);
     } catch (error) {
-      // Error handling is done in the mutation's onError callback
+      console.error("Failed to delete quiz:", error);
     }
   };
 
@@ -180,8 +197,13 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
     return (
       <Box>
         <HeaderContainer>
-          <Skeleton variant="text" sx={{ fontSize: '2rem' }} width={200} />
-          <Skeleton variant="rectangular" width={120} height={36} sx={{ borderRadius: 1 }} />
+          <Skeleton variant="text" sx={{ fontSize: "2rem" }} width={200} />
+          <Skeleton
+            variant="rectangular"
+            width={120}
+            height={36}
+            sx={{ borderRadius: 1 }}
+          />
         </HeaderContainer>
         <Box
           display="grid"

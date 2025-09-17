@@ -18,7 +18,7 @@ import { Tag } from "@/lib/database/database.types";
 import { SaveOrderButton } from "@/components/styles/creator/resources-form.styles";
 
 interface CourseTagsFormProps {
-  courseId: string;
+  courseId: string | null;
   initialTags?: Tag[];
   onSave?: () => void;
 }
@@ -54,7 +54,12 @@ const CourseTagsForm = ({
 
   // Queries
   const { data: courseTags, isPending: isPendingCourseTags } =
-    trpc.tags.getTagsByCourseId.useQuery({ courseId });
+    trpc.tags.getTagsByCourseId.useQuery(
+      { courseId: courseId! },
+      {
+        enabled: Boolean(courseId),
+      }
+    );
   const {
     data: tags,
     isPending: isPendingTags,
@@ -70,23 +75,23 @@ const CourseTagsForm = ({
     if (originalTags.length !== selectedTags.length) {
       return true;
     }
-    
+
     // Check if all original tags are still present
-    const originalTagIds = new Set(originalTags.map(tag => tag.id));
-    const selectedTagIds = new Set(selectedTags.map(tag => tag.id));
-    
+    const originalTagIds = new Set(originalTags.map((tag) => tag.id));
+    const selectedTagIds = new Set(selectedTags.map((tag) => tag.id));
+
     for (const tagId of originalTagIds) {
       if (!selectedTagIds.has(tagId)) {
         return true;
       }
     }
-    
+
     for (const tagId of selectedTagIds) {
       if (!originalTagIds.has(tagId)) {
         return true;
       }
     }
-    
+
     return false;
   }, [originalTags, selectedTags]);
 
@@ -111,10 +116,10 @@ const CourseTagsForm = ({
         courseId,
         tagIds: selectedTags.map((tag) => tag.id),
       });
-      
+
       // Invalidate the course tags query to refetch the updated data
       await utils.tags.getTagsByCourseId.invalidate({ courseId });
-      
+
       enqueueSnackbar("Course tags updated successfully", {
         variant: "success",
         anchorOrigin: {

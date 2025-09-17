@@ -1,8 +1,3 @@
--- Complete Database Setup for SoftLearner Educational Platform
--- Run this in your Supabase SQL editor
-
--- DO NOT MODIFY auth.users directly (removed ALTER on auth.users)
-
 -- Create extended User table (linked to auth.users)
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -50,6 +45,7 @@ CREATE TABLE IF NOT EXISTS courses (
   thumbnail_image_url TEXT,
   creator_id UUID REFERENCES users(id) ON DELETE SET NULL,
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
+  is_published BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -239,6 +235,7 @@ ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
 CREATE INDEX IF NOT EXISTS idx_courses_creator_id ON courses(creator_id);
 CREATE INDEX IF NOT EXISTS idx_courses_created_at ON courses(created_at);
+CREATE INDEX IF NOT EXISTS idx_courses_is_published ON courses(is_published);
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_course_id ON orders(course_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
@@ -267,59 +264,3 @@ CREATE INDEX IF NOT EXISTS idx_creator_applications_created_at ON creator_applic
 CREATE INDEX IF NOT EXISTS idx_application_logs_application_id ON application_logs(application_id);
 CREATE INDEX IF NOT EXISTS idx_application_logs_admin_id ON application_logs(admin_id);
 CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
-
--- Create function to update updated_at column
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Create update triggers
-DROP TRIGGER IF EXISTS update_users_updated_at ON users;
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_courses_updated_at ON courses;
-CREATE TRIGGER update_courses_updated_at BEFORE UPDATE ON courses
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
-CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_resources_updated_at ON resources;
-CREATE TRIGGER update_resources_updated_at BEFORE UPDATE ON resources
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_reviews_updated_at ON reviews;
-CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_review_votes_updated_at ON review_votes;
-CREATE TRIGGER update_review_votes_updated_at BEFORE UPDATE ON review_votes
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_bookmarks_updated_at ON bookmarks;
-CREATE TRIGGER update_bookmarks_updated_at BEFORE UPDATE ON bookmarks
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_tests_updated_at ON tests;
-CREATE TRIGGER update_tests_updated_at BEFORE UPDATE ON tests
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_questions_updated_at ON questions;
-CREATE TRIGGER update_questions_updated_at BEFORE UPDATE ON questions
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_answer_options_updated_at ON answer_options;
-CREATE TRIGGER update_answer_options_updated_at BEFORE UPDATE ON answer_options
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_user_tests_updated_at ON user_tests;
-CREATE TRIGGER update_user_tests_updated_at BEFORE UPDATE ON user_tests
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_user_answers_updated_at ON user_answers;
-CREATE TRIGGER update_user_answers_updated_at BEFORE UPDATE ON user_answers
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_tags_updated_at ON tags;
-CREATE TRIGGER update_tags_updated_at BEFORE UPDATE ON tags
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
-CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS update_creator_applications_updated_at ON creator_applications;
-CREATE TRIGGER update_creator_applications_updated_at BEFORE UPDATE ON creator_applications
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
