@@ -138,3 +138,16 @@ export const TabPanelContent = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(3),
   paddingBottom: theme.spacing(3),
 }));
+
+export const CourseChecklistContainer = styled(Box)(({ theme }) => ({
+  position: "fixed",
+  top: 0,
+  right: 0,
+  marginRight: theme.spacing(3),
+  marginTop: theme.spacing(3),
+}));
+
+export const CourseCheckListSkeletonContainer = styled(Box)(() => ({
+  width: "100%",
+  maxWidth: "320px",
+}));

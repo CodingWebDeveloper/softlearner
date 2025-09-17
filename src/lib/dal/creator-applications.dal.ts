@@ -152,6 +152,7 @@ export class CreatorApplicationsDAL implements ICreatorApplicationsDAL {
       status: input.status,
       reviewed_by: adminId,
       reviewed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     if (input.admin_notes) {
@@ -173,7 +174,10 @@ export class CreatorApplicationsDAL implements ICreatorApplicationsDAL {
     if (input.status === "approved") {
       const { error: userUpdateError } = await this.supabase
         .from("users")
-        .update({ role: "creator" })
+        .update({ 
+          role: "creator",
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", data.user_id);
 
       if (userUpdateError) {

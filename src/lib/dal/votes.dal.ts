@@ -39,7 +39,10 @@ export class VotesDAL implements IVotesDAL {
       // If vote type is different, update the vote
       const { data, error } = await this.supabase
         .from("review_votes")
-        .update({ vote_type: voteType })
+        .update({ 
+          vote_type: voteType,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", existingVote.id)
         .select()
         .single();

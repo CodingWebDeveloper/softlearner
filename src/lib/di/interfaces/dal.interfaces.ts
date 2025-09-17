@@ -43,6 +43,7 @@ import {
   UpdateResourceParams,
   SimpleResource,
   QuestionsInput,
+  CourseProgressStatus,
 } from "@/services/interfaces/service.interfaces";
 
 export interface PaginatedResult<T> {
@@ -92,6 +93,12 @@ export interface ICoursesDAL {
   ): Promise<SimpleCourse>;
   deleteCourse(creatorId: string, courseId: string): Promise<void>;
   getThumbnail(thumbnailPath: string): Promise<Blob>;
+  togglePublishStatus(
+    creatorId: string,
+    courseId: string,
+    isPublished: boolean
+  ): Promise<void>;
+  getCourseProgressStatus(courseId: string): Promise<CourseProgressStatus>;
 }
 
 export interface ICategoriesDAL {

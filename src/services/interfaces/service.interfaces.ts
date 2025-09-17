@@ -104,6 +104,7 @@ export interface SimpleCourse {
   category: Category;
   creator: User;
   thumbnail_image_url: string;
+  is_published: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -226,6 +227,12 @@ export interface ICoursesService {
   deleteCourse(creatorId: string, courseId: string): Promise<void>;
   getCourseDataById(id: string): Promise<SimpleCourse | null>;
   getThumbnail(thumbnailPath: string): Promise<Blob>;
+  togglePublishStatus(
+    creatorId: string,
+    courseId: string,
+    isPublished: boolean
+  ): Promise<void>;
+  getCourseProgressStatus(courseId: string): Promise<CourseProgressStatus>;
 }
 
 export interface ITagsService {
@@ -342,6 +349,15 @@ export type GetPurchasedCoursesResult = {
   data: PurchasedCourse[];
   totalRecords: number;
 };
+
+// Course progress status used for creator checklist and publishing readiness
+export interface CourseProgressStatus {
+  general: boolean;
+  resources: boolean;
+  tags: boolean;
+  quizzes: boolean;
+  publish: boolean;
+}
 
 export interface CreateTestInput {
   title: string;

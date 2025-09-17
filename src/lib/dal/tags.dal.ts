@@ -134,7 +134,10 @@ export class TagsDAL implements ITagsDAL {
   async updateTag(id: string, name: string): Promise<Tag> {
     const { data: tag, error } = await this.supabase
       .from("tags")
-      .update({ name })
+      .update({ 
+        name,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", id)
       .select()
       .single();

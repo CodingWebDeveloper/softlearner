@@ -21,13 +21,13 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import PublishIcon from "@mui/icons-material/Publish";
 import { styled } from "@mui/material/styles";
 import { SimpleCourse } from "@/services/interfaces/service.interfaces";
 import { StyledButton } from "@/components/styles/infrastructure/layout.styles";
 import { trpc } from "@/lib/trpc/client";
 import { useSnackbar } from "notistack";
 import ConfirmAlert from "@/components/confirm-alert";
+import PublishToggle from "@/components/courses/publish-toggle";
 
 export interface CreatorCourse {
   id: string;
@@ -92,6 +92,7 @@ const headCells: HeadCell[] = [
   { id: "name", label: "Name", sortable: true },
   { id: "category", label: "Category", sortable: true },
   { id: "price", label: "Price", sortable: true },
+  { id: "status", label: "Status", sortable: false },
   { id: "createdAt", label: "Created At", sortable: true },
   { id: "updatedAt", label: "Last Updated", sortable: true },
   { id: "actions", label: "Actions", sortable: false },
@@ -149,10 +150,6 @@ const CreatorCoursesTable = ({
     router.push(`/creator/courses/${courseId}`);
   };
 
-  const handlePublish = (courseId: string) => {
-    console.log("Publish course:", courseId);
-  };
-
   const handleDelete = (courseId: string) => {
     setSelectedCourseId(courseId);
     setConfirmOpen(true);
@@ -195,7 +192,7 @@ const CreatorCoursesTable = ({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setPageSize(parseInt(event.target.value, 10));
-    setPage(0);
+    setPage(1);
   };
 
   const formatDate = (dateString: string) => {
@@ -240,6 +237,9 @@ const CreatorCoursesTable = ({
         </TableCell>
         <TableCell>
           <Skeleton variant="text" width={80} />
+        </TableCell>
+        <TableCell>
+          <Skeleton variant="text" width={100} />
         </TableCell>
         <TableCell>
           <Skeleton variant="text" width={140} />
@@ -304,6 +304,12 @@ const CreatorCoursesTable = ({
                         course.currency
                       )}
                     </TableCell>
+                    <TableCell>
+                      <PublishToggle
+                        courseId={course.id}
+                        initialIsPublished={course.is_published}
+                      />
+                    </TableCell>
                     <TableCell>{formatDate(course.created_at)}</TableCell>
                     <TableCell>{formatDate(course.updated_at)}</TableCell>
                     <TableCell align="center">
@@ -320,21 +326,6 @@ const CreatorCoursesTable = ({
                           aria-label="Edit course"
                         >
                           <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Publish course">
-                        <IconButton
-                          onClick={() => handlePublish(course.id)}
-                          size="small"
-                          sx={{
-                            mr: 1,
-                            "&:hover": {
-                              backgroundColor: "action.hover",
-                            },
-                          }}
-                          aria-label="Publish course"
-                        >
-                          <PublishIcon />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete course">
@@ -374,6 +365,7 @@ const CreatorCoursesTable = ({
         rowsPerPage={pageSize}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
+        disabled={isLoading}
       />
 
       <ConfirmAlert

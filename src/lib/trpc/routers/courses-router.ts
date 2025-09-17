@@ -327,4 +327,53 @@ export const coursesRouter = router({
         );
       }
     }),
+
+  togglePublishStatus: protectedProcedure
+    .input(z.object({ 
+      courseId: z.string().uuid(),
+      isPublished: z.boolean()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+
+        await coursesService.togglePublishStatus(
+          ctx.user.id,
+          input.courseId,
+          input.isPublished
+        );
+
+        return { 
+          success: true, 
+          isPublished: input.isPublished,
+          message: input.isPublished ? "Course published successfully" : "Course unpublished successfully"
+        };
+      } catch (error) {
+        throw new Error(
+          `Failed to update course publish status: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  getCourseProgressStatus: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input: courseId }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+
+        return await coursesService.getCourseProgressStatus(courseId);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch course progress status: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 });

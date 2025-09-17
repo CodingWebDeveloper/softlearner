@@ -13,7 +13,7 @@ import {
   formatAmountForStripe,
   getActualCoursePrice,
 } from "../stripe/stripe";
-import { STRIPE_PAYMENT_METHODS } from "@/lib/constants/stripe-constants";
+import type { Stripe } from "stripe";
 
 export class PaymentsDAL implements IPaymentsDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -93,7 +93,10 @@ export class PaymentsDAL implements IPaymentsDAL {
   ): Promise<void> {
     const { error } = await this.supabase
       .from("orders")
-      .update({ stripe_payment_intent_id: paymentIntentId })
+      .update({
+        stripe_payment_intent_id: paymentIntentId,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", orderId);
 
     if (error) {
@@ -154,7 +157,9 @@ export class PaymentsDAL implements IPaymentsDAL {
 
       // Create Stripe checkout session
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: [STRIPE_PAYMENT_METHODS.CARD],
+        payment_method_types: [
+          "card" as Stripe.Checkout.SessionCreateParams.PaymentMethodType,
+        ],
         line_items: [
           {
             price_data: {

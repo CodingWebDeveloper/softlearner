@@ -160,6 +160,7 @@ export interface Course {
   creator_id: string;
   category: string;
   currency: string;
+  is_published: boolean;
   tags?: Tag[];
   created_at: string;
   updated_at: string;

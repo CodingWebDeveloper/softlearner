@@ -171,6 +171,7 @@ export class TestsDAL implements ITestsDAL {
       .update({
         title: data.title,
         description: data.description,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", id)
       .select(
@@ -331,6 +332,7 @@ export class TestsDAL implements ITestsDAL {
         text: question.text,
         type: question.type,
         points: question.points,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", question.id as string);
 
@@ -360,6 +362,7 @@ export class TestsDAL implements ITestsDAL {
               .update({
                 text: option.text,
                 is_correct: option.isCorrect,
+                updated_at: new Date().toISOString(),
               })
               .eq("id", option.id as string);
           }

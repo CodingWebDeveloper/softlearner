@@ -179,7 +179,7 @@ const ResourceCard = ({
           secondary={
             <>
               <div>
-                <ResourceDescription variant="body2" color="textSecondary">
+                <ResourceDescription variant="body2">
                   {resource.short_summary}
                 </ResourceDescription>
               </div>
