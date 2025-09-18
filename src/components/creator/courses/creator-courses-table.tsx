@@ -6,7 +6,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Paper,
@@ -21,13 +20,15 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { styled } from "@mui/material/styles";
 import { SimpleCourse } from "@/services/interfaces/service.interfaces";
 import { StyledButton } from "@/components/styles/infrastructure/layout.styles";
 import { trpc } from "@/lib/trpc/client";
 import { useSnackbar } from "notistack";
 import ConfirmAlert from "@/components/confirm-alert";
-import PublishToggle from "@/components/courses/publish-toggle";
+import {
+  StatusChip,
+  StyledTableContainer,
+} from "@/components/styles/creator/creator-courses-table";
 
 export interface CreatorCourse {
   id: string;
@@ -39,48 +40,6 @@ export interface CreatorCourse {
   createdAt: string;
   updatedAt: string;
 }
-
-const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-  marginTop: theme.spacing(2),
-  borderRadius: theme.spacing(2),
-  "& .MuiTable-root": {
-    borderCollapse: "separate",
-    borderSpacing: "0 4px",
-  },
-  "& .MuiTableCell-head": {
-    backgroundColor: "transparent",
-    fontWeight: 600,
-    fontSize: "0.875rem",
-    border: "none",
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-  },
-  "& .MuiTableBody-root .MuiTableRow-root": {
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-    borderRadius: theme.spacing(1),
-    "& .MuiTableCell-body": {
-      border: "none",
-      borderTop: `1px solid ${theme.palette.divider}`,
-      borderBottom: `1px solid ${theme.palette.divider}`,
-      "&:first-of-type": {
-        borderLeft: `1px solid ${theme.palette.divider}`,
-        borderTopLeftRadius: theme.spacing(1),
-        borderBottomLeftRadius: theme.spacing(1),
-      },
-      "&:last-of-type": {
-        borderRight: `1px solid ${theme.palette.divider}`,
-        borderTopRightRadius: theme.spacing(1),
-        borderBottomRightRadius: theme.spacing(1),
-      },
-    },
-    "&:hover": {
-      backgroundColor: theme.palette.action.hover,
-      transform: "translateY(-1px)",
-      transition: "all 0.2s ease-in-out",
-    },
-  },
-}));
 
 interface HeadCell {
   id: string;
@@ -229,27 +188,14 @@ const CreatorCoursesTable = ({
   const renderSkeletonRows = () => {
     return Array.from({ length: Math.max(pageSize, 5) }).map((_, idx) => (
       <TableRow key={`sk-${idx}`}>
-        <TableCell>
-          <Skeleton variant="text" width={160} />
-        </TableCell>
-        <TableCell>
-          <Skeleton variant="text" width={120} />
-        </TableCell>
-        <TableCell>
-          <Skeleton variant="text" width={80} />
-        </TableCell>
-        <TableCell>
-          <Skeleton variant="text" width={100} />
-        </TableCell>
-        <TableCell>
-          <Skeleton variant="text" width={140} />
-        </TableCell>
-        <TableCell>
-          <Skeleton variant="text" width={140} />
-        </TableCell>
-        <TableCell align="center">
-          <Skeleton variant="circular" width={28} height={28} />
-        </TableCell>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.id === "actions" ? "center" : "left"}
+          >
+            <Skeleton variant="text" width={160} />
+          </TableCell>
+        ))}
       </TableRow>
     ));
   };
@@ -305,10 +251,11 @@ const CreatorCoursesTable = ({
                       )}
                     </TableCell>
                     <TableCell>
-                      <PublishToggle
-                        courseId={course.id}
-                        initialIsPublished={course.is_published}
-                      />
+                      {course.is_published ? (
+                        <StatusChip color="success" label="Published" />
+                      ) : (
+                        <StatusChip color="error" label="Draft" />
+                      )}
                     </TableCell>
                     <TableCell>{formatDate(course.created_at)}</TableCell>
                     <TableCell>{formatDate(course.updated_at)}</TableCell>

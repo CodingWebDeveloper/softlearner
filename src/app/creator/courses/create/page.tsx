@@ -16,8 +16,8 @@ import { useSnackbar } from "notistack";
 import {
   LightText,
   PageContainer,
+  PageTitle,
   StyledButton,
-  WhiteText,
 } from "@/components/styles/infrastructure/layout.styles";
 import CourseTagsForm from "@/components/creator/courses/course-tags-form";
 import QuizManagement from "@/components/creator/courses/create/quiz-form/quiz-management";
@@ -31,7 +31,6 @@ import {
   CourseCheckListSkeletonContainer,
 } from "@/components/styles/creator/create-course.styles";
 import UpdateGeneralForm from "@/components/creator/courses/create/update-general-form";
-import CourseSettings from "@/components/creator/courses/course-settings";
 import CourseChecklist from "@/components/creator/courses/course-checklist";
 import { VIEWPORT_MEDIA_QUERIES } from "@/utils/constants";
 import { trpc } from "@/lib/trpc/client";
@@ -150,9 +149,9 @@ const CreateCoursePage = () => {
                   alignItems: "start",
                 }}
               >
-                <WhiteText variant="h4" gutterBottom>
+                <PageTitle variant="h4" gutterBottom>
                   Create Course
-                </WhiteText>
+                </PageTitle>
                 {courseId && isPublished === false && (
                   <StyledButton
                     variant="contained"
@@ -186,7 +185,6 @@ const CreateCoursePage = () => {
                 <Tab label="Resources" disabled={!courseId} {...a11yProps(1)} />
                 <Tab label="Tags" disabled={!courseId} {...a11yProps(2)} />
                 <Tab label="Quizzes" disabled={!courseId} {...a11yProps(3)} />
-                <Tab label="Settings" disabled={!courseId} {...a11yProps(4)} />
               </StyledTabs>
 
               <TabPanel value={currentTab} index={0}>
@@ -207,9 +205,6 @@ const CreateCoursePage = () => {
 
               <TabPanel value={currentTab} index={3}>
                 <QuizManagement courseId={courseId} />
-              </TabPanel>
-              <TabPanel value={currentTab} index={4}>
-                <CourseSettings courseId={courseId} />
               </TabPanel>
             </Box>
           </Grid>

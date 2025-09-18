@@ -316,6 +316,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
               handleSubmit,
               isSubmitting,
               isValid,
+              dirty,
             }) => (
               <form onSubmit={handleSubmit}>
                 <TextField
@@ -391,6 +392,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
                   variant="contained"
                   disabled={
                     !isValid ||
+                    !dirty ||
                     isSubmitting ||
                     (fileType === RESOURCE_TYPES.DOWNLOADABLE_FILE &&
                       !selectedFile)

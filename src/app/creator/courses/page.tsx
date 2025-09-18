@@ -4,7 +4,10 @@ import { useSupabase } from "@/contexts/supabase-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Container, Box } from "@mui/material";
-import { PageContainer } from "@/components/styles/infrastructure/layout.styles";
+import {
+  PageContainer,
+  PageTitle,
+} from "@/components/styles/infrastructure/layout.styles";
 import { ROLES } from "@/utils/constants";
 import CreatorCoursesTable from "@/components/creator/courses/creator-courses-table";
 import { trpc } from "@/lib/trpc/client";
@@ -65,9 +68,9 @@ const CreatorCoursesPage = () => {
     <PageContainer>
       <Container maxWidth="lg">
         <Box mb={4}>
-          <LightText variant="h4" gutterBottom>
+          <PageTitle variant="h4" gutterBottom>
             My Courses
-          </LightText>
+          </PageTitle>
           <LightText variant="body1" color="text.secondary">
             Manage your created courses
           </LightText>

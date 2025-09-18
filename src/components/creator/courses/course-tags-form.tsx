@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { CircularProgress, Autocomplete } from "@mui/material";
+import { CircularProgress, Autocomplete, Alert } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { trpc } from "@/lib/trpc/client";
 import { useSnackbar } from "notistack";
@@ -231,15 +231,21 @@ const CourseTagsForm = ({
         />
       </TagsAutocompleteContainer>
 
-      <SelectedTagsContainer>
-        {selectedTags.map((tag) => (
-          <TagChip
-            key={tag.id}
-            label={tag.name}
-            onDelete={() => handleTagDelete(tag)}
-          />
-        ))}
-      </SelectedTagsContainer>
+      {selectedTags.length > 0 ? (
+        <SelectedTagsContainer>
+          {selectedTags.map((tag) => (
+            <TagChip
+              key={tag.id}
+              label={tag.name}
+              onDelete={() => handleTagDelete(tag)}
+            />
+          ))}
+        </SelectedTagsContainer>
+      ) : (
+        <Alert severity="info">
+          No tags have been added yet. Select tags and click Save Changes.
+        </Alert>
+      )}
 
       <SaveButtonContainer>
         <SaveOrderButton
