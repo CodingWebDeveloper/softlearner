@@ -5,7 +5,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { updateResourceOrder } from "@/lib/store/features/resourcesSlice";
-import { Skeleton, Stack } from "@mui/material";
+import { Alert, Skeleton, Stack } from "@mui/material";
 import { ResourceItem } from "@/components/styles/creator/resources-form.styles";
 import {
   DndContext,
@@ -164,15 +164,22 @@ const ResourcesList = ({
           items={resources.map((r) => r.id)}
           strategy={verticalListSortingStrategy}
         >
-          <ResourceList>
-            {resources?.map((resource) => (
-              <SortableItem
-                key={resource.id}
-                resource={resource}
-                courseId={courseId}
-              />
-            ))}
-          </ResourceList>
+          {resources?.length > 0 ? (
+            <ResourceList>
+              {resources?.map((resource) => (
+                <SortableItem
+                  key={resource.id}
+                  resource={resource}
+                  courseId={courseId}
+                />
+              ))}
+            </ResourceList>
+          ) : (
+            <Alert severity="info">
+              No resources have been added yet. Fill the resource info and click
+              Add Resource.
+            </Alert>
+          )}
         </SortableContext>
       </DndContext>
     </ResourcesContainer>

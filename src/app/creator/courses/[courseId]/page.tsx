@@ -13,8 +13,8 @@ import Link from "next/link";
 import {
   LightText,
   PageContainer,
-  WhiteText,
   StyledButton,
+  PageTitle,
 } from "@/components/styles/infrastructure/layout.styles";
 import ResourcesForm from "@/components/creator/courses/create/resources-form/resources-form";
 import CourseTagsForm from "@/components/creator/courses/course-tags-form";
@@ -29,7 +29,6 @@ import {
 } from "@/components/styles/creator/create-course.styles";
 import UpdateGeneralForm from "@/components/creator/courses/create/update-general-form";
 import { useParams } from "next/navigation";
-import CourseSettings from "@/components/creator/courses/course-settings";
 import CourseChecklist from "@/components/creator/courses/course-checklist";
 import { VIEWPORT_MEDIA_QUERIES } from "@/utils/constants";
 import { trpc } from "@/lib/trpc/client";
@@ -111,7 +110,7 @@ const EditCoursePage = () => {
       isPublished: true,
     });
   };
-
+  console.log(desktopMatches);
   return (
     <PageContainer>
       <Container maxWidth="lg">
@@ -154,9 +153,9 @@ const EditCoursePage = () => {
                   alignItems: "start",
                 }}
               >
-                <WhiteText variant="h4" gutterBottom>
+                <PageTitle variant="h4" gutterBottom>
                   Edit Course
-                </WhiteText>
+                </PageTitle>
                 {courseId && isPublished === false && (
                   <StyledButton
                     variant="contained"
@@ -190,7 +189,6 @@ const EditCoursePage = () => {
                 <Tab label="Resources" {...a11yProps(1)} />
                 <Tab label="Tags" {...a11yProps(2)} />
                 <Tab label="Quizzes" {...a11yProps(3)} />
-                <Tab label="Settings" {...a11yProps(4)} />
               </StyledTabs>
 
               <TabPanel value={currentTab} index={0}>
@@ -207,10 +205,6 @@ const EditCoursePage = () => {
 
               <TabPanel value={currentTab} index={3}>
                 <QuizManagement courseId={courseId} />
-              </TabPanel>
-
-              <TabPanel value={currentTab} index={4}>
-                <CourseSettings courseId={courseId} />
               </TabPanel>
             </Box>
           </Grid>

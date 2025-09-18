@@ -12,7 +12,6 @@ import {
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   AdminPanelSettings as AdminIcon,
-  OndemandVideo as VideoIcon,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useSupabase } from "@/contexts/supabase-context";

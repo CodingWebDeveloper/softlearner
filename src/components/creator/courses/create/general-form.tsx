@@ -94,6 +94,7 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
             handleSubmit,
             isSubmitting,
             isValid,
+            dirty,
           }) => (
             <>
               <form onSubmit={handleSubmit}>
@@ -213,7 +214,9 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
                   <SaveOrderButton
                     type="submit"
                     variant="contained"
-                    disabled={!isValid || !thumbnailFile || isSubmitting}
+                    disabled={
+                      !isValid || !dirty || !thumbnailFile || isSubmitting
+                    }
                   >
                     {isSubmitting ? (
                       <CircularProgress color="inherit" size={20} />
