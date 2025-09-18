@@ -1,4 +1,6 @@
 import { KeyboardEvent } from "react";
+import { Button } from "@mui/material";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
   CourseCard,
   CourseCardContent,
@@ -47,6 +49,9 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
       : completedResources > 0
       ? "in_progress"
       : "not_started";
+
+  // Reviews visibility flag (placeholder logic)
+  const canAddReview: boolean = true;
 
   return (
     <CourseCard
@@ -104,7 +109,25 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
           <LastAccessed>
             Purchased: {formatDate(course.orderCreatedAt)}
           </LastAccessed>
-          {status !== "completed" && <ContinueCard course={course} />}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            {status !== "completed" && <ContinueCard course={course} />}          
+            {canAddReview && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<StarBorderIcon />}
+                sx={{
+                  color: "primary.main",
+                  borderColor: "primary.main",
+                  textTransform: "none",
+                  '&:hover': { borderColor: "secondary.main", color: "secondary.main" }
+                }}
+                aria-label="Leave a review"
+              >
+                Leave a Review
+              </Button>
+            )}
+          </div>
         </CourseFooter>
       </CourseCardContent>
     </CourseCard>

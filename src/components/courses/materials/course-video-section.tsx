@@ -1,7 +1,13 @@
 "use client";
 
-import { FC, useState } from "react";
-import { Box, Typography, useTheme, Button, CircularProgress } from "@mui/material";
+import { FC } from "react";
+import {
+  Box,
+  Typography,
+  useTheme,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import {
   VideoSection,
   VideoEmbed,
@@ -21,6 +27,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
 import { AvatarImage } from "@/components/profile/avatar-image";
 import { getInitials } from "@/utils/utils";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 interface CourseVideoSectionProps {
   course: FullCourse;
@@ -34,7 +41,11 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
   const selectedResource = useAppSelector(selectResource);
 
   // tRPC hooks
-  const {mutateAsync: downloadResourceFile, isPending: isResourceLoading  } = trpc.resources.downloadResourceFile.useMutation();
+  const { mutateAsync: downloadResourceFile, isPending: isResourceLoading } =
+    trpc.resources.downloadResourceFile.useMutation();
+
+  // Reviews visibility flag (placeholder logic)
+  const canAddReview: boolean = true;
 
   const handleDownload = async () => {
     if (!selectedResource) return;
@@ -54,7 +65,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
 
       // Create download link
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = selectedResource.name;
       document.body.appendChild(link);
@@ -62,7 +73,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Download failed:', error);
+      console.error("Download failed:", error);
     }
   };
 
@@ -104,27 +115,72 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
         <Button
           variant="contained"
           onClick={handleDownload}
-          disabled={isResourceLoading }
-          startIcon={isResourceLoading ? <CircularProgress size={20} /> : <DownloadIcon />}
+          disabled={isResourceLoading}
+          startIcon={
+            isResourceLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <DownloadIcon />
+            )
+          }
           sx={{
             backgroundColor: theme.palette.primary.main,
             color: theme.palette.primary.contrastText,
-            '&:hover': {
+            "&:hover": {
               backgroundColor: theme.palette.primary.dark,
             },
-            '&:disabled': {
+            "&:disabled": {
               backgroundColor: theme.palette.action.disabled,
             },
           }}
         >
-          {isResourceLoading ? 'Downloading...' : 'Download Resource'}
+          {isResourceLoading ? "Downloading..." : "Download Resource"}
         </Button>
       </DownloadSection>
     );
   };
 
+  // No extra logic: show review UI only based on canAddReview
+
   return (
     <VideoSection>
+      {canAddReview && (
+        <Box
+          sx={{
+            mb: 2,
+            p: 2,
+            borderRadius: 2,
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 1.5,
+            backgroundColor: theme.palette.custom.background.tertiary,
+            border: `1px solid ${theme.palette.custom.accent.yellow}`,
+            boxShadow: `0 2px 8px rgba(0,0,0,0.25)`,
+          }}
+          role="region"
+          aria-label="Course completed review prompt"
+        >
+          <StarBorderIcon
+            sx={{ color: theme.palette.custom.accent.yellow, mt: 0.5 }}
+          />
+          <Box>
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              gutterBottom
+              color={theme.palette.custom.text.white}
+            >
+              You&apos;ve completed {course.name}!
+            </Typography>
+            <Typography
+              variant="body2"
+              color={theme.palette.custom.text.light}
+            >
+              What did you think? Help other students by leaving a review.
+            </Typography>
+          </Box>
+        </Box>
+      )}
       <Typography
         variant="h5"
         fontWeight={600}
@@ -132,6 +188,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
       >
         {course.name}
       </Typography>
+      
       {renderContent()}
       <Box
         display="flex"

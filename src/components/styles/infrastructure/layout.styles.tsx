@@ -49,6 +49,17 @@ export const PageTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.custom.text.white,
 }));
 
+export const Subtitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.custom.text.light,
+}));
+
+export const PageHeader = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: theme.palette.custom.background.secondary,
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  marginBottom: theme.spacing(4),
+}));
+
 // Reusable Text Components
 export const LightText = styled(Typography)(({ theme }) => ({
   color: theme.palette.custom.text.light,

@@ -1,4 +1,4 @@
-import { styled } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
 import {
   Box,
   ListItem,
@@ -46,13 +46,27 @@ export const SidebarFooter = styled(Box)(({ theme }) => ({
   borderTop: "1px solid rgba(255,255,255,0.1)",
 }));
 
-export const UserInfo = styled(Box)(() => ({
+export const UserInfo = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: "12px",
   marginBottom: "16px",
   width: "100%",
   minWidth: 0,
+  cursor: "pointer",
+  padding: "8px 12px",
+  borderRadius: 8,
+  transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+  "&:hover": {
+    backgroundColor: "rgba(255,255,255,0.06)",
+  },
+  "&:focus-visible": {
+    outline: "none",
+    boxShadow: `0 0 0 2px ${alpha(theme.palette.custom.accent.teal, 0.2)}`,
+  },
+  "&:active": {
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
 }));
 
 export const UserName = styled(Typography)<TypographyProps>(({ theme }) => ({
