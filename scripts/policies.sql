@@ -196,7 +196,7 @@ FOR INSERT WITH CHECK (
     SELECT 1 FROM orders 
     WHERE user_id = auth.uid() 
     AND course_id = reviews.course_id 
-    AND status = 'ACTIVE'
+    AND status = 'SUCCEEDED'
   )
 );
 -- Allow users to update their own reviews

@@ -1,13 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import {
-  Box,
-  Typography,
-  useTheme,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, useTheme, CircularProgress } from "@mui/material";
 import {
   VideoSection,
   VideoEmbed,
@@ -27,7 +21,12 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
 import { AvatarImage } from "@/components/profile/avatar-image";
 import { getInitials } from "@/utils/utils";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
+import ReviewBanner from "./review-banner";
+import {
+  LightText,
+  StyledButton,
+  WhiteText,
+} from "@/components/styles/infrastructure/layout.styles";
 
 interface CourseVideoSectionProps {
   course: FullCourse;
@@ -44,9 +43,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
   const { mutateAsync: downloadResourceFile, isPending: isResourceLoading } =
     trpc.resources.downloadResourceFile.useMutation();
 
-  // Reviews visibility flag (placeholder logic)
-  const canAddReview: boolean = true;
-
+  // Handelers
   const handleDownload = async () => {
     if (!selectedResource) return;
 
@@ -112,7 +109,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
 
     return (
       <DownloadSection>
-        <Button
+        <StyledButton
           variant="contained"
           onClick={handleDownload}
           disabled={isResourceLoading}
@@ -123,72 +120,20 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
               <DownloadIcon />
             )
           }
-          sx={{
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-            "&:hover": {
-              backgroundColor: theme.palette.primary.dark,
-            },
-            "&:disabled": {
-              backgroundColor: theme.palette.action.disabled,
-            },
-          }}
         >
           {isResourceLoading ? "Downloading..." : "Download Resource"}
-        </Button>
+        </StyledButton>
       </DownloadSection>
     );
   };
 
-  // No extra logic: show review UI only based on canAddReview
-
   return (
     <VideoSection>
-      {canAddReview && (
-        <Box
-          sx={{
-            mb: 2,
-            p: 2,
-            borderRadius: 2,
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 1.5,
-            backgroundColor: theme.palette.custom.background.tertiary,
-            border: `1px solid ${theme.palette.custom.accent.yellow}`,
-            boxShadow: `0 2px 8px rgba(0,0,0,0.25)`,
-          }}
-          role="region"
-          aria-label="Course completed review prompt"
-        >
-          <StarBorderIcon
-            sx={{ color: theme.palette.custom.accent.yellow, mt: 0.5 }}
-          />
-          <Box>
-            <Typography
-              variant="h6"
-              fontWeight={700}
-              gutterBottom
-              color={theme.palette.custom.text.white}
-            >
-              You&apos;ve completed {course.name}!
-            </Typography>
-            <Typography
-              variant="body2"
-              color={theme.palette.custom.text.light}
-            >
-              What did you think? Help other students by leaving a review.
-            </Typography>
-          </Box>
-        </Box>
-      )}
-      <Typography
-        variant="h5"
-        fontWeight={600}
-        style={{ color: theme.palette.custom.text.white }}
-      >
+      <ReviewBanner courseId={course.id} isReviewed={course.isReviewed} />
+      <WhiteText variant="h5" fontWeight={600} gutterBottom>
         {course.name}
-      </Typography>
-      
+      </WhiteText>
+
       {renderContent()}
       <Box
         display="flex"
@@ -217,13 +162,9 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
       <Box mt={1}>
         <CategoryChip label={course.category.name} icon={<CategoryIcon />} />
       </Box>
-      <Typography
-        variant="body1"
-        style={{ color: theme.palette.custom.text.light }}
-        mt={2}
-      >
+      <LightText variant="body1" mt={2}>
         {selectedResource?.short_summary || course.description}
-      </Typography>
+      </LightText>
       <CourseTags courseId={course.id} />
 
       <InstructorBox>
@@ -237,13 +178,9 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
             : "U"}
         </AvatarImage>
         <Box ml={2}>
-          <Typography
-            variant="subtitle1"
-            fontWeight={500}
-            style={{ color: theme.palette.custom.text.white }}
-          >
+          <WhiteText variant="subtitle1" fontWeight={500}>
             {course.creator?.full_name || "Unknown"}
-          </Typography>
+          </WhiteText>
         </Box>
       </InstructorBox>
     </VideoSection>

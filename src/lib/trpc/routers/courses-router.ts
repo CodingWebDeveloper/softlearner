@@ -329,10 +329,12 @@ export const coursesRouter = router({
     }),
 
   togglePublishStatus: protectedProcedure
-    .input(z.object({ 
-      courseId: z.string().uuid(),
-      isPublished: z.boolean()
-    }))
+    .input(
+      z.object({
+        courseId: z.string().uuid(),
+        isPublished: z.boolean(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
@@ -345,10 +347,12 @@ export const coursesRouter = router({
           input.isPublished
         );
 
-        return { 
-          success: true, 
+        return {
+          success: true,
           isPublished: input.isPublished,
-          message: input.isPublished ? "Course published successfully" : "Course unpublished successfully"
+          message: input.isPublished
+            ? "Course published successfully"
+            : "Course unpublished successfully",
         };
       } catch (error) {
         throw new Error(
@@ -359,7 +363,7 @@ export const coursesRouter = router({
       }
     }),
 
-  getCourseProgressStatus: protectedProcedure
+  getCourseCreationProgressStatus: protectedProcedure
     .input(z.string().uuid())
     .query(async ({ ctx, input: courseId }) => {
       try {
@@ -367,7 +371,7 @@ export const coursesRouter = router({
           DI_TOKENS.COURSES_SERVICE
         );
 
-        return await coursesService.getCourseProgressStatus(courseId);
+        return await coursesService.getCourseCreationProgressStatus(courseId);
       } catch (error) {
         throw new Error(
           `Failed to fetch course progress status: ${

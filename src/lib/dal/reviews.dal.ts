@@ -3,6 +3,7 @@ import { Database } from "../database/database.types";
 import { IReviewsDAL } from "../di/interfaces/dal.interfaces";
 import {
   BasicReview,
+  CreateReviewParams,
   GetReviewsParams,
   GetReviewsResult,
   RatingStats,
@@ -53,6 +54,25 @@ export class ReviewsDAL implements IReviewsDAL {
     }
 
     return calculateRatingStats(reviews || []);
+  }
+
+  async hasUserReviewedCourse(
+    userId: string,
+    courseId: string
+  ): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .from("reviews")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("course_id", courseId)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Error checking existing review: ${error.message}`);
+    }
+
+    return Boolean(data);
   }
 
   async getCourseReviews(
@@ -148,6 +168,57 @@ export class ReviewsDAL implements IReviewsDAL {
       user: review.user,
       created_at: review.created_at,
       updated_at: review.updated_at,
+    };
+  }
+
+  async createReview(params: CreateReviewParams): Promise<BasicReview> {
+    // Check if the user already has a review for this course
+    const alreadyReviewed = await this.hasUserReviewedCourse(
+      params.userId,
+      params.courseId
+    );
+
+    if (alreadyReviewed) {
+      throw new Error("You have already submitted a review for this course.");
+    }
+
+    const { data: inserted, error } = await this.supabase
+      .from("reviews")
+      .insert({
+        user_id: params.userId,
+        course_id: params.courseId,
+        content: params.content,
+        rating: params.rating,
+      })
+      .select(
+        `
+        *,
+        user:users!reviews_user_id_fkey(
+          id,
+          full_name,
+          avatar_url,
+          created_at,
+          updated_at
+        )
+      `
+      )
+      .single();
+
+    if (error || !inserted) {
+      throw new Error(
+        `Failed to create review: ${error?.message || "Unknown error"}`
+      );
+    }
+
+    return {
+      id: inserted.id,
+      content: inserted.content,
+      rating: inserted.rating,
+      user_id: inserted.user_id,
+      course_id: inserted.course_id,
+      user: inserted.user,
+      created_at: inserted.created_at,
+      updated_at: inserted.updated_at,
     };
   }
 }

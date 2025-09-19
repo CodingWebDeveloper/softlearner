@@ -5,6 +5,7 @@ import {
   GetReviewsParams,
   GetReviewsResult,
   RatingStats,
+  CreateReviewParams,
 } from "./interfaces/service.interfaces";
 
 export class ReviewsService implements IReviewsService {
@@ -22,5 +23,12 @@ export class ReviewsService implements IReviewsService {
 
   async getReviewById(id: string): Promise<BasicReview | null> {
     return this.reviewsDAL.getReviewById(id);
+  }
+
+  async createReview(
+    userId: string,
+    input: CreateReviewParams
+  ): Promise<BasicReview> {
+    return this.reviewsDAL.createReview(userId, input);
   }
 }

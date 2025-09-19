@@ -7,11 +7,11 @@ import {
   ListItemText,
   Typography,
   LinearProgress,
-  Card,
   Button,
   Paper,
 } from "@mui/material";
 import type { ButtonProps } from "@mui/material/Button";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 interface OptionButtonProps extends ButtonProps {
   $selected?: boolean;
@@ -185,7 +185,7 @@ export const ResourceSummary = styled(Typography)(({ theme }) => ({
   fontStyle: "italic",
 }));
 
-export const QuizzesListContainer = styled(Box)(({ theme }) => ({
+export const QuizzesListContainer = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
   gap: "16px",
@@ -265,7 +265,7 @@ export const DialogContentBox = styled(Box)(({ theme }) => ({
   },
 }));
 
-export const QuizTopBar = styled(Box)(({ theme }) => ({
+export const QuizTopBar = styled(Box)(() => ({
   display: "flex",
   justifyContent: "flex-end",
   width: "100%",
@@ -320,7 +320,7 @@ export const QuizQuestionText = styled(Typography)(({ theme }) => ({
   },
 }));
 
-export const OptionListBox = styled(Box)(({ theme }) => ({
+export const OptionListBox = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
   gap: "12px",
@@ -353,7 +353,7 @@ export const OptionButton = styled(Button, {
   },
 }));
 
-export const DialogActionsRow = styled(Box)(({ theme }) => ({
+export const DialogActionsRow = styled(Box)(() => ({
   display: "flex",
   justifyContent: "space-between",
   gap: "16px",
@@ -361,7 +361,7 @@ export const DialogActionsRow = styled(Box)(({ theme }) => ({
   width: "100%",
 }));
 
-const BaseButton = styled(Button)(({ theme }) => ({
+const BaseButton = styled(Button)(() => ({
   padding: "12px 24px",
   textTransform: "none",
   fontSize: "16px",
@@ -405,7 +405,7 @@ export const NextButton = styled(BaseButton)(({ theme }) => ({
 
 export const SubmitButton = styled(NextButton)``;
 
-export const QuizProgressContainer = styled(Box)(({ theme }) => ({
+export const QuizProgressContainer = styled(Box)(() => ({
   display: "flex",
   alignItems: "center",
   gap: "12px",
@@ -451,3 +451,21 @@ export const DownloadLink = styled("a")(({ theme }) => ({
     backgroundColor: theme.palette.custom.accent.tealDark,
   },
 }));
+
+export const BannerContainer = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+  padding: theme.spacing(2),
+  borderRadius: "16px",
+  display: "flex",
+  alignItems: "flex-start",
+  gap: theme.spacing(1.5),
+  backgroundColor: theme.palette.custom.background.tertiary,
+  border: `1px solid ${theme.palette.custom.accent.yellow}`,
+  boxShadow: `0 2px 8px rgba(0,0,0,0.25)`,
+}));
+
+export const ResourceCompletedIcon = styled(CheckCircleOutlineIcon)(
+  ({ theme }) => ({
+    color: theme.palette.custom.accent.green,
+  })
+);

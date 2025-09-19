@@ -11,7 +11,32 @@ const getReviewsInput = z.object({
   rating: z.number().optional(),
 });
 
+const createReviewInput = z.object({
+  courseId: z.string(),
+  content: z.string().min(10).max(2000),
+  rating: z.number().min(1).max(5),
+});
+
 export const reviewsRouter = router({
+  createReview: protectedProcedure
+    .input(createReviewInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const reviewsService = ctx.container.resolve<IReviewsService>(
+          DI_TOKENS.REVIEWS_SERVICE
+        );
+        return await reviewsService.createReview({
+          userId: ctx.user.id,
+          ...input,
+        });
+      } catch (error) {
+        throw new Error(
+          `Failed to create review: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
   getCourseReviews: protectedProcedure
     .input(getReviewsInput)
     .query(async ({ ctx, input }) => {
@@ -28,7 +53,6 @@ export const reviewsRouter = router({
         );
       }
     }),
-
   getCourseRatingStats: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {

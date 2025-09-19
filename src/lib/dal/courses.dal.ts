@@ -42,6 +42,7 @@ type PurchasedCourse = {
   creator: CourseCreator;
   resources: PurchasedCourseResource[];
   orderCreatedAt: string;
+  isReviewed: boolean;
 };
 
 type GetPurchasedCoursesResult = {
@@ -61,6 +62,9 @@ type OrderWithCourse = Database["public"]["Tables"]["orders"]["Row"] & {
         completed: boolean;
       }> | null;
     }>;
+    reviews: Array<{
+      user_id: string;
+    }> | null;
   };
 };
 
@@ -479,6 +483,9 @@ export class CoursesDAL implements ICoursesDAL {
               completed,
               user_id
             )
+          ),
+          reviews!course_id (
+            user_id
           )
         )
         `,
@@ -509,6 +516,7 @@ export class CoursesDAL implements ICoursesDAL {
               ) ?? false,
           })),
           orderCreatedAt: order.created_at,
+          isReviewed: course.reviews?.some((r) => r.user_id === userId) ?? false,
         };
       }) || [];
 
@@ -570,6 +578,7 @@ export class CoursesDAL implements ICoursesDAL {
       created_at: course.created_at,
       updated_at: course.updated_at,
       isBookmarked: (course.bookmarks?.length ?? 0) > 0,
+      isReviewed: false,
       video_url: course.video_url || "",
     };
 
@@ -844,7 +853,7 @@ export class CoursesDAL implements ICoursesDAL {
     }
   }
 
-  async getCourseProgressStatus(courseId: string): Promise<{
+  async getCourseCreationProgressStatus(courseId: string): Promise<{
     general: boolean;
     resources: boolean;
     tags: boolean;

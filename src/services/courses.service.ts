@@ -1,19 +1,22 @@
-import { ICoursesDAL } from "@/lib/di/interfaces/dal.interfaces";
+import { ICoursesDAL, IReviewsDAL } from "@/lib/di/interfaces/dal.interfaces";
 import {
   ICoursesService,
   GetCoursesParams,
   GetCoursesResult,
   BasicCourse,
   GetPurchasedCoursesResult,
-  FullCourse,
   CreateCourseParams,
   SimpleCourse,
   PaginatedResult,
   CourseProgressStatus,
+  FullCourse,
 } from "./interfaces/service.interfaces";
 
 export class CoursesService implements ICoursesService {
-  constructor(private coursesDAL: ICoursesDAL) {}
+  constructor(
+    private coursesDAL: ICoursesDAL,
+    private reviewsDAL: IReviewsDAL
+  ) {}
 
   async createCourse(
     creatorId: string,
@@ -52,9 +55,16 @@ export class CoursesService implements ICoursesService {
 
   async getCourseMaterialsById(
     id: string,
-    userId?: string
-  ): Promise<FullCourse | null> {
-    return this.coursesDAL.getCourseMaterialsById(id, userId);
+    userId: string
+  ): Promise<FullCourse> {
+    const courseData = await this.coursesDAL.getCourseMaterialsById(id, userId);
+    const isReviewed = await this.reviewsDAL.hasUserReviewedCourse(userId, id);
+
+    if (!courseData) {
+      throw new Error("Course not found");
+    }
+
+    return { ...courseData, isReviewed: isReviewed ?? false };
   }
 
   async getCoursesByCreator(
@@ -98,10 +108,16 @@ export class CoursesService implements ICoursesService {
     courseId: string,
     isPublished: boolean
   ): Promise<void> {
-    return this.coursesDAL.togglePublishStatus(creatorId, courseId, isPublished);
+    return this.coursesDAL.togglePublishStatus(
+      creatorId,
+      courseId,
+      isPublished
+    );
   }
 
-  async getCourseProgressStatus(courseId: string): Promise<CourseProgressStatus> {
-    return this.coursesDAL.getCourseProgressStatus(courseId);
+  async getCourseCreationProgressStatus(
+    courseId: string
+  ): Promise<CourseProgressStatus> {
+    return this.coursesDAL.getCourseCreationProgressStatus(courseId);
   }
 }

@@ -164,7 +164,6 @@ export const EmptyStateIcon = styled(Box)(({ theme }) => ({
 }));
 
 export const StyledButton = styled(Button)(({ theme }) => ({
-  marginBottom: theme.spacing(4),
   textTransform: "none",
   padding: theme.spacing(1, 3),
   borderRadius: 2,
@@ -180,5 +179,8 @@ export const StyledButton = styled(Button)(({ theme }) => ({
     "&:hover": {
       backgroundColor: "transparent",
     },
+  },
+  "&:disabled": {
+    backgroundColor: theme.palette.action.disabled,
   },
 }));

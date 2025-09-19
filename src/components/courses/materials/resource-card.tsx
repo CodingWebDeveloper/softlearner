@@ -16,6 +16,7 @@ import {
   setResource,
 } from "@/lib/store/features/resourceSlice";
 import { useSearchParams, useRouter } from "next/navigation";
+import { ResourceCompletedIcon } from "@/components/styles/courses/materials.styles";
 
 interface ResourceCardProps {
   resource: BasicResource;
@@ -80,6 +81,7 @@ const ResourceCard: FC<ResourceCardProps> = ({ resource }) => {
         <MenuBookRoundedIcon fontSize="large" />
       </ListItemAvatar>
       <StyledListItemText primary={resource.name} selected={isSelected} />
+      {resource.completed && <ResourceCompletedIcon />}
     </ResourceMaterialItem>
   );
 };
