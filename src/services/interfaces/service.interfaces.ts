@@ -181,6 +181,11 @@ export interface GetReviewsResult {
   totalRecord: number;
 }
 
+export interface UpdateReviewInput {
+  content: string;
+  rating: number;
+}
+
 export interface RatingStats {
   average: number;
   total: number;
@@ -309,6 +314,17 @@ export interface IReviewsService {
   ): Promise<Omit<GetReviewsResult, "ratingStats">>;
   getReviewById(id: string): Promise<BasicReview | null>;
   createReview(input: CreateReviewParams): Promise<BasicReview>;
+  getUserReviews(
+    userId: string,
+    page: number,
+    pageSize: number
+  ): Promise<PaginatedResult<BasicReview>>;
+  updateReview(
+    userId: string,
+    reviewId: string,
+    input: UpdateReviewInput
+  ): Promise<BasicReview>;
+  deleteReview(userId: string, reviewId: string): Promise<void>;
 }
 
 export interface IVotesService {

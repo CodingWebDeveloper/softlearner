@@ -19,6 +19,7 @@ import {
   BasicCourse,
   GetTagsParams,
   BasicReview,
+  UpdateReviewInput,
   GetPurchasedCoursesResult,
   FullCourse,
   BasicResource,
@@ -157,6 +158,17 @@ export interface IReviewsDAL {
   getReviewById(id: string): Promise<BasicReview | null>;
   createReview(params: CreateReviewParams): Promise<BasicReview>;
   hasUserReviewedCourse(userId: string, courseId: string): Promise<boolean>;
+  getUserReviews(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResult<BasicReview>>;
+  updateReview(
+    userId: string,
+    reviewId: string,
+    input: UpdateReviewInput
+  ): Promise<BasicReview>;
+  deleteReview(userId: string, reviewId: string): Promise<void>;
 }
 
 export interface IVotesDAL {

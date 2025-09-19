@@ -34,6 +34,8 @@ export type ReviewModalProps = {
     { setSubmitting }: FormikHelpers<ReviewFormValues>
   ) => Promise<void> | void;
   initialValues?: Partial<ReviewFormValues>;
+  title?: string;
+  submitText?: string;
 };
 
 const defaultInitialValues: ReviewFormValues = {
@@ -55,6 +57,8 @@ export default function ReviewModal({
   onClose,
   onSubmit,
   initialValues,
+  title,
+  submitText,
 }: ReviewModalProps) {
   // General hooks
 
@@ -70,7 +74,7 @@ export default function ReviewModal({
   return (
     <StyledDialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <Header>
-        <Title variant="h6">Leave a Review</Title>
+        <Title variant="h6">{title || "Leave a Review"}</Title>
         <IconButton
           onClick={onClose}
           size="small"
@@ -137,12 +141,11 @@ export default function ReviewModal({
                   {isSubmitting ? (
                     <CircularProgress size={20} />
                   ) : (
-                    "Submit Review"
+                    submitText || "Submit Review"
                   )}
                 </StyledButton>
               </Actions>
 
-              {/* keep an actual Form element to support Enter key submissions */}
               <Form style={{ display: "none" }} />
             </Form>
           );
