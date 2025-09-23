@@ -2,8 +2,10 @@
 
 import { Typography, Grid, Container } from "@mui/material";
 import {
+  LightText,
   PageContainer,
-  PageTitle,
+  PageHeader,
+  WhiteText,
 } from "@/components/styles/infrastructure/layout.styles";
 import { trpc } from "@/lib/trpc/client";
 import LoadingFallback, { EmptyState } from "@/components/loading-fallback";
@@ -50,10 +52,15 @@ const MyCoursesPage = () => {
 
   return (
     <PageContainer>
-      <Container maxWidth="lg">
-        <PageTitle variant="h4" color="textPrimary" gutterBottom>
+      <PageHeader>
+        <WhiteText variant="h3" gutterBottom>
           My Courses
-        </PageTitle>
+        </WhiteText>
+        <LightText variant="h6">
+          Track your progress and continue learning
+        </LightText>
+      </PageHeader>
+      <Container maxWidth="lg">
         <Grid container spacing={3}>
           {purchasedCourses.data.map((course) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={course.id}>

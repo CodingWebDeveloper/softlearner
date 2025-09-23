@@ -7,7 +7,6 @@ import {
   Home as HomeIcon,
   Book as BookIcon,
   LocalLibrary as MyCoursesIcon,
-  Person as PersonIcon,
   Settings as SettingsIcon,
   Bookmark as BookmarkIcon,
   Logout as LogoutIcon,
@@ -117,13 +116,6 @@ export const DesktopNavigation = ({
       label: "Bookmarks",
       icon: <BookmarkIcon />,
       path: "/bookmarks",
-      showWhenAuthenticated: true,
-      showWhenUnauthenticated: false,
-    },
-    {
-      label: "Profile",
-      icon: <PersonIcon />,
-      path: "/profile",
       showWhenAuthenticated: true,
       showWhenUnauthenticated: false,
     },
@@ -324,7 +316,18 @@ export const DesktopNavigation = ({
       {user && (
         <SidebarFooter>
           <FooterDivider />
-          <UserInfo>
+          <UserInfo
+            role="button"
+            tabIndex={0}
+            aria-label="Open profile"
+            onClick={() => onNavigation("/profile")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onNavigation("/profile");
+              }
+            }}
+          >
             <UserAvatar>{user.email?.charAt(0).toUpperCase()}</UserAvatar>
             <UserInfoContainer>
               <UserName variant="body2">

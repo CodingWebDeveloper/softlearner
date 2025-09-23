@@ -175,7 +175,11 @@ export function registerServices(
 
   container.register<ICoursesService>(
     DI_TOKENS.COURSES_SERVICE,
-    (c) => new CoursesService(c.resolve(DI_TOKENS.COURSES_DAL))
+    (c) =>
+      new CoursesService(
+        c.resolve(DI_TOKENS.COURSES_DAL),
+        c.resolve(DI_TOKENS.REVIEWS_DAL)
+      )
   );
 
   container.register<ITagsService>(

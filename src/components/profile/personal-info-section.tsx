@@ -32,8 +32,8 @@ const validationSchema = Yup.object({
     .min(3, "Username must be at least 3 characters")
     .max(20, "Username must be less than 20 characters")
     .matches(
-      /^[a-zA-Z0-9_]+$/,
-      "Username can only contain letters, numbers, and underscores"
+      /^[a-z0-9_]+$/,
+      "Username can only contain lowercase letters, numbers, and underscores"
     )
     .required("Username is required"),
 });

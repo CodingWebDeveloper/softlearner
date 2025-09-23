@@ -6,6 +6,7 @@ import { PersonalInfoSection } from "./personal-info-section";
 import { BioSection } from "./bio-section";
 import { ChangePasswordSection } from "./change-password-section";
 import { ApplicationStatus } from "../creator-application/application-status";
+import MyReviewsSection from "./my-reviews-section";
 
 export const ProfileContent = () => {
   return (
@@ -29,6 +30,10 @@ export const ProfileContent = () => {
 
         <Grid size={{ xs: 12 }}>
           <ApplicationStatus />
+        </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <MyReviewsSection />
         </Grid>
       </Grid>
     </Box>

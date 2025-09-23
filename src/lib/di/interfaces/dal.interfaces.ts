@@ -19,6 +19,7 @@ import {
   BasicCourse,
   GetTagsParams,
   BasicReview,
+  UpdateReviewInput,
   GetPurchasedCoursesResult,
   FullCourse,
   BasicResource,
@@ -44,6 +45,7 @@ import {
   SimpleResource,
   QuestionsInput,
   CourseProgressStatus,
+  CreateReviewParams,
 } from "@/services/interfaces/service.interfaces";
 
 export interface PaginatedResult<T> {
@@ -98,7 +100,9 @@ export interface ICoursesDAL {
     courseId: string,
     isPublished: boolean
   ): Promise<void>;
-  getCourseProgressStatus(courseId: string): Promise<CourseProgressStatus>;
+  getCourseCreationProgressStatus(
+    courseId: string
+  ): Promise<CourseProgressStatus>;
 }
 
 export interface ICategoriesDAL {
@@ -152,6 +156,19 @@ export interface IReviewsDAL {
     params: GetReviewsParams
   ): Promise<Omit<GetReviewsResult, "ratingStats">>;
   getReviewById(id: string): Promise<BasicReview | null>;
+  createReview(params: CreateReviewParams): Promise<BasicReview>;
+  hasUserReviewedCourse(userId: string, courseId: string): Promise<boolean>;
+  getUserReviews(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResult<BasicReview>>;
+  updateReview(
+    userId: string,
+    reviewId: string,
+    input: UpdateReviewInput
+  ): Promise<BasicReview>;
+  deleteReview(userId: string, reviewId: string): Promise<void>;
 }
 
 export interface IVotesDAL {

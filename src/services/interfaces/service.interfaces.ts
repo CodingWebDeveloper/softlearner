@@ -134,6 +134,7 @@ export interface FullCourse {
   created_at: string;
   updated_at: string;
   isBookmarked: boolean;
+  isReviewed: boolean;
   video_url: string;
 }
 
@@ -180,12 +181,23 @@ export interface GetReviewsResult {
   totalRecord: number;
 }
 
+export interface UpdateReviewInput {
+  content: string;
+  rating: number;
+}
+
 export interface RatingStats {
   average: number;
   total: number;
   breakdown: number[]; // Array of 5 numbers representing percentages for 5,4,3,2,1 stars
 }
 
+export interface CreateReviewParams {
+  userId: string;
+  courseId: string;
+  content: string;
+  rating: number;
+}
 export interface ICategoriesService {
   getCategories(): Promise<Category[]>;
 }
@@ -208,10 +220,7 @@ export interface ICoursesService {
     page?: number,
     pageSize?: number
   ): Promise<GetPurchasedCoursesResult>;
-  getCourseMaterialsById(
-    id: string,
-    userId?: string
-  ): Promise<FullCourse | null>;
+  getCourseMaterialsById(id: string, userId: string): Promise<FullCourse>;
   getCoursesByCreator(
     creatorId: string,
     page?: number,
@@ -232,7 +241,9 @@ export interface ICoursesService {
     courseId: string,
     isPublished: boolean
   ): Promise<void>;
-  getCourseProgressStatus(courseId: string): Promise<CourseProgressStatus>;
+  getCourseCreationProgressStatus(
+    courseId: string
+  ): Promise<CourseProgressStatus>;
 }
 
 export interface ITagsService {
@@ -302,6 +313,18 @@ export interface IReviewsService {
     params: GetReviewsParams
   ): Promise<Omit<GetReviewsResult, "ratingStats">>;
   getReviewById(id: string): Promise<BasicReview | null>;
+  createReview(input: CreateReviewParams): Promise<BasicReview>;
+  getUserReviews(
+    userId: string,
+    page: number,
+    pageSize: number
+  ): Promise<PaginatedResult<BasicReview>>;
+  updateReview(
+    userId: string,
+    reviewId: string,
+    input: UpdateReviewInput
+  ): Promise<BasicReview>;
+  deleteReview(userId: string, reviewId: string): Promise<void>;
 }
 
 export interface IVotesService {
@@ -343,6 +366,7 @@ export type PurchasedCourse = {
   creator: CourseCreator;
   resources: PurchasedCourseResource[];
   orderCreatedAt: string;
+  isReviewed: boolean;
 };
 
 export type GetPurchasedCoursesResult = {

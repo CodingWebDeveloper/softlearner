@@ -1,7 +1,7 @@
 "use client";
 
-import { FC, useState } from "react";
-import { Box, Typography, useTheme, Button, CircularProgress } from "@mui/material";
+import { FC } from "react";
+import { Box, Typography, useTheme, CircularProgress } from "@mui/material";
 import {
   VideoSection,
   VideoEmbed,
@@ -21,6 +21,12 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
 import { AvatarImage } from "@/components/profile/avatar-image";
 import { getInitials } from "@/utils/utils";
+import ReviewBanner from "./review-banner";
+import {
+  LightText,
+  StyledButton,
+  WhiteText,
+} from "@/components/styles/infrastructure/layout.styles";
 
 interface CourseVideoSectionProps {
   course: FullCourse;
@@ -34,8 +40,10 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
   const selectedResource = useAppSelector(selectResource);
 
   // tRPC hooks
-  const {mutateAsync: downloadResourceFile, isPending: isResourceLoading  } = trpc.resources.downloadResourceFile.useMutation();
+  const { mutateAsync: downloadResourceFile, isPending: isResourceLoading } =
+    trpc.resources.downloadResourceFile.useMutation();
 
+  // Handelers
   const handleDownload = async () => {
     if (!selectedResource) return;
 
@@ -54,7 +62,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
 
       // Create download link
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = selectedResource.name;
       document.body.appendChild(link);
@@ -62,7 +70,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Download failed:', error);
+      console.error("Download failed:", error);
     }
   };
 
@@ -101,37 +109,31 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
 
     return (
       <DownloadSection>
-        <Button
+        <StyledButton
           variant="contained"
           onClick={handleDownload}
-          disabled={isResourceLoading }
-          startIcon={isResourceLoading ? <CircularProgress size={20} /> : <DownloadIcon />}
-          sx={{
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-            '&:hover': {
-              backgroundColor: theme.palette.primary.dark,
-            },
-            '&:disabled': {
-              backgroundColor: theme.palette.action.disabled,
-            },
-          }}
+          disabled={isResourceLoading}
+          startIcon={
+            isResourceLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <DownloadIcon />
+            )
+          }
         >
-          {isResourceLoading ? 'Downloading...' : 'Download Resource'}
-        </Button>
+          {isResourceLoading ? "Downloading..." : "Download Resource"}
+        </StyledButton>
       </DownloadSection>
     );
   };
 
   return (
     <VideoSection>
-      <Typography
-        variant="h5"
-        fontWeight={600}
-        style={{ color: theme.palette.custom.text.white }}
-      >
+      <ReviewBanner courseId={course.id} isReviewed={course.isReviewed} />
+      <WhiteText variant="h5" fontWeight={600} gutterBottom>
         {course.name}
-      </Typography>
+      </WhiteText>
+
       {renderContent()}
       <Box
         display="flex"
@@ -160,13 +162,9 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
       <Box mt={1}>
         <CategoryChip label={course.category.name} icon={<CategoryIcon />} />
       </Box>
-      <Typography
-        variant="body1"
-        style={{ color: theme.palette.custom.text.light }}
-        mt={2}
-      >
+      <LightText variant="body1" mt={2}>
         {selectedResource?.short_summary || course.description}
-      </Typography>
+      </LightText>
       <CourseTags courseId={course.id} />
 
       <InstructorBox>
@@ -180,13 +178,9 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
             : "U"}
         </AvatarImage>
         <Box ml={2}>
-          <Typography
-            variant="subtitle1"
-            fontWeight={500}
-            style={{ color: theme.palette.custom.text.white }}
-          >
+          <WhiteText variant="subtitle1" fontWeight={500}>
             {course.creator?.full_name || "Unknown"}
-          </Typography>
+          </WhiteText>
         </Box>
       </InstructorBox>
     </VideoSection>
