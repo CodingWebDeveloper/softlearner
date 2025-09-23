@@ -1,4 +1,5 @@
 import { KeyboardEvent, useState } from "react";
+import type { FormikHelpers } from "formik";
 import { Button, useTheme } from "@mui/material";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
@@ -20,12 +21,36 @@ import { formatDate } from "@/utils/date.utils";
 import { useRouter } from "next/navigation";
 import { PurchasedCourse } from "@/services/interfaces/service.interfaces";
 import ContinueCard from "./continue-card";
-import ReviewModal from "@/components/reviews/review-modal";
+import ReviewModal, {
+  ReviewFormValues,
+} from "@/components/reviews/review-modal";
+import { trpc } from "@/lib/trpc/client";
+import { enqueueSnackbar, useSnackbar } from "notistack";
 
 const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
   // General hooks
   const router = useRouter();
   const theme = useTheme();
+  const {enqueueSnackbar} = useSnackbar();
+
+  // States
+  const [reviewed, setReviewed] = useState(course.isReviewed);
+
+  // Queries
+  const { mutateAsync: createReview } = trpc.reviews.createReview.useMutation({
+      onSuccess: () => {
+        setReviewed(true);
+        enqueueSnackbar("Thanks for your feedback!", {
+          variant: "success",
+        });
+      },
+      onError: () => {
+        setReviewed(false); // Revert optimistic update
+        enqueueSnackbar("Failed to submit review", {
+          variant: "error",
+        });
+      },
+    });
 
   // States
   const [openReview, setOpenReview] = useState(false);
@@ -42,6 +67,31 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleClick(courseId);
+    }
+  };
+
+  const handleCloseReview =() => {
+    setOpenReview(false); 
+  }
+
+  const handleReviewSubmit = async (
+    values: ReviewFormValues,
+    { setSubmitting }: FormikHelpers<ReviewFormValues>
+  ) => {
+    try {
+      setSubmitting(true);
+      // Optimistic update to hide the banner immediately
+      await createReview({
+        courseId: course.id,
+        rating: values.rating,
+        content: values.content,
+      });
+
+      handleCloseReview();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -116,7 +166,7 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
               {status !== "completed" ? (
                 <ContinueCard course={course} />
               ) : (
-                !course.isReviewed && (
+                !reviewed && (
                   <Button
                     size="small"
                     variant="outlined"
@@ -129,6 +179,10 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
                         borderColor: theme.palette.custom.accent.yellow,
                         color: theme.palette.custom.accent.yellow,
                       },
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenReview(true);
                     }}
                     aria-label="Leave a review"
                   >
@@ -144,7 +198,7 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
         <ReviewModal
           open={openReview}
           onClose={() => setOpenReview(false)}
-          onSubmit={() => {}}
+          onSubmit={handleReviewSubmit}
         />
       )}
     </>
