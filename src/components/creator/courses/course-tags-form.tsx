@@ -118,7 +118,7 @@ const CourseTagsForm = ({
       });
 
       await utils.tags.getTagsByCourseId.invalidate({ courseId: courseId! });
-      await utils.courses.getCourseProgressStatus.invalidate(courseId!);
+      await utils.courses.getCourseCreationProgressStatus.invalidate(courseId!);
 
       enqueueSnackbar("Course tags updated successfully", {
         variant: "success",

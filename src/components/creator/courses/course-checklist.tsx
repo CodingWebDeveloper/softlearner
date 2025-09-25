@@ -27,7 +27,7 @@ export default function CourseChecklist({
   const theme = useTheme();
 
   const { data: status, isPending: progressStatusPending } =
-    trpc.courses.getCourseProgressStatus.useQuery(courseId!, {
+    trpc.courses.getCourseCreationProgressStatus.useQuery(courseId!, {
       enabled: Boolean(courseId),
     });
 

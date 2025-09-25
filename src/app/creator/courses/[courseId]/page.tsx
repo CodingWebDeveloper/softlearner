@@ -85,7 +85,7 @@ const EditCoursePage = () => {
       onSuccess: async (data) => {
         await utils.courses.getCourseDataById.invalidate(courseId!);
         await utils.courses.getCreatorCourses.invalidate();
-        await utils.courses.getCourseProgressStatus.invalidate(courseId!);
+        await utils.courses.getCourseCreationProgressStatus.invalidate(courseId!);
         enqueueSnackbar(data.message, { variant: "success" });
       },
       onError: (error) => {
