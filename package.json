@@ -44,6 +44,7 @@
     "react-redux": "^9.2.0",
     "react-select": "^5.10.2",
     "react-spinners": "^0.17.0",
+    "recharts": "^3.2.1",
     "stripe": "^18.3.0",
     "superjson": "^2.2.2",
     "yup": "^1.6.1",
