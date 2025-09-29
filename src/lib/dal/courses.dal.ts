@@ -20,6 +20,13 @@ type CourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {
   bookmarks?: { id: string }[] | null;
 };
 
+export interface SimpleOrder {
+  total_amount: number;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+}
+
 type SimpleCourseWithRelations =
   Database["public"]["Tables"]["courses"]["Row"] & {
     creator: User;

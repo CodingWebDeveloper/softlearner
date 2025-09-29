@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Grid, Box, Typography, Stack, Chip } from "@mui/material";
 import AnalyticsCard from "@/components/creator/courses/analytics/analytics-card";
 import OneValueStat from "@/components/creator/courses/analytics/widgets/one-value-stat";
-import TwoValueStat from "@/components/creator/courses/analytics/widgets/two-value-stat";
 import GaugeStat from "@/components/creator/courses/analytics/widgets/gauge-stat";
 import AreaChartWidget from "@/components/creator/courses/analytics/widgets/area-chart";
 import BarChartWidget from "@/components/creator/courses/analytics/widgets/bar-chart";
+import { trpc } from "@/lib/trpc/client";
+import { detectUserCurrency, fetchRates, Rates } from "@/utils/currency";
+import TotalEarnings from "./total-earnings";
+import AverageSales from "./average-sales";
+import Enrollment from "./enrollment";
 
 export interface CourseAnalyticsTabProps {
   courseId: string;
@@ -94,38 +98,87 @@ const ratingDistribution = [
 
 const recentReviews = [
   { id: "r1", rating: 5, content: "Great course!", createdAt: "2025-09-01" },
-  { id: "r2", rating: 4, content: "Very informative.", createdAt: "2025-09-05" },
-  { id: "r3", rating: 3, content: "Good, but could be shorter.", createdAt: "2025-09-12" },
+  {
+    id: "r2",
+    rating: 4,
+    content: "Very informative.",
+    createdAt: "2025-09-05",
+  },
+  {
+    id: "r3",
+    rating: 3,
+    content: "Good, but could be shorter.",
+    createdAt: "2025-09-12",
+  },
 ];
 
-const currency = (n: number) => `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-
-const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({ courseId, loading }) => {
+const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({
+  courseId,
+  loading,
+}) => {
   const [period, setPeriod] = useState<PeriodKey>("30d");
   const revenueSeries = useMemo(() => buildRevenueSeries(period), [period]);
+
+  const userCurrency = useMemo(() => detectUserCurrency(), []);
+  const [rates, setRates] = useState<Rates | null>(null);
+  const [ratesLoading, setRatesLoading] = useState(false);
+
+  // Fetch FX rates with base USD so we can convert any currency to userCurrency
+  useEffect(() => {
+    let mounted = true;
+    setRatesLoading(true);
+    fetchRates("USD")
+      .then((r) => {
+        if (mounted) setRates(r);
+      })
+      .catch(() => {
+        if (mounted) setRates(null);
+      })
+      .finally(() => mounted && setRatesLoading(false));
+    return () => {
+      mounted = false;
+    };
+  }, [userCurrency]);
+
+  // Orders for earnings
+  const ordersQuery = trpc.orders.getOrdersByCourseId.useQuery(courseId, {
+    enabled: Boolean(courseId),
+  });
+
+  const totalEarningsLoading =
+    ordersQuery.isLoading || ratesLoading || !!loading?.totalEarnings;
+
+  // Sales and average price (converted)
+  const salesAvgLoading =
+    ordersQuery.isLoading || ratesLoading || !!loading?.salesAvg;
+
+  const studentsLoading = ordersQuery.isLoading || !!loading?.students;
+
   return (
     <Box>
       <Grid container spacing={2}>
         {/* Top stats */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard title="Total Earnings" subtitle="All time" loading={!!loading?.totalEarnings}>
-            <OneValueStat
-              label="Revenue"
-              value={currency(18540)}
-              delta={{ value: "+12%", direction: "up", tooltip: "vs last 30 days" }}
-              helpText="Completed orders only"
-            />
-          </AnalyticsCard>
+          <TotalEarnings
+            rates={rates}
+            userCurrency={userCurrency}
+            orders={ordersQuery.data ?? []}
+            isLoading={totalEarningsLoading}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard title="Sales & Avg Price" subtitle="All time" loading={!!loading?.salesAvg}>
-            <TwoValueStat labelLeft="Total Sales" valueLeft={342} labelRight="Avg Price" valueRight={currency(54)} />
-          </AnalyticsCard>
+          <AverageSales
+            rates={rates}
+            userCurrency={userCurrency}
+            orders={ordersQuery.data ?? []}
+            isLoading={salesAvgLoading}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard title="Students" subtitle="Enrollment" loading={!!loading?.students}>
-            <TwoValueStat labelLeft="Total Students" valueLeft={298} labelRight="New (30d)" valueRight={42} />
-          </AnalyticsCard>
+          <Enrollment
+            orders={ordersQuery.data ?? []}
+            isLoading={studentsLoading}
+          />
         </Grid>
 
         {/* Charts */}
@@ -145,12 +198,14 @@ const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({ courseId, loadi
             loading={!!loading?.earningsSeries}
             action={
               <Stack direction="row" spacing={1}>
-                {([
-                  { key: "7d", label: "7d" },
-                  { key: "30d", label: "30d" },
-                  { key: "1y", label: "1y" },
-                  { key: "all", label: "All" },
-                ] as { key: PeriodKey; label: string }[]).map((p) => (
+                {(
+                  [
+                    { key: "7d", label: "7d" },
+                    { key: "30d", label: "30d" },
+                    { key: "1y", label: "1y" },
+                    { key: "all", label: "All" },
+                  ] as { key: PeriodKey; label: string }[]
+                ).map((p) => (
                   <Chip
                     key={p.key}
                     label={p.label}
@@ -163,30 +218,64 @@ const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({ courseId, loadi
               </Stack>
             }
           >
-            <AreaChartWidget data={revenueSeries} xKey="period" yKey="amount" formatY={(v) => `$${v}`} />
+            <AreaChartWidget
+              data={revenueSeries}
+              xKey="period"
+              yKey="amount"
+              formatY={(v) => `$${v}`}
+            />
           </AnalyticsCard>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard title="Completion Rate" subtitle="Course-wide" loading={!!loading?.completion}>
-            <GaugeStat label="Completion" value={64} helpText="Percentage of enrolled students who completed the course" />
+          <AnalyticsCard
+            title="Completion Rate"
+            subtitle="Course-wide"
+            loading={!!loading?.completion}
+          >
+            <GaugeStat
+              label="Completion"
+              value={64}
+              helpText="Percentage of enrolled students who completed the course"
+            />
           </AnalyticsCard>
         </Grid>
 
         {/* Feedback */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard title="Average Rating" subtitle="All reviews" loading={!!loading?.averageRating}>
-            <OneValueStat label="Average" value={4.6} helpText="Out of 5 stars" />
+          <AnalyticsCard
+            title="Average Rating"
+            subtitle="All reviews"
+            loading={!!loading?.averageRating}
+          >
+            <OneValueStat
+              label="Average"
+              value={4.6}
+              helpText="Out of 5 stars"
+            />
           </AnalyticsCard>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard title="Rating Distribution" subtitle="Count by stars" disablePadding loading={!!loading?.ratingDistribution}>
+          <AnalyticsCard
+            title="Rating Distribution"
+            subtitle="Count by stars"
+            disablePadding
+            loading={!!loading?.ratingDistribution}
+          >
             <Box px={2} pt={2}>
-              <BarChartWidget data={ratingDistribution} xKey="stars" yKey="count" />
+              <BarChartWidget
+                data={ratingDistribution}
+                xKey="stars"
+                yKey="count"
+              />
             </Box>
           </AnalyticsCard>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard title="Recent Reviews" subtitle="Latest 3" loading={!!loading?.recentReviews}>
+          <AnalyticsCard
+            title="Recent Reviews"
+            subtitle="Latest 3"
+            loading={!!loading?.recentReviews}
+          >
             <Stack spacing={1}>
               {recentReviews.map((r) => (
                 <Box key={r.id}>

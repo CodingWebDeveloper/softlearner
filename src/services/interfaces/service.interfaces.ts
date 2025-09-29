@@ -1,4 +1,5 @@
 import { Category, Tag, PreviewResource } from "@/lib/database/database.types";
+import { SimpleOrder } from "@/lib/di/interfaces/dal.interfaces";
 import { ResourceType } from "@/lib/constants/database-constants";
 export interface SimpleResource {
   id: string;
@@ -345,6 +346,10 @@ export interface IPaymentsService {
 export interface IBookmarksService {
   createBookmark(userId: string, courseId: string): Promise<Bookmark>;
   deleteBookmark(userId: string, courseId: string): Promise<void>;
+}
+
+export interface IOrdersService {
+  getOrdersByCourseId(courseId: string): Promise<SimpleOrder[]>;
 }
 
 export interface Bookmark {
