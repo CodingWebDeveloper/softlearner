@@ -175,6 +175,8 @@ export interface GetReviewsParams {
   pageSize: number;
   search?: string;
   rating?: number | null;
+  sortDir?: "asc" | "desc";
+  sortBy?: "change" | "created" | "rating";
 }
 
 export interface GetReviewsResult {

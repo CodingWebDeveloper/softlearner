@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Grid, Box, Typography, Stack } from "@mui/material";
+import { Grid, Box } from "@mui/material";
 import AnalyticsCard from "@/components/creator/courses/analytics/analytics-card";
 import OneValueStat from "@/components/creator/courses/analytics/widgets/one-value-stat";
 import GaugeStat from "@/components/creator/courses/analytics/widgets/gauge-stat";
-import BarChartWidget from "@/components/creator/courses/analytics/widgets/bar-chart";
 import { trpc } from "@/lib/trpc/client";
 import { detectUserCurrency, fetchRates, Rates } from "@/utils/currency";
 import TotalEarnings from "./total-earnings";
 import AverageSales from "./average-sales";
 import Enrollment from "./enrollment";
 import EarningsOverTime from "./earnings-over-time";
+import AverageRating from "./average-rating";
+import RatingDistribution from "./rating-distribution";
+import RecentReviews from "./recent-reviews";
 
 export interface CourseAnalyticsTabProps {
   courseId: string;
@@ -36,21 +38,7 @@ const ratingDistribution = [
   { stars: "5★", count: 30 },
 ];
 
-const recentReviews = [
-  { id: "r1", rating: 5, content: "Great course!", createdAt: "2025-09-01" },
-  {
-    id: "r2",
-    rating: 4,
-    content: "Very informative.",
-    createdAt: "2025-09-05",
-  },
-  {
-    id: "r3",
-    rating: 3,
-    content: "Good, but could be shorter.",
-    createdAt: "2025-09-12",
-  },
-];
+// Recent reviews are fetched via tRPC in the RecentReviews component
 
 const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({
   courseId,
@@ -153,11 +141,7 @@ const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({
             subtitle="All reviews"
             loading={!!loading?.averageRating}
           >
-            <OneValueStat
-              label="Average"
-              value={4.6}
-              helpText="Out of 5 stars"
-            />
+            <AverageRating courseId={courseId} />
           </AnalyticsCard>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
@@ -167,13 +151,7 @@ const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({
             disablePadding
             loading={!!loading?.ratingDistribution}
           >
-            <Box px={2} pt={2}>
-              <BarChartWidget
-                data={ratingDistribution}
-                xKey="stars"
-                yKey="count"
-              />
-            </Box>
+            <RatingDistribution courseId={courseId} />
           </AnalyticsCard>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
@@ -182,16 +160,7 @@ const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({
             subtitle="Latest 3"
             loading={!!loading?.recentReviews}
           >
-            <Stack spacing={1}>
-              {recentReviews.map((r) => (
-                <Box key={r.id}>
-                  <Typography variant="subtitle2">{`${r.rating}★ • ${r.createdAt}`}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {r.content}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
+            <RecentReviews courseId={courseId} />
           </AnalyticsCard>
         </Grid>
       </Grid>

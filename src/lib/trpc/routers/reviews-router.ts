@@ -9,6 +9,8 @@ const getReviewsInput = z.object({
   pageSize: z.number().min(1).max(100).default(15),
   search: z.string().optional(),
   rating: z.number().optional(),
+  sortDir: z.enum(["asc", "desc"]).optional(),
+  sortBy: z.enum(["change", "created", "rating"]).optional(),
 });
 
 const createReviewInput = z.object({
