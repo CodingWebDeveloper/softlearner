@@ -24,6 +24,30 @@ FOR ALL USING (
   )
 );
 
+-- Allow course creators to view user resource completion records for their courses
+DROP POLICY IF EXISTS "Allow creators to view user resource completions for their courses" ON user_resources;
+CREATE POLICY "Allow creators to view user resource completions for their courses" ON user_resources
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1
+    FROM resources r
+    JOIN courses c ON c.id = r.course_id
+    WHERE r.id = user_resources.resource_id
+      AND c.creator_id = auth.uid()
+  )
+);
+
+-- Allow admins to view all user resource completion records
+DROP POLICY IF EXISTS "Allow admins to view all user resource completions" ON user_resources;
+CREATE POLICY "Allow admins to view all user resource completions" ON user_resources
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+  )
+);
+
 -- Tags Policies
 -- Allow all users to view tags
 DROP POLICY IF EXISTS "Allow all users to view tags" ON tags;

@@ -120,4 +120,8 @@ export class CoursesService implements ICoursesService {
   ): Promise<CourseProgressStatus> {
     return this.coursesDAL.getCourseCreationProgressStatus(courseId);
   }
+
+  async getCourseCompletionRate(courseId: string): Promise<number> {
+    return this.coursesDAL.getCourseCompletionRate(courseId);
+  }
 }

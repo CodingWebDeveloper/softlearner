@@ -8,6 +8,7 @@ import { votesRouter } from "./votes-router";
 import { bookmarksRouter } from "./bookmarks-router";
 import { testsRouter } from "./tests-router";
 import { usersRouter } from "./users-router";
+import { ordersRouter } from "./orders-router";
 import { creatorApplicationsRouter } from "./creator-applications-router";
 import { router } from "../trpc";
 
@@ -23,6 +24,7 @@ export const appRouter = router({
   tests: testsRouter,
   users: usersRouter,
   creatorApplications: creatorApplicationsRouter,
+  orders: ordersRouter,
 });
 
 export type AppRouter = typeof appRouter;

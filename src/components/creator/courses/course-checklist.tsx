@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
+  Collapse,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
@@ -12,6 +14,8 @@ import {
 } from "@mui/material";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import RadioButtonUncheckedRoundedIcon from "@mui/icons-material/RadioButtonUncheckedRounded";
+import ExpandLessRoundedIcon from "@mui/icons-material/ExpandLessRounded";
+import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import { useTheme } from "@mui/material/styles";
 import { trpc } from "@/lib/trpc/client";
 
@@ -27,7 +31,7 @@ export default function CourseChecklist({
   const theme = useTheme();
 
   const { data: status, isPending: progressStatusPending } =
-    trpc.courses.getCourseProgressStatus.useQuery(courseId!, {
+    trpc.courses.getCourseCreationProgressStatus.useQuery(courseId!, {
       enabled: Boolean(courseId),
     });
 
@@ -40,6 +44,20 @@ export default function CourseChecklist({
     pending: theme.palette.custom.accent.gray,
   } as const;
 
+  // Local state
+  const [minimized, setMinimized] = useState<null | boolean>(null);
+
+  const allComplete = useMemo(() => {
+    if (!status) return false;
+    return Boolean(
+      status.general &&
+        status.resources &&
+        status.tags &&
+        status.quizzes &&
+        status.publish
+    );
+  }, [status]);
+
   // Effects
   useEffect(() => {
     if (status) {
@@ -48,7 +66,18 @@ export default function CourseChecklist({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
-  if (progressStatusPending || !Boolean(status)) {
+  // Auto-minimize once when everything becomes complete
+  useEffect(() => {
+    if (!progressStatusPending) {
+      if (Boolean(allComplete) && !minimized) {
+        setMinimized(true);
+      } else {
+        setMinimized(false);
+      }
+    }
+  }, [allComplete, progressStatusPending]);
+
+  if (progressStatusPending || !Boolean(status) || minimized === null) {
     return <Skeleton variant="rectangular" width={300} height={300} />;
   }
 
@@ -61,114 +90,148 @@ export default function CourseChecklist({
         p: 2.5,
       }}
     >
-      <Typography
-        variant="h6"
-        sx={{ fontWeight: 600, color: colors.textPrimary, mb: 1.5 }}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: minimized ? 0 : 1.5,
+        }}
       >
-        Course Checklist
-      </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {allComplete && (
+            <CheckCircleRoundedIcon
+              fontSize="small"
+              htmlColor={colors.success}
+            />
+          )}
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 600, color: colors.textPrimary }}
+          >
+            Course Checklist
+          </Typography>
+          {allComplete && (
+            <Typography
+              sx={{ color: colors.textSecondary, ml: 0.5, fontSize: 13 }}
+            >
+              All checks complete
+            </Typography>
+          )}
+        </Box>
+        <IconButton
+          size="small"
+          aria-label={minimized ? "Expand checklist" : "Minimize checklist"}
+          onClick={() => setMinimized((v) => !v)}
+          sx={{ color: colors.textSecondary }}
+        >
+          {minimized ? <ExpandMoreRoundedIcon /> : <ExpandLessRoundedIcon />}
+        </IconButton>
+      </Box>
 
-      <List sx={{ p: 0 }}>
-        <ListItem sx={{ px: 0 }}>
-          <ListItemIcon sx={{ minWidth: 36 }}>
-            {status?.general ? (
-              <CheckCircleRoundedIcon htmlColor={colors.success} />
-            ) : (
-              <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
-            )}
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
-                Add Course Details
-              </Typography>
-            }
-            secondary={
-              <Typography sx={{ color: colors.textSecondary }}>
-                Course Name, Description, Thumbnail
-              </Typography>
-            }
-          />
-        </ListItem>
+      <Collapse in={!minimized} timeout="auto" unmountOnExit>
+        <List sx={{ p: 0 }}>
+          <ListItem sx={{ px: 0 }}>
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              {status?.general ? (
+                <CheckCircleRoundedIcon htmlColor={colors.success} />
+              ) : (
+                <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
+                  Add Course Details
+                </Typography>
+              }
+              secondary={
+                <Typography sx={{ color: colors.textSecondary }}>
+                  Course Name, Description, Thumbnail
+                </Typography>
+              }
+            />
+          </ListItem>
 
-        <ListItem sx={{ px: 0 }}>
-          <ListItemIcon sx={{ minWidth: 36 }}>
-            {status?.resources ? (
-              <CheckCircleRoundedIcon htmlColor={colors.success} />
-            ) : (
-              <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
-            )}
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
-                Upload Course Resources (Optional)
-              </Typography>
-            }
-            secondary={
-              <Typography sx={{ color: colors.textSecondary }}>
-                e.g., videos, PDFs
-              </Typography>
-            }
-          />
-        </ListItem>
+          <ListItem sx={{ px: 0 }}>
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              {status?.resources ? (
+                <CheckCircleRoundedIcon htmlColor={colors.success} />
+              ) : (
+                <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
+                  Upload Course Resources (Optional)
+                </Typography>
+              }
+              secondary={
+                <Typography sx={{ color: colors.textSecondary }}>
+                  e.g., videos, PDFs
+                </Typography>
+              }
+            />
+          </ListItem>
 
-        <ListItem sx={{ px: 0 }}>
-          <ListItemIcon sx={{ minWidth: 36 }}>
-            {status?.tags ? (
-              <CheckCircleRoundedIcon htmlColor={colors.success} />
-            ) : (
-              <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
-            )}
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
-                Add Tags (Optional)
-              </Typography>
-            }
-            secondary={
-              <Typography sx={{ color: colors.textSecondary }}>
-                Improve discoverability with relevant tags
-              </Typography>
-            }
-          />
-        </ListItem>
+          <ListItem sx={{ px: 0 }}>
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              {status?.tags ? (
+                <CheckCircleRoundedIcon htmlColor={colors.success} />
+              ) : (
+                <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
+                  Add Tags (Optional)
+                </Typography>
+              }
+              secondary={
+                <Typography sx={{ color: colors.textSecondary }}>
+                  Improve discoverability with relevant tags
+                </Typography>
+              }
+            />
+          </ListItem>
 
-        <ListItem sx={{ px: 0 }}>
-          <ListItemIcon sx={{ minWidth: 36 }}>
-            {status?.quizzes ? (
-              <CheckCircleRoundedIcon htmlColor={colors.success} />
-            ) : (
-              <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
-            )}
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
-                Create a Quiz (Optional)
-              </Typography>
-            }
-          />
-        </ListItem>
+          <ListItem sx={{ px: 0 }}>
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              {status?.quizzes ? (
+                <CheckCircleRoundedIcon htmlColor={colors.success} />
+              ) : (
+                <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
+                  Create a Quiz (Optional)
+                </Typography>
+              }
+            />
+          </ListItem>
 
-        <ListItem sx={{ px: 0 }}>
-          <ListItemIcon sx={{ minWidth: 36 }}>
-            {status?.publish ? (
-              <CheckCircleRoundedIcon htmlColor={colors.success} />
-            ) : (
-              <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
-            )}
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
-                Adjust Settings & Publish
-              </Typography>
-            }
-          />
-        </ListItem>
-      </List>
+          <ListItem sx={{ px: 0 }}>
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              {status?.publish ? (
+                <CheckCircleRoundedIcon htmlColor={colors.success} />
+              ) : (
+                <RadioButtonUncheckedRoundedIcon htmlColor={colors.pending} />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Typography sx={{ color: colors.textPrimary, fontWeight: 500 }}>
+                  Adjust Settings & Publish
+                </Typography>
+              }
+            />
+          </ListItem>
+        </List>
+      </Collapse>
     </Box>
   );
 }

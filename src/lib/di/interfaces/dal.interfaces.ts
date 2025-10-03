@@ -53,6 +53,18 @@ export interface PaginatedResult<T> {
   totalRecords: number;
 }
 
+// Orders
+export interface SimpleOrder {
+  total_amount: number;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IOrdersDAL {
+  getOrdersByCourseId(courseId: string): Promise<SimpleOrder[]>;
+}
+
 export interface ICoursesDAL {
   createCourse(
     creatorId: string,
@@ -103,6 +115,7 @@ export interface ICoursesDAL {
   getCourseCreationProgressStatus(
     courseId: string
   ): Promise<CourseProgressStatus>;
+  getCourseCompletionRate(courseId: string): Promise<number>;
 }
 
 export interface ICategoriesDAL {

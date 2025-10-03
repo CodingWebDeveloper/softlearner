@@ -1,4 +1,5 @@
 import { Category, Tag, PreviewResource } from "@/lib/database/database.types";
+import { SimpleOrder } from "@/lib/di/interfaces/dal.interfaces";
 import { ResourceType } from "@/lib/constants/database-constants";
 export interface SimpleResource {
   id: string;
@@ -174,6 +175,8 @@ export interface GetReviewsParams {
   pageSize: number;
   search?: string;
   rating?: number | null;
+  sortDir?: "asc" | "desc";
+  sortBy?: "change" | "created" | "rating";
 }
 
 export interface GetReviewsResult {
@@ -244,6 +247,7 @@ export interface ICoursesService {
   getCourseCreationProgressStatus(
     courseId: string
   ): Promise<CourseProgressStatus>;
+  getCourseCompletionRate(courseId: string): Promise<number>;
 }
 
 export interface ITagsService {
@@ -345,6 +349,10 @@ export interface IPaymentsService {
 export interface IBookmarksService {
   createBookmark(userId: string, courseId: string): Promise<Bookmark>;
   deleteBookmark(userId: string, courseId: string): Promise<void>;
+}
+
+export interface IOrdersService {
+  getOrdersByCourseId(courseId: string): Promise<SimpleOrder[]>;
 }
 
 export interface Bookmark {

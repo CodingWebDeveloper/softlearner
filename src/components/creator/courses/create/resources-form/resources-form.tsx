@@ -108,7 +108,7 @@ const ResourcesForm = ({ courseId }: ResourceFormProps) => {
   const createResourceMutation = trpc.resources.createResource.useMutation({
     onSuccess: async (newResource: SimpleResource) => {
       dispatch(addResource(newResource));
-      await utils.courses.getCourseProgressStatus.invalidate(courseId!);
+      await utils.courses.getCourseCreationProgressStatus.invalidate(courseId!);
       enqueueSnackbar("Resource added successfully!", { variant: "success" });
     },
     onError: (error: Error) => {

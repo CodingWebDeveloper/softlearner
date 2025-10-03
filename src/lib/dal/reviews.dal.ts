@@ -79,7 +79,7 @@ export class ReviewsDAL implements IReviewsDAL {
   async getCourseReviews(
     params: GetReviewsParams
   ): Promise<Omit<GetReviewsResult, "ratingStats">> {
-    const { courseId, page, pageSize, search, rating } = params;
+    const { courseId, page, pageSize, search, rating, sortDir, sortBy } = params;
     const offset = (page - 1) * pageSize;
 
     let query = this.supabase
@@ -107,14 +107,23 @@ export class ReviewsDAL implements IReviewsDAL {
       query = query.eq("rating", rating);
     }
 
-    // Apply pagination
-    const {
-      data: reviews,
-      count,
-      error,
-    } = await query
-      .range(offset, offset + pageSize - 1)
-      .order("created_at", { ascending: false });
+    // Apply pagination and ordering based on sortBy
+    const ascending = sortDir === "asc";
+    let orderedQuery = query.range(offset, offset + pageSize - 1);
+
+    const effectiveSortBy = sortBy || "change"; // default to change date
+    if (effectiveSortBy === "rating") {
+      orderedQuery = orderedQuery.order("rating", { ascending });
+    } else if (effectiveSortBy === "created") {
+      orderedQuery = orderedQuery.order("created_at", { ascending });
+    } else {
+      // change date: updated_at first (nulls handled), then created_at
+      orderedQuery = orderedQuery
+        .order("updated_at", { ascending, nullsFirst: ascending })
+        .order("created_at", { ascending });
+    }
+
+    const { data: reviews, count, error } = await orderedQuery;
 
     if (error) {
       throw new Error(`Error fetching reviews: ${error.message}`);

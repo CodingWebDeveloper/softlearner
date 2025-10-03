@@ -20,6 +20,13 @@ type CourseWithRelations = Database["public"]["Tables"]["courses"]["Row"] & {
   bookmarks?: { id: string }[] | null;
 };
 
+export interface SimpleOrder {
+  total_amount: number;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+}
+
 type SimpleCourseWithRelations =
   Database["public"]["Tables"]["courses"]["Row"] & {
     creator: User;
@@ -919,5 +926,53 @@ export class CoursesDAL implements ICoursesDAL {
       quizzes: Boolean(quiz),
       publish: Boolean(course.is_published),
     };
+  }
+
+  async getCourseCompletionRate(courseId: string): Promise<number> {
+    const { data: resources, error: resourcesError } = await this.supabase
+      .from("resources")
+      .select("id")
+      .eq("course_id", courseId);
+
+    if (resourcesError) {
+      throw new Error(`Error fetching course resources: ${resourcesError.message}`);
+    }
+
+    const resourceIds = (resources ?? []).map((r) => r.id);
+    const resourcesCount = resourceIds.length;
+    if (resourcesCount === 0) return 0;
+
+    const { data: orders, error: ordersError } = await this.supabase
+      .from("orders")
+      .select("user_id")
+      .eq("course_id", courseId)
+      .eq("status", ORDER_STATUS.SUCCEEDED);
+
+    if (ordersError) {
+      throw new Error(`Error fetching course enrollments: ${ordersError.message}`);
+    }
+
+    const userIds = Array.from(new Set((orders ?? []).map((o) => o.user_id)));
+    const studentsCount = userIds.length;
+    if (studentsCount === 0) return 0;
+
+    const { count: completedCount, error: completedError } = await this.supabase
+      .from("user_resources")
+      .select("*", { count: "exact", head: true })
+      .in("resource_id", resourceIds)
+      .in("user_id", userIds)
+      .eq("completed", true);
+
+    if (completedError) {
+      throw new Error(
+        `Error counting completed resources: ${completedError.message}`
+      );
+    }
+
+    const totalPossible = resourcesCount * studentsCount;
+    if (totalPossible === 0) return 0;
+
+    const rate = ((completedCount || 0) / totalPossible) * 100;
+    return Math.round(rate);
   }
 }

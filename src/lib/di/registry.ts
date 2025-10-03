@@ -10,6 +10,7 @@ import { ReviewsDAL } from "../dal/reviews.dal";
 import { VotesDAL } from "../dal/votes.dal";
 import { ResourcesDAL } from "../dal/resources.dal";
 import { PaymentsDAL } from "../dal/payments.dal";
+import { OrdersDAL } from "../dal/orders.dal";
 import { BookmarksDAL } from "../dal/bookmarks.dal";
 import { TestsDAL } from "../dal/tests.dal";
 import { UsersDAL } from "../dal/users.dal";
@@ -26,6 +27,7 @@ import { PaymentsService } from "@/services/payments.service";
 import { BookmarksService } from "@/services/bookmarks.service";
 import { TestsService } from "@/services/tests.service";
 import { UsersService } from "@/services/users.service";
+import { OrdersService } from "@/services/orders.service";
 import { CreatorApplicationsService } from "@/services/creator-applications.service";
 
 // Interface imports
@@ -85,6 +87,7 @@ export const DI_TOKENS = {
   TESTS_SERVICE: "TESTS_SERVICE",
   USERS_SERVICE: "USERS_SERVICE",
   CREATOR_APPLICATIONS_SERVICE: "CREATOR_APPLICATIONS_SERVICE",
+  ORDERS_SERVICE: "ORDERS_SERVICE",
 
   // Core dependencies
   SUPABASE: "SUPABASE",
@@ -129,6 +132,11 @@ export function registerDALs(
   container.register<IResourcesDAL>(
     DI_TOKENS.RESOURCES_DAL,
     (c) => new ResourcesDAL(c.resolve(DI_TOKENS.SUPABASE))
+  );
+
+  container.register( // Orders DAL
+    DI_TOKENS.ORDERS_DAL,
+    (c) => new OrdersDAL(c.resolve(DI_TOKENS.SUPABASE))
   );
 
   container.register<IPaymentsDAL>(
@@ -228,5 +236,11 @@ export function registerServices(
       new CreatorApplicationsService(
         c.resolve(DI_TOKENS.CREATOR_APPLICATIONS_DAL)
       )
+  );
+
+  // Orders Service
+  container.register(
+    DI_TOKENS.ORDERS_SERVICE,
+    (c) => new OrdersService(c.resolve(DI_TOKENS.ORDERS_DAL))
   );
 }
