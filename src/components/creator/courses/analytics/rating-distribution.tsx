@@ -2,14 +2,18 @@
 
 import React, { useMemo } from "react";
 import BarChartWidget from "@/components/creator/courses/analytics/widgets/bar-chart";
+import AnalyticsCard from "@/components/creator/courses/analytics/analytics-card";
 import { trpc } from "@/lib/trpc/client";
-import { Box } from "@mui/material";
 
 export interface RatingDistributionProps {
   courseId: string;
+  loading?: boolean;
 }
 
-const RatingDistribution: React.FC<RatingDistributionProps> = ({ courseId }) => {
+const RatingDistribution: React.FC<RatingDistributionProps> = ({
+  courseId,
+  loading,
+}) => {
   const { data } = trpc.reviews.getCourseRatingStats.useQuery(courseId, {
     enabled: Boolean(courseId),
   });
@@ -26,9 +30,14 @@ const RatingDistribution: React.FC<RatingDistributionProps> = ({ courseId }) => 
   }, [data?.breakdown]);
 
   return (
-    <Box px={2} pt={2}>
+    <AnalyticsCard
+      title="Rating Distribution"
+      subtitle="Count by stars"
+      disablePadding
+      loading={!!loading}
+    >
       <BarChartWidget data={chartData} xKey="stars" yKey="count" />
-    </Box>
+    </AnalyticsCard>
   );
 };
 

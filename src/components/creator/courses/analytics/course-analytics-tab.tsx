@@ -2,9 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Grid, Box } from "@mui/material";
-import AnalyticsCard from "@/components/creator/courses/analytics/analytics-card";
-import OneValueStat from "@/components/creator/courses/analytics/widgets/one-value-stat";
-import GaugeStat from "@/components/creator/courses/analytics/widgets/gauge-stat";
+import CompletionRate from "@/components/creator/courses/analytics/completion-rate";
 import { trpc } from "@/lib/trpc/client";
 import { detectUserCurrency, fetchRates, Rates } from "@/utils/currency";
 import TotalEarnings from "./total-earnings";
@@ -29,23 +27,10 @@ export interface CourseAnalyticsTabProps {
   };
 }
 
-
-const ratingDistribution = [
-  { stars: "1★", count: 2 },
-  { stars: "2★", count: 4 },
-  { stars: "3★", count: 6 },
-  { stars: "4★", count: 18 },
-  { stars: "5★", count: 30 },
-];
-
-// Recent reviews are fetched via tRPC in the RecentReviews component
-
 const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({
   courseId,
   loading,
 }) => {
-  
-
   const userCurrency = useMemo(() => detectUserCurrency(), []);
   const [rates, setRates] = useState<Rates | null>(null);
   const [ratesLoading, setRatesLoading] = useState(false);
@@ -71,6 +56,8 @@ const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({
   const ordersQuery = trpc.orders.getOrdersByCourseId.useQuery(courseId, {
     enabled: Boolean(courseId),
   });
+
+  // Completion rate handled in CompletionRate component
 
   const totalEarningsLoading =
     ordersQuery.isLoading || ratesLoading || !!loading?.totalEarnings;
@@ -121,51 +108,29 @@ const CourseAnalyticsTab: React.FC<CourseAnalyticsTabProps> = ({
           />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard
-            title="Completion Rate"
-            subtitle="Course-wide"
-            loading={!!loading?.completion}
-          >
-            <GaugeStat
-              label="Completion"
-              value={64}
-              helpText="Percentage of enrolled students who completed the course"
-            />
-          </AnalyticsCard>
+          <CompletionRate courseId={courseId} loading={!!loading?.completion} />
         </Grid>
-
         {/* Feedback */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard
-            title="Average Rating"
-            subtitle="All reviews"
+          <AverageRating
+            courseId={courseId}
             loading={!!loading?.averageRating}
-          >
-            <AverageRating courseId={courseId} />
-          </AnalyticsCard>
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard
-            title="Rating Distribution"
-            subtitle="Count by stars"
-            disablePadding
+          <RatingDistribution
+            courseId={courseId}
             loading={!!loading?.ratingDistribution}
-          >
-            <RatingDistribution courseId={courseId} />
-          </AnalyticsCard>
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <AnalyticsCard
-            title="Recent Reviews"
-            subtitle="Latest 3"
+          <RecentReviews
+            courseId={courseId}
             loading={!!loading?.recentReviews}
-          >
-            <RecentReviews courseId={courseId} />
-          </AnalyticsCard>
+          />
         </Grid>
       </Grid>
     </Box>
   );
 };
-
 export default CourseAnalyticsTab;

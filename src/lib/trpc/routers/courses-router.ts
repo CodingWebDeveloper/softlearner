@@ -380,4 +380,22 @@ export const coursesRouter = router({
         );
       }
     }),
+
+  getCourseCompletionRate: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input: courseId }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+
+        return await coursesService.getCourseCompletionRate(courseId);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch course completion rate: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 });

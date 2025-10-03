@@ -247,6 +247,7 @@ export interface ICoursesService {
   getCourseCreationProgressStatus(
     courseId: string
   ): Promise<CourseProgressStatus>;
+  getCourseCompletionRate(courseId: string): Promise<number>;
 }
 
 export interface ITagsService {

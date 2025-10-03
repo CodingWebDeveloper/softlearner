@@ -28,7 +28,7 @@ import ConfirmAlert from "@/components/confirm-alert";
 import {
   StatusChip,
   StyledTableContainer,
-} from "@/components/styles/creator/creator-courses-table";
+} from "@/components/styles/creator/creator-courses-table.styles";
 
 export interface CreatorCourse {
   id: string;
