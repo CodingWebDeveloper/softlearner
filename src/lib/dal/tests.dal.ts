@@ -492,4 +492,42 @@ export class TestsDAL implements ITestsDAL {
       maxScore,
     };
   }
+
+  async getAverageTestScoreByUser(userId: string): Promise<number | null> {
+    const { data, error } = await this.supabase
+      .from("tests")
+      .select(
+        `
+        id,
+        questions(id, points),
+        user_tests!inner (
+          score,
+          user_id
+        )
+      `
+      )
+      .eq("user_tests.user_id", userId);
+
+    if (error) {
+      throw new Error(`Error fetching average test score: ${error.message}`);
+    }
+
+    const rows = data || [];
+    if (rows.length === 0) return null;
+
+    let totalPercent = 0;
+    let counted = 0;
+
+    for (const row of rows) {
+      const max = (row.questions || []).reduce((sum: number, q: { points: number }) => sum + (q?.points || 0), 0);
+      const score = row.user_tests?.[0]?.score ?? 0;
+      if (max > 0) {
+        totalPercent += (score / max) * 100;
+        counted += 1;
+      }
+    }
+
+    if (counted === 0) return null;
+    return totalPercent / counted;
+  }
 }

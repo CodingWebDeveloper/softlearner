@@ -1,0 +1,2 @@
+ALTER TABLE public.user_resources
+ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP WITH TIME ZONE;

@@ -89,4 +89,8 @@ export class TestsService implements ITestsService {
       };
     });
   }
+
+  async getAverageTestScoreByUser(userId: string): Promise<number | null> {
+    return this.testsDAL.getAverageTestScoreByUser(userId);
+  }
 }

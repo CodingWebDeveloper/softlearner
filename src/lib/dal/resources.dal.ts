@@ -8,8 +8,6 @@ import { RESOURCE_TYPES } from "../constants/database-constants";
 function formatIntervalToDuration(interval: string | null): string | undefined {
   if (!interval) return undefined;
 
-  // PostgreSQL interval is already in HH:MM:SS format
-  // Just return it as is, but ensure it's properly formatted
   const match = interval.match(/^(\d{2}):(\d{2}):(\d{2})$/);
   if (match) {
     return interval;
@@ -485,5 +483,34 @@ export class ResourcesDAL implements IResourcesDAL {
     }
 
     return data;
+  }
+
+  async getUserCompletedResourcesByYear(
+    userId: string,
+    year: number
+  ): Promise<{ id: string; completed_at: string }[]> {
+    if (!userId || !year) {
+      throw new Error("User ID and year are required");
+    }
+
+    const start = new Date(Date.UTC(year, 0, 1)).toISOString();
+    const endExclusive = new Date(Date.UTC(year + 1, 0, 1)).toISOString();
+
+    const { data, error } = await this.supabase
+      .from("user_resources")
+      .select("resource_id, completed_at")
+      .eq("user_id", userId)
+      .eq("completed", true)
+      .gte("completed_at", start)
+      .lt("completed_at", endExclusive);
+
+    if (error) {
+      throw new Error(`Error fetching user activity: ${error.message}`);
+    }
+
+    const rows = (data || []) as Array<{ resource_id: string; completed_at: string | null }>;
+    return rows
+      .filter((r) => !!r.completed_at)
+      .map((r) => ({ id: r.resource_id, completed_at: r.completed_at as string }));
   }
 }

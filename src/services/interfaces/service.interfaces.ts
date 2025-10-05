@@ -25,6 +25,12 @@ export interface BasicResource {
   completed?: boolean;
 }
 
+// Minimal activity record for heatmap calculations
+export interface ActivityResource {
+  id: string;
+  completed_at: string;
+}
+
 export type User = {
   id: string;
   email: string | null;
@@ -158,6 +164,13 @@ export interface PaginatedResult<T> {
   totalRecords: number;
 }
 
+// Student progress over purchased courses
+export interface CourseProgressItem {
+  id: string;
+  resourcesCompletedCount: number;
+  resourceCount: number;
+}
+
 export interface BasicReview {
   id: string;
   content: string;
@@ -221,8 +234,10 @@ export interface ICoursesService {
   getPurchasedCourses(
     userId: string,
     page?: number,
-    pageSize?: number
-  ): Promise<GetPurchasedCoursesResult>;
+    pageSize?: number,
+    sortBy?: "name" | "orderCreatedAt",
+    sortDir?: "asc" | "desc"
+  ): Promise<PaginatedResult<PurchasedCourse>>;
   getCourseMaterialsById(id: string, userId: string): Promise<FullCourse>;
   getCoursesByCreator(
     creatorId: string,
@@ -248,6 +263,15 @@ export interface ICoursesService {
     courseId: string
   ): Promise<CourseProgressStatus>;
   getCourseCompletionRate(courseId: string): Promise<number>;
+  getTotalEnrolledCourses(userId: string): Promise<number>;
+  getCompletedResourcesCount(userId: string): Promise<number>;
+  getOverallCompletionRate(userId: string): Promise<number>;
+  getReviewsCount(userId: string): Promise<number>;
+  getCourseProgressData(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResult<CourseProgressItem>>;
 }
 
 export interface ITagsService {
@@ -309,6 +333,11 @@ export interface IResourcesService {
   ): Promise<SimpleResource[]>;
   downloadResourceFile(resourceId: string): Promise<Blob>;
   deleteResource(resourceId: string): Promise<void>;
+  // User activity for a given calendar year
+  getUserCompletedResourcesByYear(
+    userId: string,
+    year: number
+  ): Promise<ActivityResource[]>;
 }
 
 export interface IReviewsService {
@@ -496,6 +525,7 @@ export interface ITestsService {
     courseId: string,
     userId: string
   ): Promise<TestWithProgress[]>;
+  getAverageTestScoreByUser(userId: string): Promise<number | null>;
 }
 
 export interface IUsersService {

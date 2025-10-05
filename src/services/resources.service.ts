@@ -1,5 +1,5 @@
 import { IResourcesDAL } from "@/lib/di/interfaces/dal.interfaces";
-import { CreateResourceParams, IResourcesService, SimpleResource, UpdateResourceParams } from "./interfaces/service.interfaces";
+import { CreateResourceParams, IResourcesService, SimpleResource, UpdateResourceParams, ActivityResource } from "./interfaces/service.interfaces";
 import { PreviewResource } from "@/lib/database/database.types";
 import { BasicResource } from "./interfaces/service.interfaces";
 
@@ -66,5 +66,12 @@ export class ResourcesService implements IResourcesService {
 
   async deleteResource(resourceId: string): Promise<void> {
     return this.resourcesDAL.deleteResource(resourceId);
+  }
+
+  async getUserCompletedResourcesByYear(
+    userId: string,
+    year: number
+  ): Promise<ActivityResource[]> {
+    return this.resourcesDAL.getUserCompletedResourcesByYear(userId, year);
   }
 }

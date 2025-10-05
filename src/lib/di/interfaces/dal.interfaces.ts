@@ -20,7 +20,8 @@ import {
   GetTagsParams,
   BasicReview,
   UpdateReviewInput,
-  GetPurchasedCoursesResult,
+  PurchasedCourse,
+  CourseProgressItem,
   FullCourse,
   BasicResource,
   BasicTest,
@@ -46,6 +47,7 @@ import {
   QuestionsInput,
   CourseProgressStatus,
   CreateReviewParams,
+  ActivityResource,
 } from "@/services/interfaces/service.interfaces";
 
 export interface PaginatedResult<T> {
@@ -87,8 +89,15 @@ export interface ICoursesDAL {
   getPurchasedCourses(
     userId: string,
     page?: number,
+    pageSize?: number,
+    sortBy?: "name" | "orderCreatedAt",
+    sortDir?: "asc" | "desc"
+  ): Promise<PaginatedResult<PurchasedCourse>>;
+  getCourseProgressData(
+    userId: string,
+    page?: number,
     pageSize?: number
-  ): Promise<GetPurchasedCoursesResult>;
+  ): Promise<PaginatedResult<CourseProgressItem>>;
   getCourseMaterialsById(
     id: string,
     userId?: string
@@ -116,6 +125,9 @@ export interface ICoursesDAL {
     courseId: string
   ): Promise<CourseProgressStatus>;
   getCourseCompletionRate(courseId: string): Promise<number>;
+  getTotalEnrolledCourses(userId: string): Promise<number>;
+  getCompletedResourcesCount(userId: string): Promise<number>;
+  getOverallCompletionRate(userId: string): Promise<number>;
 }
 
 export interface ICategoriesDAL {
@@ -161,6 +173,10 @@ export interface IResourcesDAL {
   ): Promise<SimpleResource[]>;
   downloadResourceFile(resourceId: string): Promise<Blob>;
   deleteResource(resourceId: string): Promise<void>;
+  getUserCompletedResourcesByYear(
+    userId: string,
+    year: number
+  ): Promise<ActivityResource[]>;
 }
 
 export interface IReviewsDAL {
@@ -176,6 +192,7 @@ export interface IReviewsDAL {
     page?: number,
     pageSize?: number
   ): Promise<PaginatedResult<BasicReview>>;
+  getReviewsCount(userId: string): Promise<number>;
   updateReview(
     userId: string,
     reviewId: string,
@@ -238,6 +255,7 @@ export interface ITestsDAL {
     submission: TestSubmission
   ): Promise<TestResult>;
   deleteTest(id: string): Promise<void>;
+  getAverageTestScoreByUser(userId: string): Promise<number | null>;
 }
 
 export interface IUsersDAL {

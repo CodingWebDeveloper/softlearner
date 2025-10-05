@@ -7,6 +7,7 @@ import {
   WhiteText,
 } from "@/components/styles/infrastructure/layout.styles";
 import { useSupabase } from "@/contexts/supabase-context";
+import StudentDashboard from "@/components/student/student-dashboard";
 
 const Home = () => {
   // Custom hooks
@@ -14,14 +15,7 @@ const Home = () => {
 
   return (
     <ContentContainer maxWidth="xl">
-      <PageHeader>
-        <WhiteText variant="h3">
-          Welcome{" "}
-          <LightText variant="h3" component="span">
-            {userProfile?.full_name}
-          </LightText>
-        </WhiteText>
-      </PageHeader>
+      {userProfile?.role === "student" && <StudentDashboard />}
     </ContentContainer>
   );
 };

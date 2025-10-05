@@ -181,6 +181,7 @@ CREATE TABLE IF NOT EXISTS user_resources (
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   resource_id UUID REFERENCES resources(id) ON DELETE CASCADE,
   completed BOOLEAN DEFAULT FALSE,
+  completed_at TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY (user_id, resource_id)
 );
 

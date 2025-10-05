@@ -227,4 +227,19 @@ export const testsRouter = router({
         );
       }
     }),
+  getAverageTestScoreByUser: protectedProcedure
+    .query(async ({ ctx }) => {
+      try {
+        const testsService = ctx.container.resolve<ITestsService>(
+          DI_TOKENS.TESTS_SERVICE
+        );
+        return await testsService.getAverageTestScoreByUser(ctx.user.id);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch average test score: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 });

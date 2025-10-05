@@ -19,6 +19,13 @@ const getBookmarkedCoursesInput = z.object({
 const getPurchasedCoursesInput = z.object({
   page: z.number().min(1).default(1),
   pageSize: z.number().min(1).max(100).default(15),
+  sortBy: z.enum(["name", "orderCreatedAt"]).default("orderCreatedAt").optional(),
+  sortDir: z.enum(["asc", "desc"]).default("desc").optional(),
+});
+
+const getCourseProgressInput = z.object({
+  page: z.number().min(1).default(1),
+  pageSize: z.number().min(1).max(100).default(15),
 });
 
 const getCreatorCoursesInput = z.object({
@@ -89,6 +96,21 @@ export const coursesRouter = router({
         );
       }
     }),
+
+  getReviewsCount: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const coursesService = ctx.container.resolve<ICoursesService>(
+        DI_TOKENS.COURSES_SERVICE
+      );
+      return await coursesService.getReviewsCount(ctx.user.id);
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch reviews count: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }),
 
   updateCourse: protectedProcedure
     .input(z.instanceof(FormData))
@@ -253,7 +275,9 @@ export const coursesRouter = router({
         return await coursesService.getPurchasedCourses(
           ctx.user.id,
           input.page,
-          input.pageSize
+          input.pageSize,
+          input.sortBy,
+          input.sortDir
         );
       } catch (error) {
         throw new Error(
@@ -393,6 +417,73 @@ export const coursesRouter = router({
       } catch (error) {
         throw new Error(
           `Failed to fetch course completion rate: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+  getTotalEnrolledCourses: protectedProcedure
+    .query(async ({ ctx }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+        return await coursesService.getTotalEnrolledCourses(ctx.user.id);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch total enrolled courses: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+  getCompletedResourcesCount: protectedProcedure
+    .query(async ({ ctx }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+        return await coursesService.getCompletedResourcesCount(ctx.user.id);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch completed resources: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  // Student: overall completion percentage across enrolled courses
+  getOverallCompletionRate: protectedProcedure
+    .query(async ({ ctx }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+        return await coursesService.getOverallCompletionRate(ctx.user.id);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch overall completion rate: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+  getCourseProgressData: protectedProcedure
+    .input(getCourseProgressInput)
+    .query(async ({ ctx, input }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE
+        );
+        return await coursesService.getCourseProgressData(
+          ctx.user.id,
+          input.page,
+          input.pageSize
+        );
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch course progress data: ${
             error instanceof Error ? error.message : "Unknown error"
           }`
         );

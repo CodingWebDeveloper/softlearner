@@ -348,6 +348,19 @@ export class ReviewsDAL implements IReviewsDAL {
     };
   }
 
+  async getReviewsCount(userId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from("reviews")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    if (error) {
+      throw new Error(`Error counting user reviews: ${error.message}`);
+    }
+
+    return count || 0;
+  }
+
   async deleteReview(userId: string, reviewId: string): Promise<void> {
     // Verify ownership
     const { data: existing, error: fetchError } = await this.supabase
