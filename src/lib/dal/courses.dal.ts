@@ -9,6 +9,7 @@ import {
   CreateCourseParams,
   SimpleCourse,
   User,
+  CourseProgressItem,
 } from "@/services/interfaces/service.interfaces";
 import { ORDER_STATUS } from "@/lib/constants/stripe-constants";
 import { FullCourse } from "@/services/interfaces/service.interfaces";
@@ -469,13 +470,15 @@ export class CoursesDAL implements ICoursesDAL {
   async getPurchasedCourses(
     userId: string,
     page: number = 1,
-    pageSize: number = 15
-  ): Promise<GetPurchasedCoursesResult> {
+    pageSize: number = 15,
+    sortBy: "name" | "orderCreatedAt" = "orderCreatedAt",
+    sortDir: "asc" | "desc" = "desc"
+  ): Promise<PaginatedResult<PurchasedCourse>> {
     // Calculate pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const { data, error, count } = await this.supabase
+    let query = this.supabase
       .from("orders")
       .select(
         `
@@ -500,8 +503,16 @@ export class CoursesDAL implements ICoursesDAL {
       )
       .eq("user_id", userId)
       .eq("status", ORDER_STATUS.SUCCEEDED)
-      .range(from, to)
-      .order("created_at", { ascending: false });
+      .range(from, to);
+
+    // Apply sorting
+    if (sortBy === "orderCreatedAt") {
+      query = query.order("created_at", { ascending: sortDir === "asc" });
+    } else if (sortBy === "name") {
+      query = query.order("course.name", { ascending: sortDir === "asc" });
+    }
+
+    const { data, error, count } = await query;
 
     if (error) {
       throw new Error(`Error fetching purchased courses: ${error.message}`);
@@ -974,5 +985,158 @@ export class CoursesDAL implements ICoursesDAL {
 
     const rate = ((completedCount || 0) / totalPossible) * 100;
     return Math.round(rate);
+  }
+
+  async getTotalEnrolledCourses(userId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", ORDER_STATUS.SUCCEEDED);
+
+    if (error) {
+      throw new Error(`Error counting enrolled courses: ${error.message}`);
+    }
+
+    return count || 0;
+  }
+
+  async getCompletedResourcesCount(userId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from("user_resources")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("completed", true);
+
+    if (error) {
+      throw new Error(`Error counting completed resources: ${error.message}`);
+    }
+
+    return count || 0;
+  }
+  async getOverallCompletionRate(userId: string): Promise<number> {
+    // Get enrolled course IDs
+    const { data: orders, error: ordersError } = await this.supabase
+      .from("orders")
+      .select("course_id")
+      .eq("user_id", userId)
+      .eq("status", ORDER_STATUS.SUCCEEDED);
+
+    if (ordersError) {
+      throw new Error(`Error fetching enrolled courses: ${ordersError.message}`);
+    }
+
+    const courseIds = Array.from(new Set((orders ?? []).map((o) => o.course_id)));
+    if (courseIds.length === 0) return 0;
+
+    // Count total resources in enrolled courses
+    const { count: totalResources, error: totalResError } = await this.supabase
+      .from("resources")
+      .select("id", { count: "exact", head: true })
+      .in("course_id", courseIds);
+
+    if (totalResError) {
+      throw new Error(`Error counting resources: ${totalResError.message}`);
+    }
+
+    const total = totalResources || 0;
+    if (total === 0) return 0;
+
+    // Count completed resources for this user within those courses
+    const { count: completed, error: completedError } = await this.supabase
+      .from("user_resources")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("completed", true)
+      .in(
+        "resource_id",
+        (
+          await this.supabase
+            .from("resources")
+            .select("id")
+            .in("course_id", courseIds)
+        ).data?.map((r) => r.id) || []
+      );
+
+    if (completedError) {
+      throw new Error(
+        `Error counting completed user resources: ${completedError.message}`
+      );
+    }
+
+    const pct = ((completed || 0) / total) * 100;
+    return Math.round(pct);
+  }
+
+  async getCourseProgressData(
+    userId: string,
+    page: number = 1,
+    pageSize: number = 15
+  ): Promise<PaginatedResult<CourseProgressItem>> {
+    // Get enrolled course IDs
+    const { data: orders, error: ordersError } = await this.supabase
+      .from("orders")
+      .select("course_id")
+      .eq("user_id", userId)
+      .eq("status", ORDER_STATUS.SUCCEEDED);
+
+    if (ordersError) {
+      throw new Error(`Error fetching enrolled courses: ${ordersError.message}`);
+    }
+
+    const courseIds = Array.from(new Set((orders ?? []).map((o) => o.course_id)));
+    if (courseIds.length === 0) {
+      return { data: [], totalRecords: 0 };
+    }
+
+    const { data: coursesData, error: coursesError } = await this.supabase
+      .from("courses")
+      .select(`
+        id,
+        name,
+        resources (
+          id,
+          user_resources (
+            completed,
+            user_id
+          )
+        )
+      `)
+      .in("id", courseIds);
+
+    if (coursesError) {
+      throw new Error(`Error fetching course data: ${coursesError.message}`);
+    }
+
+    const progressData = (coursesData || []).map((course: any) => {
+      const resourceCount = course.resources?.length || 0;
+      const resourcesCompletedCount = course.resources?.filter((r: any) =>
+        r.user_resources?.some((ur: any) => ur.user_id === userId && ur.completed)
+      ).length || 0;
+
+      return {
+        id: course.id,
+        name: course.name,
+        resourcesCompletedCount,
+        resourceCount,
+      };
+    });
+
+    progressData.sort((a, b) => {
+      const byCompleted = b.resourcesCompletedCount - a.resourcesCompletedCount;
+      if (byCompleted !== 0) return byCompleted;
+      const byTotal = b.resourceCount - a.resourceCount;
+      if (byTotal !== 0) return byTotal;
+      return a.name.localeCompare(b.name);
+    });
+
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize;
+    const paginatedData = progressData.slice(from, to);
+
+    return {
+      data: progressData as CourseProgressItem[],
+      totalRecords: progressData.length,
+    };
   }
 }

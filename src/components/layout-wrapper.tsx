@@ -7,8 +7,6 @@ import ClientOnly from "./client-only";
 import {
   LayoutContainer,
   MainContent,
-  FallbackContainer,
-  FallbackMain,
 } from "@/components/styles/infrastructure/layout.styles";
 import Navigation from "./navigation/navigation";
 
@@ -17,31 +15,21 @@ interface LayoutProps {
 }
 
 const LayoutWrapper = ({ children }: LayoutProps) => {
-  return (
-    <ClientOnly
-      fallback={
-        <FallbackContainer>
-          <FallbackMain component="main">{children}</FallbackMain>
-        </FallbackContainer>
-      }
-    >
-      <LayoutContent>{children}</LayoutContent>
-    </ClientOnly>
-  );
-};
-
-const LayoutContent = ({ children }: { children: ReactNode }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { user, isRecoveryMode } = useSupabase();
+  const { user, userProfile, isRecoveryMode } = useSupabase();
 
   return (
     <LayoutContainer>
       <ClientOnly fallback={null}>
-        {user && !isRecoveryMode && <Navigation />}
+        {user && userProfile && !isRecoveryMode && <Navigation />}
       </ClientOnly>
 
-      <MainContent component="main" isMobile={isMobile} hasUser={!!user}>
+      <MainContent
+        component="main"
+        isMobile={isMobile}
+        hasUser={Boolean(user) && Boolean(userProfile)}
+      >
         {children}
       </MainContent>
     </LayoutContainer>

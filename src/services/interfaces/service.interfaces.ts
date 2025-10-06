@@ -25,6 +25,12 @@ export interface BasicResource {
   completed?: boolean;
 }
 
+// Minimal activity record for heatmap calculations
+export interface ActivityResource {
+  id: string;
+  completed_at: string;
+}
+
 export type User = {
   id: string;
   email: string | null;
@@ -158,6 +164,14 @@ export interface PaginatedResult<T> {
   totalRecords: number;
 }
 
+// Student progress over purchased courses
+export interface CourseProgressItem {
+  id: string;
+  name: string;
+  resourcesCompletedCount: number;
+  resourceCount: number;
+}
+
 export interface BasicReview {
   id: string;
   content: string;
@@ -221,8 +235,10 @@ export interface ICoursesService {
   getPurchasedCourses(
     userId: string,
     page?: number,
-    pageSize?: number
-  ): Promise<GetPurchasedCoursesResult>;
+    pageSize?: number,
+    sortBy?: "name" | "orderCreatedAt",
+    sortDir?: "asc" | "desc"
+  ): Promise<PaginatedResult<PurchasedCourse>>;
   getCourseMaterialsById(id: string, userId: string): Promise<FullCourse>;
   getCoursesByCreator(
     creatorId: string,
@@ -248,6 +264,15 @@ export interface ICoursesService {
     courseId: string
   ): Promise<CourseProgressStatus>;
   getCourseCompletionRate(courseId: string): Promise<number>;
+  getTotalEnrolledCourses(userId: string): Promise<number>;
+  getCompletedResourcesCount(userId: string): Promise<number>;
+  getOverallCompletionRate(userId: string): Promise<number>;
+  getReviewsCount(userId: string): Promise<number>;
+  getCourseProgressData(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResult<CourseProgressItem>>;
 }
 
 export interface ITagsService {
@@ -309,6 +334,11 @@ export interface IResourcesService {
   ): Promise<SimpleResource[]>;
   downloadResourceFile(resourceId: string): Promise<Blob>;
   deleteResource(resourceId: string): Promise<void>;
+  // User activity for a given calendar year
+  getUserCompletedResourcesByYear(
+    userId: string,
+    year: number
+  ): Promise<ActivityResource[]>;
 }
 
 export interface IReviewsService {
@@ -457,6 +487,17 @@ export interface TestWithProgress extends BasicTest {
   progress: number;
 }
 
+// Recent user test results for dashboard KPI
+export interface RecentUserTestResult {
+  id: string; // user_test id
+  testId: string;
+  title: string;
+  score: number;
+  maxScore: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface QuestionsInput {
   testId: string;
   questions: QuestionInput[];
@@ -483,6 +524,11 @@ export interface ITestsService {
   getTestById(id: string): Promise<FullTest | null>;
   getTestQuestions(testId: string): Promise<FullQuestion[]>;
   getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
+  getRecentTestResults(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResult<RecentUserTestResult>>;
   createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
   updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;
   deleteTest(id: string): Promise<void>;
@@ -496,6 +542,7 @@ export interface ITestsService {
     courseId: string,
     userId: string
   ): Promise<TestWithProgress[]>;
+  getAverageTestScoreByUser(userId: string): Promise<number | null>;
 }
 
 export interface IUsersService {

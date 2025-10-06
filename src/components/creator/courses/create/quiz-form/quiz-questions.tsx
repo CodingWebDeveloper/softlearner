@@ -199,6 +199,7 @@ const QuizQuestions = ({ testId }: QuizQuestionsProps) => {
                         text: "",
                         type: "single",
                         points: 1,
+                        status: "NEW",
                         options: [],
                       })
                     }

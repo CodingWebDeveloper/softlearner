@@ -231,6 +231,27 @@ export const resourcesRouter = router({
       }
     }),
 
+  getUserCompletedResourcesByYear: protectedProcedure
+    .input(z.object({ year: z.number().int().min(1970).max(3000) }))
+    .query(async ({ ctx, input }) => {
+      try {
+        const resourcesService = ctx.container.resolve<IResourcesService>(
+          DI_TOKENS.RESOURCES_SERVICE
+        );
+        const userId = ctx.user.id;
+        return await resourcesService.getUserCompletedResourcesByYear(
+          userId,
+          input.year
+        );
+      } catch (error) {
+        throw new Error(
+          `Failed to load user activity: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
   updateResourcesOrder: protectedProcedure
     .input(
       z.object({

@@ -4,12 +4,13 @@ import {
   GetCoursesParams,
   GetCoursesResult,
   BasicCourse,
-  GetPurchasedCoursesResult,
+  PurchasedCourse,
   CreateCourseParams,
   SimpleCourse,
   PaginatedResult,
   CourseProgressStatus,
   FullCourse,
+  CourseProgressItem,
 } from "./interfaces/service.interfaces";
 
 export class CoursesService implements ICoursesService {
@@ -48,9 +49,17 @@ export class CoursesService implements ICoursesService {
   async getPurchasedCourses(
     userId: string,
     page: number = 1,
-    pageSize: number = 15
-  ): Promise<GetPurchasedCoursesResult> {
-    return this.coursesDAL.getPurchasedCourses(userId, page, pageSize);
+    pageSize: number = 15,
+    sortBy?: "name" | "orderCreatedAt",
+    sortDir?: "asc" | "desc"
+  ): Promise<PaginatedResult<PurchasedCourse>> {
+    return this.coursesDAL.getPurchasedCourses(
+      userId,
+      page,
+      pageSize,
+      sortBy,
+      sortDir
+    );
   }
 
   async getCourseMaterialsById(
@@ -123,5 +132,29 @@ export class CoursesService implements ICoursesService {
 
   async getCourseCompletionRate(courseId: string): Promise<number> {
     return this.coursesDAL.getCourseCompletionRate(courseId);
+  }
+
+  async getTotalEnrolledCourses(userId: string): Promise<number> {
+    return this.coursesDAL.getTotalEnrolledCourses(userId);
+  }
+
+  async getCompletedResourcesCount(userId: string): Promise<number> {
+    return this.coursesDAL.getCompletedResourcesCount(userId);
+  }
+
+  async getOverallCompletionRate(userId: string): Promise<number> {
+    return this.coursesDAL.getOverallCompletionRate(userId);
+  }
+
+  async getReviewsCount(userId: string): Promise<number> {
+    return this.reviewsDAL.getReviewsCount(userId);
+  }
+
+  async getCourseProgressData(
+    userId: string,
+    page: number = 1,
+    pageSize: number = 15
+  ): Promise<PaginatedResult<CourseProgressItem>> {
+    return this.coursesDAL.getCourseProgressData(userId, page, pageSize);
   }
 }

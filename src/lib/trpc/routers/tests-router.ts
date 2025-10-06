@@ -227,4 +227,49 @@ export const testsRouter = router({
         );
       }
     }),
+  getAverageTestScoreByUser: protectedProcedure
+    .query(async ({ ctx }) => {
+      try {
+        const testsService = ctx.container.resolve<ITestsService>(
+          DI_TOKENS.TESTS_SERVICE
+        );
+        return await testsService.getAverageTestScoreByUser(ctx.user.id);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch average test score: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
+
+  getRecentTestResults: protectedProcedure
+    .input(
+      z
+        .object({
+          page: z.number().int().min(1).optional(),
+          pageSize: z.number().int().min(1).max(50).optional(),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const testsService = ctx.container.resolve<ITestsService>(
+          DI_TOKENS.TESTS_SERVICE
+        );
+        const page = input?.page ?? 1;
+        const pageSize = input?.pageSize ?? 5;
+        return await testsService.getRecentTestResults(
+          ctx.user.id,
+          page,
+          pageSize
+        );
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch recent test results: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    }),
 });
