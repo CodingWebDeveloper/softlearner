@@ -48,6 +48,7 @@ import {
   CourseProgressStatus,
   CreateReviewParams,
   ActivityResource,
+  RecentUserTestResult,
 } from "@/services/interfaces/service.interfaces";
 
 export interface PaginatedResult<T> {
@@ -246,6 +247,11 @@ export interface ITestsDAL {
   getTestById(id: string): Promise<FullTest | null>;
   getTestQuestions(testId: string): Promise<FullQuestion[]>;
   getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
+  getRecentTestResults(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResult<RecentUserTestResult>>;
   createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
   saveQuestions(data: QuestionsInput): Promise<FullTest>;
   updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;

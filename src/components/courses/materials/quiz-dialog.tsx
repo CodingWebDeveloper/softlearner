@@ -57,6 +57,8 @@ const QuizDialog: FC<QuizDialogProps> = ({
     }
   );
 
+  console.log(test);
+
   // Mutations
   const createScoreMutation = trpc.tests.createScore.useMutation();
   const utils = trpc.useUtils();

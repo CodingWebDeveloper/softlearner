@@ -178,6 +178,7 @@ export class ResourcesDAL implements IResourcesDAL {
     }
 
     const newCompletionStatus = !existingRecord?.completed;
+    const nowIso = new Date().toISOString();
 
     const { data, error } = await this.supabase
       .from("user_resources")
@@ -186,6 +187,7 @@ export class ResourcesDAL implements IResourcesDAL {
           user_id: userId,
           resource_id: resourceId,
           completed: newCompletionStatus,
+          completed_at: newCompletionStatus ? nowIso : null,
         },
         { onConflict: "user_id,resource_id" }
       )

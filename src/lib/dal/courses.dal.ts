@@ -1089,7 +1089,6 @@ export class CoursesDAL implements ICoursesDAL {
       return { data: [], totalRecords: 0 };
     }
 
-    // Get course data with resources and completion status
     const { data: coursesData, error: coursesError } = await this.supabase
       .from("courses")
       .select(`
@@ -1131,16 +1130,12 @@ export class CoursesDAL implements ICoursesDAL {
       return a.name.localeCompare(b.name);
     });
 
-    // Apply pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize;
     const paginatedData = progressData.slice(from, to);
 
-    // Remove name from final result
-    const result = paginatedData.map(({ name, ...rest }) => rest);
-
     return {
-      data: result as CourseProgressItem[],
+      data: progressData as CourseProgressItem[],
       totalRecords: progressData.length,
     };
   }

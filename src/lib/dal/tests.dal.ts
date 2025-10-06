@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../database/database.types";
 import { ITestsDAL } from "../di/interfaces/dal.interfaces";
+import { PaginatedResult } from "../di/interfaces/dal.interfaces";
 import {
   BasicAnswerOption,
   BasicTest,
@@ -13,6 +14,7 @@ import {
   QuestionType,
   QuestionInput,
   OptionInput,
+  RecentUserTestResult,
 } from "@/services/interfaces/service.interfaces";
 
 type QuestionWithOptions = {
@@ -231,7 +233,7 @@ export class TestsDAL implements ITestsDAL {
 
   async saveQuestions(data: QuestionsInput): Promise<FullTest> {
     const { testId, questions } = data;
-    console.log("questions", questions);
+    
     try {
       for (const question of questions) {
         switch (question.status) {
@@ -529,5 +531,61 @@ export class TestsDAL implements ITestsDAL {
 
     if (counted === 0) return null;
     return totalPercent / counted;
+  }
+
+  async getRecentTestResults(
+    userId: string,
+    page: number = 1,
+    pageSize: number = 10
+  ): Promise<PaginatedResult<RecentUserTestResult>> {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await this.supabase
+      .from("user_tests")
+      .select(
+        `
+        id,
+        score,
+        created_at,
+        updated_at,
+        test:tests!user_tests_test_id_fkey (
+          id,
+          title,
+          questions(points)
+        )
+      `,
+        { count: "exact" }
+      )
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      throw new Error(`Error fetching recent test results: ${error.message}`);
+    }
+
+    const results: RecentUserTestResult[] = (data || []).map((row) => {
+      const questions = (row as any).test?.questions || [];
+      const maxScore = questions.reduce(
+        (sum: number, q: { points: number }) => sum + (q?.points || 0),
+        0
+      );
+      return {
+        id: row.id,
+        testId: (row as any).test?.id || "",
+        title: (row as any).test?.title || "",
+        score: row.score || 0,
+        maxScore,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+      };
+    });
+
+    return {
+      data: results,
+      totalRecords: count || 0,
+    };
   }
 }

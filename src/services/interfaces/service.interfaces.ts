@@ -167,6 +167,7 @@ export interface PaginatedResult<T> {
 // Student progress over purchased courses
 export interface CourseProgressItem {
   id: string;
+  name: string;
   resourcesCompletedCount: number;
   resourceCount: number;
 }
@@ -486,6 +487,17 @@ export interface TestWithProgress extends BasicTest {
   progress: number;
 }
 
+// Recent user test results for dashboard KPI
+export interface RecentUserTestResult {
+  id: string; // user_test id
+  testId: string;
+  title: string;
+  score: number;
+  maxScore: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface QuestionsInput {
   testId: string;
   questions: QuestionInput[];
@@ -512,6 +524,11 @@ export interface ITestsService {
   getTestById(id: string): Promise<FullTest | null>;
   getTestQuestions(testId: string): Promise<FullQuestion[]>;
   getTestResults(courseId: string, userId: string): Promise<TestResult[]>;
+  getRecentTestResults(
+    userId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResult<RecentUserTestResult>>;
   createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
   updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;
   deleteTest(id: string): Promise<void>;

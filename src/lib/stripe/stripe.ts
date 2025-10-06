@@ -1,3 +1,4 @@
+import 'server-only';
 import { Stripe } from 'stripe';
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -15,4 +16,4 @@ export const formatAmountForStripe = (amount: number): number => {
 // Helper to get the actual price of a course (considering new_price if available)
 export const getActualCoursePrice = (price: number, newPrice: number | null): number => {
   return newPrice !== null ? newPrice : price;
-}; 
+};

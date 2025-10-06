@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import HeatMap from "@uiw/react-heat-map";
 import { trpc } from "@/lib/trpc/client";
@@ -29,6 +29,8 @@ export default function ActivityHeatMapWidget({ year }: { year?: number }) {
     trpc.resources.getUserCompletedResourcesByYear.useQuery({
       year: currentYear,
     });
+
+  console.log(data);
 
   const { startDate, endDate } = useMemo(() => {
     const start = new Date(Date.UTC(currentYear, 0, 1));
@@ -79,6 +81,17 @@ export default function ActivityHeatMapWidget({ year }: { year?: number }) {
                 4: theme.palette.custom.accent.blue,
                 5: theme.palette.custom.accent.yellow,
                 6: theme.palette.custom.accent.red,
+              }}
+              rectRender={(props, data) => {
+                // if (!data.count) return <rect {...props} />;
+                return (
+                  <Tooltip
+                    placement="top"
+                    title={`count: ${data.count || 0}`}
+                  >
+                    <rect {...props} />
+                  </Tooltip>
+                );
               }}
               rectProps={{ rx: 2, ry: 2 }}
             />

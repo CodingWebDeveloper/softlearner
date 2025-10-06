@@ -31,26 +31,26 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
   // General hooks
   const router = useRouter();
   const theme = useTheme();
-  const {enqueueSnackbar} = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
 
   // States
   const [reviewed, setReviewed] = useState(course.isReviewed);
 
   // Queries
   const { mutateAsync: createReview } = trpc.reviews.createReview.useMutation({
-      onSuccess: () => {
-        setReviewed(true);
-        enqueueSnackbar("Thanks for your feedback!", {
-          variant: "success",
-        });
-      },
-      onError: () => {
-        setReviewed(false); // Revert optimistic update
-        enqueueSnackbar("Failed to submit review", {
-          variant: "error",
-        });
-      },
-    });
+    onSuccess: () => {
+      setReviewed(true);
+      enqueueSnackbar("Thanks for your feedback!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      setReviewed(false); // Revert optimistic update
+      enqueueSnackbar("Failed to submit review", {
+        variant: "error",
+      });
+    },
+  });
 
   // States
   const [openReview, setOpenReview] = useState(false);
@@ -70,9 +70,9 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
     }
   };
 
-  const handleCloseReview =() => {
-    setOpenReview(false); 
-  }
+  const handleCloseReview = () => {
+    setOpenReview(false);
+  };
 
   const handleReviewSubmit = async (
     values: ReviewFormValues,
@@ -95,8 +95,9 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
     }
   };
 
-  const completedResources = course.resources.filter((r) => r.completed).length;
-  const totalResources = course.resources.length;
+  const completedResources =
+    course.resources.filter((r) => r.completed).length ?? 0;
+  const totalResources = course.resources.length ?? 0;
   const progressPercentage = (completedResources / totalResources) * 100;
   const status =
     completedResources === totalResources
@@ -149,12 +150,12 @@ const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
                 {completedResources} of {totalResources} resources completed
               </ProgressText>
               <ProgressPercentage>
-                {Math.round(progressPercentage)}%
+                {progressPercentage ? Math.round(progressPercentage) : 0}%
               </ProgressPercentage>
             </ProgressHeader>
             <StyledProgressBar
               variant="determinate"
-              value={progressPercentage}
+              value={progressPercentage ?? 0}
               aria-label="Course progress"
             />
           </ProgressSection>

@@ -9,6 +9,8 @@ import {
   TestResult,
   TestWithProgress,
   TestSubmission,
+  PaginatedResult,
+  RecentUserTestResult,
 } from "./interfaces/service.interfaces";
 
 export class TestsService implements ITestsService {
@@ -92,5 +94,13 @@ export class TestsService implements ITestsService {
 
   async getAverageTestScoreByUser(userId: string): Promise<number | null> {
     return this.testsDAL.getAverageTestScoreByUser(userId);
+  }
+
+  async getRecentTestResults(
+    userId: string,
+    page: number = 1,
+    pageSize: number = 10
+  ): Promise<PaginatedResult<RecentUserTestResult>> {
+    return this.testsDAL.getRecentTestResults(userId, page, pageSize);
   }
 }

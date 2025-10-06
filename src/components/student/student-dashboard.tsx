@@ -26,6 +26,7 @@ import WelcomeCard from "@/components/student/widgets/welcome-card";
 import { PieChart, Pie, Cell } from "recharts";
 import ActivityHeatMapWidget from "@/components/student/widgets/activity-heatmap-widget";
 import AverageTestScoreWidget from "@/components/student/widgets/average-test-score-widget";
+import RecentTestResultsWidget from "@/components/student/widgets/recent-test-results-widget";
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <Typography variant="h6" sx={{ color: "custom.text.white", mb: 1 }}>
@@ -141,34 +142,7 @@ export default function StudentDashboard() {
           <AverageTestScoreWidget />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Card sx={{ backgroundColor: "custom.background.secondary" }}>
-            <CardContent>
-              <SectionTitle>Recent Test Results</SectionTitle>
-              {recentTests.length === 0 ? (
-                <SubtleText>No tests taken yet.</SubtleText>
-              ) : (
-                <Stack spacing={1}>
-                  {recentTests.map((t) => (
-                    <Box key={t.id}>
-                      <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        justifyContent="space-between"
-                        alignItems={{ xs: "flex-start", sm: "center" }}
-                        gap={1}
-                      >
-                        <WhiteText variant="subtitle2">{t.title}</WhiteText>
-                        <LightText variant="body2">
-                          {new Date(t.createdAt).toLocaleDateString()} •{" "}
-                          {Math.round(t.score)}%
-                        </LightText>
-                      </Stack>
-                      <Divider sx={{ my: 1, opacity: 0.1 }} />
-                    </Box>
-                  ))}
-                </Stack>
-              )}
-            </CardContent>
-          </Card>
+          <RecentTestResultsWidget />
         </Grid>
       </Grid>
 
