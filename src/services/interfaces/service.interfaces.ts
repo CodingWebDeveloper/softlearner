@@ -381,6 +381,34 @@ export interface IBookmarksService {
   deleteBookmark(userId: string, courseId: string): Promise<void>;
 }
 
+// Orders KPI analytics
+export type OrdersKpiGranularity = "month" | "week" | "day";
+export type OrdersRevenueSeriesPoint = {
+  periodStart: string; // ISO date at start of bucket (UTC)
+  total: number;
+};
+
+export interface IOrdersKpiService {
+  getTotalRevenue(
+    creatorId: string,
+    opts?: { currency?: string; from?: string; to?: string }
+  ): Promise<number>;
+  getCurrentMonthRevenue(
+    creatorId: string,
+    opts?: { currency?: string }
+  ): Promise<number>;
+  getRevenueSeries(
+    creatorId: string,
+    opts?: {
+      granularity?: OrdersKpiGranularity;
+      periodMonths?: number;
+      currency?: string;
+      from?: string;
+      to?: string;
+    }
+  ): Promise<OrdersRevenueSeriesPoint[]>;
+}
+
 export interface IOrdersService {
   getOrdersByCourseId(courseId: string): Promise<SimpleOrder[]>;
 }

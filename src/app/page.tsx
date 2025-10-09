@@ -8,6 +8,7 @@ import {
 } from "@/components/styles/infrastructure/layout.styles";
 import { useSupabase } from "@/contexts/supabase-context";
 import StudentDashboard from "@/components/student/student-dashboard";
+import CreatorDashboard from "@/components/creator/courses/analytics/creator-dashboard";
 
 const Home = () => {
   // Custom hooks
@@ -15,7 +16,11 @@ const Home = () => {
 
   return (
     <ContentContainer maxWidth="xl">
-      {userProfile?.role === "student" && <StudentDashboard />}
+      {userProfile?.role === "student" ? (
+        <StudentDashboard />
+      ) : (
+        <CreatorDashboard />
+      )}
     </ContentContainer>
   );
 };

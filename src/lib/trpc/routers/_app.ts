@@ -10,6 +10,7 @@ import { testsRouter } from "./tests-router";
 import { usersRouter } from "./users-router";
 import { ordersRouter } from "./orders-router";
 import { creatorApplicationsRouter } from "./creator-applications-router";
+import { ordersKpiRouter } from "./orders-kpi-router";
 import { router } from "../trpc";
 
 export const appRouter = router({
@@ -25,6 +26,7 @@ export const appRouter = router({
   users: usersRouter,
   creatorApplications: creatorApplicationsRouter,
   orders: ordersRouter,
+  ordersKpi: ordersKpiRouter,
 });
 
 export type AppRouter = typeof appRouter;
