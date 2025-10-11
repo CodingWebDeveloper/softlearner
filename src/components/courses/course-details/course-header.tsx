@@ -49,7 +49,7 @@ const CourseHeader: FC<CourseHeaderProps> = ({ course, instructor }) => {
 
       <InstructorBox>
         <AvatarImage
-          avatarUrl={instructor.avatar || undefined}
+          avatarUrl={instructor.avatar}
           alt={instructor.name}
           size="medium"
         >

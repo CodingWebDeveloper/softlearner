@@ -180,18 +180,6 @@ export const DesktopNavigation = ({
       path: "/creator/courses",
       description: "Manage your created courses",
     },
-    {
-      label: "Analytics",
-      icon: <AnalyticsIcon />,
-      path: "/creator/analytics",
-      description: "View course performance",
-    },
-    {
-      label: "Earnings",
-      icon: <PaymentsIcon />,
-      path: "/creator/earnings",
-      description: "Track your earnings",
-    },
   ];
 
   const filteredItems = navigationItems.filter((item) => {

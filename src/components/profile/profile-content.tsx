@@ -24,15 +24,15 @@ export const ProfileContent = () => {
           <BioSection />
         </Grid>
 
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <ChangePasswordSection />
         </Grid>
 
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <ApplicationStatus />
         </Grid>
 
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <MyReviewsSection />
         </Grid>
       </Grid>

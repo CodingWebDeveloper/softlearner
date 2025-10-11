@@ -381,6 +381,53 @@ export interface IBookmarksService {
   deleteBookmark(userId: string, courseId: string): Promise<void>;
 }
 
+// Orders KPI analytics
+export type OrdersKpiGranularity = "month" | "week" | "day";
+export type OrdersRevenueSample = {
+  created_at: string;
+  total_amount: number;
+  currency: string;
+};
+
+export type TopEarningCourse = {
+  courseId: string;
+  name: string;
+  total: number;
+  currency?: string;
+};
+
+export type StudentsPerCourseItem = {
+  courseId: string;
+  name: string;
+  count: number;
+};
+
+export interface IOrdersKpiService {
+  getTotalRevenue(
+    creatorId: string,
+    opts?: { currency?: string; from?: string; to?: string }
+  ): Promise<number>;
+  getCurrentMonthRevenue(
+    creatorId: string,
+    opts?: { currency?: string }
+  ): Promise<number>;
+  getRevenueSeries(
+    creatorId: string,
+    opts?: {
+      period?: "7d" | "30d" | "1y" | null;
+      currency?: string;
+    }
+  ): Promise<OrdersRevenueSample[]>;
+  getRevenueByCourse(
+    creatorId: string,
+    opts?: { currency?: string; from?: string; to?: string; limit?: number }
+  ): Promise<TopEarningCourse[]>;
+  getStudentsByCourse(
+    creatorId: string,
+    opts?: { from?: string; to?: string; limit?: number }
+  ): Promise<StudentsPerCourseItem[]>;
+}
+
 export interface IOrdersService {
   getOrdersByCourseId(courseId: string): Promise<SimpleOrder[]>;
 }
@@ -419,6 +466,26 @@ export interface CourseProgressStatus {
   tags: boolean;
   quizzes: boolean;
   publish: boolean;
+}
+
+// Reviews KPI analytics
+export type CreatorRecentReview = {
+  id: string;
+  content: string;
+  rating: number;
+  created_at: string;
+  updated_at: string | null;
+  course_name: string;
+  user: User;
+};
+
+export interface IReviewsKpiService {
+  getCreatorRecentReviews(
+    creatorId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResult<CreatorRecentReview>>;
+  getCreatorAverageRating(creatorId: string): Promise<number | null>;
 }
 
 export interface CreateTestInput {

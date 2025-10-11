@@ -29,6 +29,8 @@ import { TestsService } from "@/services/tests.service";
 import { UsersService } from "@/services/users.service";
 import { OrdersService } from "@/services/orders.service";
 import { CreatorApplicationsService } from "@/services/creator-applications.service";
+import { OrdersKpiService } from "@/services/orders-kpi.service";
+import { ReviewsKpiService } from "@/services/reviews-kpi.service";
 
 // Interface imports
 import {
@@ -57,6 +59,8 @@ import {
   ITestsService,
   IUsersService,
   ICreatorApplicationsService,
+  IOrdersKpiService,
+  IReviewsKpiService,
 } from "@/services/interfaces/service.interfaces";
 
 // Token constants for dependency injection
@@ -88,6 +92,8 @@ export const DI_TOKENS = {
   USERS_SERVICE: "USERS_SERVICE",
   CREATOR_APPLICATIONS_SERVICE: "CREATOR_APPLICATIONS_SERVICE",
   ORDERS_SERVICE: "ORDERS_SERVICE",
+  ORDERS_KPI_SERVICE: "ORDERS_KPI_SERVICE",
+  REVIEWS_KPI_SERVICE: "REVIEWS_KPI_SERVICE",
 
   // Core dependencies
   SUPABASE: "SUPABASE",
@@ -242,5 +248,17 @@ export function registerServices(
   container.register(
     DI_TOKENS.ORDERS_SERVICE,
     (c) => new OrdersService(c.resolve(DI_TOKENS.ORDERS_DAL))
+  );
+
+  // Orders KPI Service
+  container.register<IOrdersKpiService>(
+    DI_TOKENS.ORDERS_KPI_SERVICE,
+    (c) => new OrdersKpiService(c.resolve(DI_TOKENS.SUPABASE))
+  );
+
+  // Reviews KPI Service
+  container.register<IReviewsKpiService>(
+    DI_TOKENS.REVIEWS_KPI_SERVICE,
+    (c) => new ReviewsKpiService(c.resolve(DI_TOKENS.SUPABASE))
   );
 }

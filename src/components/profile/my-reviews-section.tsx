@@ -4,22 +4,13 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import {
   Box,
   CardContent,
-  IconButton,
   List,
-  ListItem,
-  ListItemAvatar,
-  Avatar,
-  ListItemText,
-  Rating,
   Typography,
   Skeleton,
   Snackbar,
   Alert,
   Stack,
-  Tooltip,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   ProfileCard,
   ProfileCardHeader,
@@ -29,13 +20,7 @@ import { trpc } from "@/lib/trpc/client";
 import ReviewModal from "@/components/reviews/review-modal";
 import ConfirmAlert from "@/components/confirm-alert";
 import { REVIEWS_PER_PAGE } from "@/utils/constants";
-
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+import ReviewCard from "@/components/reviews/review-card";
 
 export default function MyReviewsSection() {
   const loaderRef = useRef<HTMLDivElement | null>(null);
@@ -238,65 +223,19 @@ export default function MyReviewsSection() {
           </Typography>
         ) : (
           <>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              After 24 hours, you are not able to edit or delete the review.
+            </Typography>
             <List>
               {items.map((r) => (
-                <ListItem
+                <ReviewCard
                   key={r.id}
-                  secondaryAction={
-                    <Box>
-                      <Tooltip title="Edit">
-                        <IconButton
-                          edge="end"
-                          onClick={() =>
-                            handleOpenEdit({
-                              id: r.id,
-                              content: r.content,
-                              rating: r.rating,
-                            })
-                          }
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete">
-                        <IconButton
-                          edge="end"
-                          onClick={() => handleConfirmDelete(r.id)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
+                  review={r}
+                  onEdit={({ id, content, rating }) =>
+                    handleOpenEdit({ id, content, rating })
                   }
-                >
-                  <ListItemAvatar>
-                    <Avatar>
-                      {(r.user?.full_name || "A")
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Rating
-                          name={`rating-${r.id}`}
-                          value={r.rating}
-                          readOnly
-                          size="small"
-                        />
-                        <Typography variant="body2" color="text.secondary">
-                          {formatDate(r.created_at)}
-                        </Typography>
-                      </Box>
-                    }
-                    secondary={
-                      <Typography variant="body2">{r.content}</Typography>
-                    }
-                  />
-                </ListItem>
+                  onDelete={(id) => handleConfirmDelete(id)}
+                />
               ))}
             </List>
             <Box ref={loaderRef} sx={{ height: 8 }} />
