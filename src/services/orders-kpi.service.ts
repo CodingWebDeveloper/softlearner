@@ -5,6 +5,8 @@ import {
   IOrdersKpiService,
   OrdersKpiGranularity,
   OrdersRevenueSeriesPoint,
+  TopEarningCourse,
+  StudentsPerCourseItem,
 } from "./interfaces/service.interfaces";
 
 export class OrdersKpiService implements IOrdersKpiService {
@@ -46,5 +48,19 @@ export class OrdersKpiService implements IOrdersKpiService {
       from: opts?.from,
       to: opts?.to,
     });
+  }
+
+  async getRevenueByCourse(
+    creatorId: string,
+    opts?: { currency?: string; from?: string; to?: string; limit?: number }
+  ): Promise<TopEarningCourse[]> {
+    return this.dal.getRevenueByCourse(creatorId, opts);
+  }
+
+  async getStudentsByCourse(
+    creatorId: string,
+    opts?: { from?: string; to?: string; limit?: number }
+  ): Promise<StudentsPerCourseItem[]> {
+    return this.dal.getStudentsByCourse(creatorId, opts);
   }
 }

@@ -36,9 +36,97 @@ export class OrdersKpiDAL {
     if (error) {
       throw new Error(`Error fetching total revenue: ${error.message}`);
     }
-
     const total = (data ?? []).reduce((sum, o: any) => sum + Number(o.total_amount || 0), 0);
     return Number(total.toFixed(2));
+  }
+
+  // Revenue grouped by course for a creator
+  async getRevenueByCourse(
+    creatorId: string,
+    opts?: { currency?: string; from?: string; to?: string; limit?: number }
+  ): Promise<{ courseId: string; name: string; total: number; currency?: string }[]> {
+    const { currency, from, to, limit = 10 } = opts || {};
+
+    let query = this.supabase
+      .from("orders")
+      .select(
+        `total_amount, currency, created_at, course:course_id(id, name, creator_id)`,
+        { count: "exact" }
+      )
+      .eq("status", ORDER_STATUS.SUCCEEDED)
+      .eq("course.creator_id", creatorId);
+
+    if (currency) query = query.eq("currency", currency);
+    if (from) query = query.gte("created_at", from);
+    if (to) query = query.lte("created_at", to);
+
+    const { data, error } = await query;
+    if (error) {
+      throw new Error(`Error fetching revenue by course: ${error.message}`);
+    }
+
+    // Aggregate in-memory
+    const map = new Map<string, { courseId: string; name: string; total: number; currency?: string }>();
+    for (const row of data ?? []) {
+      const course = (row as any).course as { id: string; name: string } | null;
+      if (!course?.id) continue;
+      const key = course.id;
+      const prev = map.get(key) || { courseId: course.id, name: course.name, total: 0, currency: currency || (row as any).currency };
+      prev.total += Number((row as any).total_amount || 0);
+      // If mixed currencies and no filter, omit currency for safety (keep undefined)
+      if (!currency) {
+        prev.currency = undefined;
+      }
+      map.set(key, prev);
+    }
+
+    const result = Array.from(map.values())
+      .map((r) => ({ ...r, total: Number(r.total.toFixed(2)) }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, Math.max(1, limit));
+
+    return result;
+  }
+
+  // Students per course (count of successful orders) for a creator
+  async getStudentsByCourse(
+    creatorId: string,
+    opts?: { from?: string; to?: string; limit?: number }
+  ): Promise<{ courseId: string; name: string; count: number }[]> {
+    const { from, to, limit = 10 } = opts || {};
+
+    let query = this.supabase
+      .from("orders")
+      .select(
+        `id, created_at, course:course_id(id, name, creator_id)`,
+        { count: "exact" }
+      )
+      .eq("status", ORDER_STATUS.SUCCEEDED)
+      .eq("course.creator_id", creatorId);
+
+    if (from) query = query.gte("created_at", from);
+    if (to) query = query.lte("created_at", to);
+
+    const { data, error } = await query;
+    if (error) {
+      throw new Error(`Error fetching students by course: ${error.message}`);
+    }
+
+    const map = new Map<string, { courseId: string; name: string; count: number }>();
+    for (const row of data ?? []) {
+      const course = (row as any).course as { id: string; name: string } | null;
+      if (!course?.id) continue;
+      const key = course.id;
+      const prev = map.get(key) || { courseId: course.id, name: course.name, count: 0 };
+      prev.count += 1; // each successful order counts as one enrollment
+      map.set(key, prev);
+    }
+
+    const result = Array.from(map.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, Math.max(1, limit));
+
+    return result;
   }
 
   // Current month revenue (MRR-like), filtered to the month of now()

@@ -388,6 +388,19 @@ export type OrdersRevenueSeriesPoint = {
   total: number;
 };
 
+export type TopEarningCourse = {
+  courseId: string;
+  name: string;
+  total: number;
+  currency?: string;
+};
+
+export type StudentsPerCourseItem = {
+  courseId: string;
+  name: string;
+  count: number;
+};
+
 export interface IOrdersKpiService {
   getTotalRevenue(
     creatorId: string,
@@ -407,6 +420,14 @@ export interface IOrdersKpiService {
       to?: string;
     }
   ): Promise<OrdersRevenueSeriesPoint[]>;
+  getRevenueByCourse(
+    creatorId: string,
+    opts?: { currency?: string; from?: string; to?: string; limit?: number }
+  ): Promise<TopEarningCourse[]>;
+  getStudentsByCourse(
+    creatorId: string,
+    opts?: { from?: string; to?: string; limit?: number }
+  ): Promise<StudentsPerCourseItem[]>;
 }
 
 export interface IOrdersService {
@@ -447,6 +468,26 @@ export interface CourseProgressStatus {
   tags: boolean;
   quizzes: boolean;
   publish: boolean;
+}
+
+// Reviews KPI analytics
+export type CreatorRecentReview = {
+  id: string;
+  content: string;
+  rating: number;
+  created_at: string;
+  updated_at: string | null;
+  course_name: string;
+  user: User;
+};
+
+export interface IReviewsKpiService {
+  getCreatorRecentReviews(
+    creatorId: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResult<CreatorRecentReview>>;
+  getCreatorAverageRating(creatorId: string): Promise<number | null>;
 }
 
 export interface CreateTestInput {

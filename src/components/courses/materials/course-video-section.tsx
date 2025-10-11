@@ -169,7 +169,7 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
 
       <InstructorBox>
         <AvatarImage
-          avatarUrl={course.creator?.avatar_url || undefined}
+          avatarUrl={course.creator?.avatar_url}
           alt={course.creator?.full_name || "Instructor"}
           size="small"
         >

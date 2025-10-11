@@ -32,7 +32,7 @@ import { trpc } from "@/lib/trpc/client";
 type AvatarSize = "small" | "medium" | "large";
 
 interface AvatarImageProps {
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   alt: string;
   children?: React.ReactNode;
   size?: AvatarSize;
