@@ -4,9 +4,11 @@ import { ORDER_STATUS } from "@/lib/constants/stripe-constants";
 
 export type Granularity = "month" | "week" | "day";
 
-export type RevenueSeriesPoint = {
-  periodStart: string; // ISO date at start of bucket
-  total: number;
+// Raw revenue sample for charting on client
+export type RevenueSample = {
+  created_at: string; // ISO timestamp of order creation (UTC)
+  total_amount: number;
+  currency: string;
 };
 
 export class OrdersKpiDAL {
@@ -147,28 +149,37 @@ export class OrdersKpiDAL {
   async getRevenueSeries(
     creatorId: string,
     opts?: {
-      granularity?: Granularity; // default month
-      periodMonths?: number; // default 12 (used if from/to not given)
+      // period filter: 7 days, 30 days, 1 year, or all-time when null/undefined
+      period?: "7d" | "30d" | "1y" | null;
       currency?: string;
-      from?: string; // ISO
-      to?: string; // ISO
     }
-  ): Promise<RevenueSeriesPoint[]> {
-    const granularity: Granularity = opts?.granularity || "month";
+  ): Promise<RevenueSample[]> {
+    // Compute optional time range based on period
+    const now = new Date();
+    let fromISO: string | undefined;
+    let toISO: string | undefined;
 
-    // Decide range
-    let fromISO = opts?.from;
-    let toISO = opts?.to;
-    if (!fromISO || !toISO) {
-      const months = Math.max(1, opts?.periodMonths ?? 12);
-      const now = new Date();
-      const from = new Date(now);
-      from.setMonth(from.getMonth() - (months - 1));
-      fromISO = this.startOfBucketISO(from, granularity);
-      toISO = this.endOfBucketISO(now, granularity);
+    const period = opts?.period ?? null;
+    if (period === "7d" || period === "30d") {
+      const days = period === "7d" ? 6 : 29;
+      const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+      const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+      start.setUTCDate(start.getUTCDate() - days);
+      fromISO = start.toISOString();
+      toISO = end.toISOString();
+    } else if (period === "1y") {
+      const startMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
+      startMonth.setUTCMonth(startMonth.getUTCMonth() - 11);
+      const endMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+      fromISO = startMonth.toISOString();
+      toISO = endMonth.toISOString();
+    } else {
+      // all-time: no date filter
+      fromISO = undefined;
+      toISO = undefined;
     }
 
-    // Fetch raw orders and aggregate in-memory
+    // Fetch raw orders within computed range
     let query = this.supabase
       .from("orders")
       .select(
@@ -176,31 +187,22 @@ export class OrdersKpiDAL {
         { count: "exact" }
       )
       .eq("status", ORDER_STATUS.SUCCEEDED)
-      .eq("course.creator_id", creatorId)
-      .gte("created_at", fromISO!)
-      .lte("created_at", toISO!);
+      .eq("course.creator_id", creatorId);
 
     if (opts?.currency) query = query.eq("currency", opts.currency);
+    if (fromISO) query = query.gte("created_at", fromISO);
+    if (toISO) query = query.lte("created_at", toISO);
 
     const { data, error } = await query;
     if (error) {
       throw new Error(`Error fetching revenue series: ${error.message}`);
     }
 
-    const buckets = this.buildEmptyBuckets(fromISO!, toISO!, granularity);
-
-    for (const row of data ?? []) {
-      const createdAt = new Date(row.created_at as string);
-      const key = this.bucketKey(createdAt, granularity);
-      if (key in buckets) {
-        buckets[key] += Number(row.total_amount || 0);
-      }
-    }
-
-    // Format ordered series
-    const series: RevenueSeriesPoint[] = Object.keys(buckets)
-      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-      .map((k) => ({ periodStart: k, total: Number(buckets[k].toFixed(2)) }));
+    const series: RevenueSample[] = (data ?? []).map((row: any) => ({
+      created_at: row.created_at as string,
+      total_amount: Number(row.total_amount || 0),
+      currency: (row.currency || "USD") as string,
+    }));
 
     return series;
   }

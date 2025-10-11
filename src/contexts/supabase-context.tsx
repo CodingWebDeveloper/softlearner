@@ -37,8 +37,14 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
   // Queries
+  const utils = trpc.useUtils();
   const { data: userProfile, isPending: isPendingUserProfile } =
-    trpc.users.getUserProfile.useQuery();
+    trpc.users.getUserProfile.useQuery(undefined, {
+      enabled: Boolean(user),
+      staleTime: 0,
+      refetchOnReconnect: true,
+      refetchOnWindowFocus: false,
+    });
 
   // Effects
   useEffect(() => {
@@ -68,6 +74,9 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      // Invalidate user-scoped queries on any auth change
+      utils.users.getUserProfile.invalidate();
+      utils.users.getUserRole.invalidate();
     });
 
     return () => subscription.unsubscribe();
@@ -95,6 +104,12 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    // Clear local auth state immediately
+    setUser(null);
+    setSession(null);
+    // Reset user-scoped caches to avoid showing previous user's data
+    await utils.users.getUserProfile.reset();
+    await utils.users.getUserRole.reset();
   };
 
   const resetPassword = async (email: string) => {
@@ -116,6 +131,12 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   const setRecoveryMode = (isRecovery: boolean) => {
     setIsRecoveryMode(isRecovery);
   };
+
+  // When the authenticated user changes, invalidate user-scoped queries
+  useEffect(() => {
+    utils.users.getUserProfile.invalidate();
+    utils.users.getUserRole.invalidate();
+  }, [user?.id]);
 
   const isPending = isPendingUserProfile || loading;
 

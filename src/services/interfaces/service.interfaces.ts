@@ -383,9 +383,10 @@ export interface IBookmarksService {
 
 // Orders KPI analytics
 export type OrdersKpiGranularity = "month" | "week" | "day";
-export type OrdersRevenueSeriesPoint = {
-  periodStart: string; // ISO date at start of bucket (UTC)
-  total: number;
+export type OrdersRevenueSample = {
+  created_at: string;
+  total_amount: number;
+  currency: string;
 };
 
 export type TopEarningCourse = {
@@ -413,13 +414,10 @@ export interface IOrdersKpiService {
   getRevenueSeries(
     creatorId: string,
     opts?: {
-      granularity?: OrdersKpiGranularity;
-      periodMonths?: number;
+      period?: "7d" | "30d" | "1y" | null;
       currency?: string;
-      from?: string;
-      to?: string;
     }
-  ): Promise<OrdersRevenueSeriesPoint[]>;
+  ): Promise<OrdersRevenueSample[]>;
   getRevenueByCourse(
     creatorId: string,
     opts?: { currency?: string; from?: string; to?: string; limit?: number }

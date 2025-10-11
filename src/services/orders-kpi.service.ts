@@ -4,7 +4,7 @@ import { OrdersKpiDAL } from "@/lib/dal/orders-kpi.dal";
 import {
   IOrdersKpiService,
   OrdersKpiGranularity,
-  OrdersRevenueSeriesPoint,
+  OrdersRevenueSample,
   TopEarningCourse,
   StudentsPerCourseItem,
 } from "./interfaces/service.interfaces";
@@ -33,20 +33,14 @@ export class OrdersKpiService implements IOrdersKpiService {
   async getRevenueSeries(
     creatorId: string,
     opts?: {
-      granularity?: OrdersKpiGranularity;
-      periodMonths?: number;
+      period?: "7d" | "30d" | "1y" | null;
       currency?: string;
-      from?: string;
-      to?: string;
     }
-  ): Promise<OrdersRevenueSeriesPoint[]> {
-    // Map interface types to DAL's accepted types (identical strings)
+  ): Promise<OrdersRevenueSample[]> {
+    // Pass through to DAL with new period-based options
     return this.dal.getRevenueSeries(creatorId, {
-      granularity: opts?.granularity as any,
-      periodMonths: opts?.periodMonths,
+      period: opts?.period ?? null,
       currency: opts?.currency,
-      from: opts?.from,
-      to: opts?.to,
     });
   }
 

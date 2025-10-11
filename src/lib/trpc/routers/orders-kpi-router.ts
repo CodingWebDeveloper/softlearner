@@ -19,11 +19,8 @@ const currentMonthRevenueInput = z
 
 const revenueSeriesInput = z
   .object({
-    granularity: z.enum(["month", "week", "day"]).optional(),
-    periodMonths: z.number().int().min(1).max(60).optional(),
+    period: z.enum(["7d", "30d", "1y"]).nullable().optional(),
     currency: z.string().min(1).optional(),
-    from: z.string().optional(),
-    to: z.string().optional(),
   })
   .optional();
 
