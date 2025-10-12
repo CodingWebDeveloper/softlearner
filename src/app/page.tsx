@@ -16,11 +16,8 @@ const Home = () => {
 
   return (
     <ContentContainer maxWidth="xl">
-      {userProfile?.role === "student" ? (
-        <StudentDashboard />
-      ) : (
-        <CreatorDashboard />
-      )}
+      {userProfile?.role === "student" && <StudentDashboard />}
+      {userProfile?.role === "creator" && <CreatorDashboard />}
     </ContentContainer>
   );
 };

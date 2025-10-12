@@ -53,11 +53,6 @@ type PurchasedCourse = {
   isReviewed: boolean;
 };
 
-type GetPurchasedCoursesResult = {
-  data: PurchasedCourse[];
-  totalRecords: number;
-};
-
 type OrderWithCourse = Database["public"]["Tables"]["orders"]["Row"] & {
   course: {
     id: string;

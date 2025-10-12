@@ -41,9 +41,6 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   const { data: userProfile, isPending: isPendingUserProfile } =
     trpc.users.getUserProfile.useQuery(undefined, {
       enabled: Boolean(user),
-      staleTime: 0,
-      refetchOnReconnect: true,
-      refetchOnWindowFocus: false,
     });
 
   // Effects
@@ -74,9 +71,6 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      // Invalidate user-scoped queries on any auth change
-      utils.users.getUserProfile.invalidate();
-      utils.users.getUserRole.invalidate();
     });
 
     return () => subscription.unsubscribe();
@@ -132,13 +126,7 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     setIsRecoveryMode(isRecovery);
   };
 
-  // When the authenticated user changes, invalidate user-scoped queries
-  useEffect(() => {
-    utils.users.getUserProfile.invalidate();
-    utils.users.getUserRole.invalidate();
-  }, [user?.id]);
-
-  const isPending = isPendingUserProfile || loading;
+  const isPending = (user && isPendingUserProfile) || loading;
 
   const value = {
     user,

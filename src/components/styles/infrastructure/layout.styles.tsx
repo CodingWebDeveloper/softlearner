@@ -11,9 +11,9 @@ export const MainContent = styled(Box, {
 })<{
   isMobile?: boolean;
   hasUser?: boolean;
-}>(({ isMobile, hasUser }) => ({
+}>(({ theme, isMobile, hasUser }) => ({
   flexGrow: 1,
-  backgroundColor: "#1a1b23",
+  backgroundColor: theme.palette.custom.background.dark,
   minHeight: "100vh",
   // Add margin for mobile navigation
   ...(isMobile &&
