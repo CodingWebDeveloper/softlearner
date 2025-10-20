@@ -25,7 +25,8 @@ const LayoutWrapper = ({ children }: LayoutProps) => {
   const isAuthRoute =
     pathname === "/signin" ||
     pathname === "/signup" ||
-    pathname === "/update-password";
+    pathname === "/update-password" ||
+    pathname === "/reset-password";
   if (!user && !isAuthRoute) {
     return (
       <div
