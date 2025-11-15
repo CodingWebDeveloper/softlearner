@@ -160,12 +160,6 @@ export const DesktopNavigation = ({
       description: "Manage course tags",
     },
     {
-      label: "Analytics",
-      icon: <AssessmentIcon />,
-      path: "/admin/analytics",
-      description: "Platform analytics and reports",
-    },
-    {
       label: "Security",
       icon: <SecurityIcon />,
       path: "/admin/security",

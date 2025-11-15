@@ -26,6 +26,7 @@ import { VotesService } from "@/services/votes.service";
 import { PaymentsService } from "@/services/payments.service";
 import { BookmarksService } from "@/services/bookmarks.service";
 import { TestsService } from "@/services/tests.service";
+import { AiTestsService } from "@/services/ai-tests.service";
 import { UsersService } from "@/services/users.service";
 import { OrdersService } from "@/services/orders.service";
 import { CreatorApplicationsService } from "@/services/creator-applications.service";
@@ -78,6 +79,7 @@ export const DI_TOKENS = {
   TESTS_DAL: "TESTS_DAL",
   USERS_DAL: "USERS_DAL",
   CREATOR_APPLICATIONS_DAL: "CREATOR_APPLICATIONS_DAL",
+  
 
   // Service tokens
   CATEGORIES_SERVICE: "CATEGORIES_SERVICE",
@@ -94,6 +96,7 @@ export const DI_TOKENS = {
   ORDERS_SERVICE: "ORDERS_SERVICE",
   ORDERS_KPI_SERVICE: "ORDERS_KPI_SERVICE",
   REVIEWS_KPI_SERVICE: "REVIEWS_KPI_SERVICE",
+  AI_TESTS_SERVICE: "AI_TESTS_SERVICE",
 
   // Core dependencies
   SUPABASE: "SUPABASE",
@@ -159,6 +162,8 @@ export function registerDALs(
     DI_TOKENS.TESTS_DAL,
     (c) => new TestsDAL(c.resolve(DI_TOKENS.SUPABASE))
   );
+
+  
 
   container.register<IUsersDAL>(
     DI_TOKENS.USERS_DAL,
@@ -229,6 +234,12 @@ export function registerServices(
   container.register<ITestsService>(
     DI_TOKENS.TESTS_SERVICE,
     (c) => new TestsService(c.resolve(DI_TOKENS.TESTS_DAL))
+  );
+
+  // AI Tests Service (Gemini)
+  container.register(
+    DI_TOKENS.AI_TESTS_SERVICE,
+    () => new AiTestsService()
   );
 
   container.register<IUsersService>(

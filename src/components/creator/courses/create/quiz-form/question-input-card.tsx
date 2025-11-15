@@ -21,18 +21,17 @@ import {
   StyledButton,
   WhiteText,
 } from "@/components/styles/infrastructure/layout.styles";
-import { QuestionInput } from "@/lib/store/features/questionsSlice";
 import {
   AlertInfo,
   AlertWarning,
   DeleteIconButton,
   OptionInputCard,
   StyledChip,
-  StyledDragIcon,
   StyledQuestionInputCard,
   StyledSelect,
   StyledTextField,
 } from "@/components/styles/creator/question-input-card.styles";
+import { QuestionInput } from "./quiz-questions";
 
 interface QuestionInputCardProps {
   question: QuestionInput;
@@ -45,12 +44,10 @@ const QuestionInputCard: React.FC<QuestionInputCardProps> = ({
   question,
   index,
   remove,
-  totalQuestions = 1,
 }) => {
   const { setFieldValue, handleChange, values } = useFormikContext();
 
   const theme = useTheme();
-  const canDelete = totalQuestions > 1;
   const hasOptions = question.options && question.options.length > 0;
   const correctOptionsCount =
     question.options?.filter((opt) => opt.isCorrect)?.length || 0;
@@ -80,7 +77,7 @@ const QuestionInputCard: React.FC<QuestionInputCardProps> = ({
           mb={2}
         >
           <Box display="flex" alignItems="center" gap={1}>
-            <StyledDragIcon />
+            {/* <StyledDragIcon /> */}
             <WhiteText variant="h6" component="h3">
               Question {index + 1}
             </WhiteText>
@@ -94,22 +91,13 @@ const QuestionInputCard: React.FC<QuestionInputCardProps> = ({
             )}
           </Box>
 
-          <Tooltip
-            title={
-              canDelete ? "Delete question" : "Cannot delete the last question"
-            }
+          <DeleteIconButton
+            onClick={() => remove(index)}
+            size="small"
+            hasQuestions={question.options.length > 1}
           >
-            <span>
-              <DeleteIconButton
-                onClick={() => remove(index)}
-                disabled={!canDelete}
-                size="small"
-                hasQuestions={question.options.length > 1}
-              >
-                <DeleteIcon />
-              </DeleteIconButton>
-            </span>
-          </Tooltip>
+            <DeleteIcon />
+          </DeleteIconButton>
         </Box>
 
         {/* Question Input Section */}

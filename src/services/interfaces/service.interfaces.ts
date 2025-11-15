@@ -612,6 +612,33 @@ export interface ITestsService {
   getAverageTestScoreByUser(userId: string): Promise<number | null>;
 }
 
+// AI Tests (Gemini) interfaces
+export type AiDifficulty = "easy" | "medium" | "hard";
+
+export interface AiGenerateQuestionsInput {
+  topic: string;
+  numQuestions?: number;
+  difficulty?: AiDifficulty;
+}
+
+export interface AiGeneratedOptionDto {
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface AiGeneratedQuestionDto {
+  text: string;
+  type: QuestionType;
+  points: number;
+  options: AiGeneratedOptionDto[];
+}
+
+export interface IAiTestsService {
+  generateQuestions(
+    input: AiGenerateQuestionsInput
+  ): Promise<AiGeneratedQuestionDto[]>;
+}
+
 export interface IUsersService {
   getUserDetails(userId: string): Promise<UserDetails | null>;
   getUserDetailsByUsername(username: string): Promise<UserDetails | null>;

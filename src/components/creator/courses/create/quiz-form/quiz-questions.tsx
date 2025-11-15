@@ -5,11 +5,15 @@ import { Box, CircularProgress, Alert, Snackbar, Stack } from "@mui/material";
 import { trpc } from "@/lib/trpc/client";
 import { AlertColor } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { SaveOrderButton } from "@/components/styles/creator/resources-form.styles";
 import { LightText } from "@/components/styles/infrastructure/layout.styles";
 import { FieldArray, Form, Formik } from "formik";
 import QuestionInputCard from "./question-input-card";
 import { StyledButton } from "@/components/styles/infrastructure/layout.styles";
+import GenerateAIQuestionsForm, {
+  GeneratedQuestion,
+} from "./generate-ai-questions-form";
 import * as yup from "yup";
 
 interface QuizQuestionsProps {
@@ -64,6 +68,7 @@ const QuizQuestions = ({ testId }: QuizQuestionsProps) => {
     message: "",
     severity: "success",
   });
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
 
   // TRPC hooks
   const utils = trpc.useUtils();
@@ -83,6 +88,34 @@ const QuizQuestions = ({ testId }: QuizQuestionsProps) => {
 
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleAIQuestionsGenerated = (
+    generatedQuestions: GeneratedQuestion[],
+    push: (value: QuestionInput) => void
+  ) => {
+    generatedQuestions.forEach((genQ) => {
+      const newQuestion: QuestionInput = {
+        id: crypto.randomUUID(),
+        text: genQ.text,
+        type: genQ.type,
+        points: genQ.points,
+        status: "NEW",
+        options: genQ.options.map((opt) => ({
+          id: crypto.randomUUID(),
+          text: opt.text,
+          isCorrect: opt.isCorrect,
+          status: "NEW" as Status,
+        })),
+      };
+      push(newQuestion);
+    });
+
+    setSnackbar({
+      open: true,
+      message: `${generatedQuestions.length} AI-generated questions added successfully!`,
+      severity: "success",
+    });
   };
 
   const handleSubmit = async (values: typeof initialValues) => {
@@ -163,12 +196,6 @@ const QuizQuestions = ({ testId }: QuizQuestionsProps) => {
   return (
     <Box>
       <LightText variant="h6">Questions</LightText>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      ></Box>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -176,41 +203,12 @@ const QuizQuestions = ({ testId }: QuizQuestionsProps) => {
       >
         {({ values, dirty }) => (
           <Form>
-            <FieldArray name="questions">
-              {({ push, remove }) => (
-                <Stack spacing={2}>
-                  {values.questions.map((q, qIndex) => (
-                    <>
-                      <QuestionInputCard
-                        question={q}
-                        index={qIndex}
-                        remove={remove}
-                      />
-                    </>
-                  ))}
-
-                  <StyledButton
-                    sx={{ marginInline: "auto" }}
-                    variant="outlined"
-                    startIcon={<AddIcon />}
-                    onClick={() =>
-                      push({
-                        id: crypto.randomUUID(),
-                        text: "",
-                        type: "single",
-                        points: 1,
-                        status: "NEW",
-                        options: [],
-                      })
-                    }
-                  >
-                    Add Question
-                  </StyledButton>
-                </Stack>
-              )}
-            </FieldArray>
-
-            <Box display="flex" justifyContent="flex-end" mt={3}>
+            <Box
+              display="flex"
+              marginBottom="16px"
+              justifyContent="flex-end"
+              mt={3}
+            >
               <SaveOrderButton
                 type="submit"
                 disabled={saveQuestionsMutation.isPending || !dirty}
@@ -219,9 +217,63 @@ const QuizQuestions = ({ testId }: QuizQuestionsProps) => {
                 Save Questions
               </SaveOrderButton>
             </Box>
+            <FieldArray name="questions">
+              {({ push, remove }) => (
+                <>
+                  <Stack spacing={2}>
+                    {values.questions.map((q, qIndex) => (
+                      <QuestionInputCard
+                        key={q.id}
+                        question={q}
+                        index={qIndex}
+                        remove={remove}
+                        totalQuestions={values.questions.length}
+                      />
+                    ))}
+
+                    <Box display="flex" gap={2} justifyContent="center">
+                      <StyledButton
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        onClick={() =>
+                          push({
+                            id: crypto.randomUUID(),
+                            text: "",
+                            type: "single",
+                            points: 1,
+                            status: "NEW",
+                            options: [],
+                          })
+                        }
+                      >
+                        Add Question
+                      </StyledButton>
+
+                      <StyledButton
+                        variant="outlined"
+                        color="secondary"
+                        startIcon={<AutoAwesomeIcon />}
+                        onClick={() => setIsAIDialogOpen(true)}
+                      >
+                        Generate with AI
+                      </StyledButton>
+                    </Box>
+                  </Stack>
+
+                  <GenerateAIQuestionsForm
+                    open={isAIDialogOpen}
+                    onClose={() => setIsAIDialogOpen(false)}
+                    onQuestionsGenerated={(questions) =>
+                      handleAIQuestionsGenerated(questions, push)
+                    }
+                  />
+                </>
+              )}
+            </FieldArray>
           </Form>
         )}
       </Formik>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
