@@ -28,7 +28,7 @@ type QuestionWithOptions = {
 };
 
 export class TestsDAL implements ITestsDAL {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  constructor(private supabase: SupabaseClient<Database>) { }
 
   async getTests(courseId: string): Promise<BasicTest[]> {
     const { data, error } = await this.supabase
@@ -233,8 +233,28 @@ export class TestsDAL implements ITestsDAL {
 
   async saveQuestions(data: QuestionsInput): Promise<FullTest> {
     const { testId, questions } = data;
-    
+
     try {
+      // Determine and delete removed questions
+      const { data: existingQuestions, error: existingQError } = await this.supabase
+        .from("questions")
+        .select("id")
+        .eq("test_id", testId);
+
+      if (existingQError) {
+        throw new Error(`Error fetching existing questions: ${existingQError.message}`);
+      }
+
+      const existingIds = (existingQuestions || []).map((q) => q.id as string);
+      const submittedIds = (questions || [])
+        .map((q) => q.id)
+        .filter((id): id is string => Boolean(id));
+
+      const toDeleteQuestionIds = existingIds.filter((id) => !submittedIds.includes(id));
+      for (const qId of toDeleteQuestionIds) {
+        await this.deleteQuestion(qId);
+      }
+
       for (const question of questions) {
         switch (question.status) {
           case "INITIAL":
@@ -259,8 +279,7 @@ export class TestsDAL implements ITestsDAL {
       return updatedTest;
     } catch (error) {
       throw new Error(
-        `Failed to save questions: ${
-          error instanceof Error ? error.message : "Unknown error"
+        `Failed to save questions: ${error instanceof Error ? error.message : "Unknown error"
         }`
       );
     }

@@ -53,6 +53,40 @@ This template includes a complete Supabase integration with:
 
 For detailed setup instructions, see [SUPABASE_SETUP.md](./SUPABASE_SETUP.md).
 
+## Stripe Webhook (local)
+
+Follow these steps to receive Stripe events locally and update order statuses via the webhook at `/api/webhooks/stripe`.
+
+- **Prerequisites**
+  - Stripe account and [Stripe CLI](https://stripe.com/docs/stripe-cli) installed
+  - `.env.local` configured (see `helper-context-files/env.example`)
+
+- **Required environment variables**
+  - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_WEBHOOK_SECRET` (provided by Stripe CLI after listening)
+
+- **Start dev server**
+  ```bash
+  npm run dev
+  ```
+
+- **Start Stripe CLI forwarding** (in a new terminal)
+  ```bash
+  stripe listen --forward-to localhost:3000/api/webhooks/stripe
+  ```
+  Copy the displayed "webhook signing secret" and set it as `STRIPE_WEBHOOK_SECRET` in `.env.local`. Restart the dev server after updating envs.
+
+- **Trigger test events (optional)**
+  ```bash
+  stripe trigger checkout.session.completed
+  stripe trigger checkout.session.expired
+  ```
+
+- **Production**
+  - Create a webhook endpoint in the Stripe Dashboard pointing to `https://<your-domain>/api/webhooks/stripe`
+  - Use the production signing secret as `STRIPE_WEBHOOK_SECRET` in your production environment
+
 ## Project Structure
 
 ```

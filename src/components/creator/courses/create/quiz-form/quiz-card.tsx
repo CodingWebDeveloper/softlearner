@@ -15,7 +15,6 @@ import { alpha, styled } from "@mui/material/styles";
 import QuizIcon from "@mui/icons-material/Quiz";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MoreIcon from "@mui/icons-material/More";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import ConfirmAlert from "@/components/confirm-alert";
@@ -46,11 +45,6 @@ const TitleIconWrapper = styled(Box)(({ theme }) => ({
 const StyledQuizIcon = styled(QuizIcon)(({ theme }) => ({
   fontSize: "2rem",
   marginRight: theme.spacing(1),
-}));
-
-const StyledAddIcon = styled(AddCircleOutlineIcon)(({ theme }) => ({
-  fontSize: "1.5rem",
-  color: theme.palette.custom.accent.teal,
 }));
 
 const StyledMenu = styled((props: MenuProps) => (
@@ -106,18 +100,24 @@ interface QuizCardProps {
   onDelete: (quizId: string) => void;
 }
 
-const QuizCard = ({ quiz, onClick, onAddQuestions, onDelete }: QuizCardProps) => {
+const QuizCard = ({
+  quiz,
+  onClick,
+  onAddQuestions,
+  onDelete,
+}: QuizCardProps) => {
   // States
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Handlers
-  const handleAddQuestions = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleAddQuestions = () => {
     onAddQuestions(quiz.id);
+    handleClose();
   };
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
@@ -142,7 +142,7 @@ const QuizCard = ({ quiz, onClick, onAddQuestions, onDelete }: QuizCardProps) =>
   const open = Boolean(anchorEl);
 
   return (
-    <StyledCard>
+    <StyledCard onClick={handleAddQuestions}>
       <CardContent>
         <IconWrapper>
           <TitleIconWrapper>
@@ -195,22 +195,12 @@ const QuizCard = ({ quiz, onClick, onAddQuestions, onDelete }: QuizCardProps) =>
           <EditIcon />
           Edit
         </MenuItem>
-        <MenuItem
-          onClick={(e) => {
-            handleAddQuestions(e);
-            handleClose();
-          }}
-          disableRipple
-        >
-          <StyledAddIcon />
-          Add Questions
-        </MenuItem>
         <MenuItem onClick={handleDeleteClick} disableRipple>
           <DeleteIcon />
           Delete
         </MenuItem>
       </StyledMenu>
-      
+
       <ConfirmAlert
         open={showDeleteConfirm}
         onClose={handleDeleteCancel}

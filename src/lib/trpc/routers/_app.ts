@@ -13,6 +13,7 @@ import { creatorApplicationsRouter } from "./creator-applications-router";
 import { ordersKpiRouter } from "./orders-kpi-router";
 import { reviewsKpiRouter } from "./reviews-kpi-router";
 import { router } from "../trpc";
+import { aiTestsRouter } from "./ai-tests-router";
 
 export const appRouter = router({
   courses: coursesRouter,
@@ -29,6 +30,7 @@ export const appRouter = router({
   orders: ordersRouter,
   ordersKpi: ordersKpiRouter,
   reviewsKpi: reviewsKpiRouter,
+  aiTests: aiTestsRouter,
 });
 
 export type AppRouter = typeof appRouter;

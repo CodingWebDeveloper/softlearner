@@ -1,14 +1,10 @@
 "use client";
 
 import { ContentContainer } from "@/components/styles/home-page/home-page.styles";
-import {
-  LightText,
-  PageHeader,
-  WhiteText,
-} from "@/components/styles/infrastructure/layout.styles";
 import { useSupabase } from "@/contexts/supabase-context";
 import StudentDashboard from "@/components/student/student-dashboard";
 import CreatorDashboard from "@/components/creator/courses/analytics/creator-dashboard";
+import AdminDashboard from "@/components/admin/admin-dashboard";
 
 const Home = () => {
   // Custom hooks
@@ -16,6 +12,7 @@ const Home = () => {
 
   return (
     <ContentContainer maxWidth="xl">
+      {userProfile?.role === "admin" && <AdminDashboard />}
       {userProfile?.role === "student" && <StudentDashboard />}
       {userProfile?.role === "creator" && <CreatorDashboard />}
     </ContentContainer>

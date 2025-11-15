@@ -232,17 +232,6 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
 
   return (
     <Box>
-      <HeaderContainer>
-        <LightText variant="h5">Course Quizzes</LightText>
-        <StyledButton
-          startIcon={<AddIcon />}
-          onClick={handleAddQuiz}
-          variant="contained"
-        >
-          Add Quiz
-        </StyledButton>
-      </HeaderContainer>
-
       {selectedQuiz ? (
         <Box mt={4}>
           <Box
@@ -260,6 +249,16 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
         </Box>
       ) : (
         <>
+          <HeaderContainer>
+            <LightText variant="h5">Course Quizzes</LightText>
+            <StyledButton
+              startIcon={<AddIcon />}
+              onClick={handleAddQuiz}
+              variant="contained"
+            >
+              Add Quiz
+            </StyledButton>
+          </HeaderContainer>
           {quizzes && quizzes.length > 0 ? (
             <Box
               display="grid"
