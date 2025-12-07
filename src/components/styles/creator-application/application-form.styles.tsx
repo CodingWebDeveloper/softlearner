@@ -23,6 +23,6 @@ export const PortfolioChipsContainer = styled(Box)(({ theme }) => ({
   gap: theme.spacing(1),
 }));
 
-export const StyledButton = styled(Button)(({ theme }) => ({
+export const StyledButton = styled(Button)(({}) => ({
   textTransform: "none",
 }));

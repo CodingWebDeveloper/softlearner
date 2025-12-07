@@ -13,7 +13,7 @@ import {
 } from "@/utils/currency";
 
 const TotalRevenueCard: React.FC = () => {
-  const { data, isLoading, isError } = trpc.ordersKpi.getTotalRevenue.useQuery();
+  const { data, isLoading } = trpc.ordersKpi.getTotalRevenue.useQuery();
 
   const [userCurrency] = useState(() => detectUserCurrency());
   const [rates, setRates] = useState<Rates | null>(null);

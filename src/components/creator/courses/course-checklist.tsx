@@ -75,6 +75,8 @@ export default function CourseChecklist({
         setMinimized(false);
       }
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allComplete, progressStatusPending]);
 
   if (progressStatusPending || !Boolean(status) || minimized === null) {

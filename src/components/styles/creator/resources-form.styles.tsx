@@ -8,7 +8,6 @@ import {
   RadioGroup,
   Typography,
   Stack,
-  Skeleton,
 } from "@mui/material";
 
 export const FormContainer = styled("div")(({ theme }) => ({
@@ -167,18 +166,18 @@ export const FormSectionContainer = styled(Box)(({ theme }) => ({
 
 // Loading Container
 export const LoadingContainer = styled(FormContainer)(({ theme }) => ({
-  '& .MuiSkeleton-root': {
+  "& .MuiSkeleton-root": {
     backgroundColor: theme.palette.custom.background.tertiary,
   },
 }));
 
 // Grid Layout for Resource Details
 export const ResourceDetailsGridResponsive = styled(Box)(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: '1fr',
+  display: "grid",
+  gridTemplateColumns: "1fr",
   gap: theme.spacing(2),
-  [theme.breakpoints.up('md')]: {
-    gridTemplateColumns: '1fr 200px',
+  [theme.breakpoints.up("md")]: {
+    gridTemplateColumns: "1fr 200px",
   },
 }));
 
@@ -189,20 +188,20 @@ export const FormStack = styled(Stack)(({ theme }) => ({
 
 // Typography with icon styling
 export const IconTypography = styled(Typography)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: theme.spacing(1),
 }));
 
 // Hidden file input
-export const HiddenFileInput = styled('input')(() => ({
-  display: 'none',
+export const HiddenFileInput = styled("input")(() => ({
+  display: "none",
 }));
 
 // Upload label wrapper
-export const UploadLabel = styled('label')(() => ({
-  cursor: 'pointer',
-  width: '100%',
+export const UploadLabel = styled("label")(() => ({
+  cursor: "pointer",
+  width: "100%",
 }));
 
 export const ButtonGroup = styled("div")(({ theme }) => ({

@@ -39,6 +39,6 @@ export const ReapplyMessage = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(2),
 }));
 
-export const ApplyButton = styled(Button)(({ theme }) => ({
+export const ApplyButton = styled(Button)(({}) => ({
   textTransform: "none",
 }));

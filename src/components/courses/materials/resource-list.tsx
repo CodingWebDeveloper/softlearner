@@ -66,6 +66,8 @@ const ResourceList: FC<ResourceListProps> = ({ courseId }) => {
         }
       }
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resources]);
 
   // Scroll to selected resource

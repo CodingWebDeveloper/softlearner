@@ -30,6 +30,8 @@ const ResetPasswordPage = () => {
     if (!loading && user) {
       router.push("/");
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user]);
 
   // Ensure recovery mode is false on reset password page

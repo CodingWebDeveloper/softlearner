@@ -8,7 +8,7 @@ export const ordersRouter = router({
     .input(z.string().uuid())
     .query(async ({ ctx, input: courseId }) => {
       const ordersService = ctx.container.resolve<IOrdersService>(
-        DI_TOKENS.ORDERS_SERVICE as any
+        DI_TOKENS.ORDERS_SERVICE
       );
       return ordersService.getOrdersByCourseId(courseId);
     }),

@@ -25,7 +25,7 @@ import ReviewModal, {
   ReviewFormValues,
 } from "@/components/reviews/review-modal";
 import { trpc } from "@/lib/trpc/client";
-import { enqueueSnackbar, useSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 
 const CourseProgressCard = ({ course }: { course: PurchasedCourse }) => {
   // General hooks

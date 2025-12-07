@@ -1065,8 +1065,6 @@ export class CoursesDAL implements ICoursesDAL {
 
   async getCourseProgressData(
     userId: string,
-    page: number = 1,
-    pageSize: number = 15
   ): Promise<PaginatedResult<CourseProgressItem>> {
     // Get enrolled course IDs
     const { data: orders, error: ordersError } = await this.supabase
@@ -1124,10 +1122,6 @@ export class CoursesDAL implements ICoursesDAL {
       if (byTotal !== 0) return byTotal;
       return a.name.localeCompare(b.name);
     });
-
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize;
-    const paginatedData = progressData.slice(from, to);
 
     return {
       data: progressData as CourseProgressItem[],

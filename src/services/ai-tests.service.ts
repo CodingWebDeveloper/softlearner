@@ -46,7 +46,7 @@ export class AiTestsService implements IAiTestsService {
     let data: any;
     try {
       data = JSON.parse(extractJsonString(text));
-    } catch (e) {
+    } catch {
       const retry = await this.genAI.models.generateContent({
         model: "gemini-2.0-flash-001",
         contents: [
