@@ -30,6 +30,8 @@ const SignInPage = () => {
     if (!loading && user) {
       router.push("/");
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user]);
 
   // Show loading while checking authentication

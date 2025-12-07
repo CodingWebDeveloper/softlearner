@@ -228,7 +228,7 @@ export const CloseButtonContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(0.5),
 }));
 
-export const CloseButtonStyled = styled(IconButton)(({ theme }) => ({
+export const CloseButtonStyled = styled(IconButton)(({}) => ({
   color: "white",
 }));
 
@@ -243,7 +243,7 @@ export const DividerStyled = styled(Divider)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }));
 
-export const ClickablePreviewBox = styled(SidebarPreviewBox)(({ theme }) => ({
+export const ClickablePreviewBox = styled(SidebarPreviewBox)(({}) => ({
   cursor: "pointer",
 }));
 
@@ -255,7 +255,7 @@ export const BackIconButton = styled(IconButton)(({ theme }) => ({
   alignSelf: "flex-start",
 }));
 
-export const InstructorAvatar = styled(Avatar)(({ theme }) => ({
+export const InstructorAvatar = styled(Avatar)(({}) => ({
   width: 56,
   height: 56,
 }));

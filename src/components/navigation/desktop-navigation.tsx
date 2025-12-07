@@ -16,11 +16,8 @@ import {
   People as PeopleIcon,
   Category as CategoryIcon,
   LocalOffer as TagIcon,
-  Assessment as AssessmentIcon,
   Security as SecurityIcon,
   OndemandVideo as VideoIcon,
-  Analytics as AnalyticsIcon,
-  Payments as PaymentsIcon,
 } from "@mui/icons-material";
 import {
   SidebarContainer,

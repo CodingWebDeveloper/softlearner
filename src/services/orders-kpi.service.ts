@@ -3,7 +3,6 @@ import { Database } from "@/lib/database/database.types";
 import { OrdersKpiDAL } from "@/lib/dal/orders-kpi.dal";
 import {
   IOrdersKpiService,
-  OrdersKpiGranularity,
   OrdersRevenueSample,
   TopEarningCourse,
   StudentsPerCourseItem,

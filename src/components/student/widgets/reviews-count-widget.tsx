@@ -8,14 +8,24 @@ const ReviewsCountWidget: React.FC = () => {
   const { data, isPending, isError } = trpc.courses.getReviewsCount.useQuery();
 
   return (
-    <Card sx={{ backgroundColor: "custom.background.secondary", height: "100%" }}>
+    <Card
+      sx={{ backgroundColor: "custom.background.secondary", height: "100%" }}
+    >
       <CardContent>
         {isPending ? (
           <Skeleton variant="rounded" height={48} />
         ) : isError ? (
-          <OneValueStat label="Total Reviews" value={"—" as any} helpText="Given by you" />
+          <OneValueStat
+            label="Total Reviews"
+            value={"—"}
+            helpText="Given by you"
+          />
         ) : (
-          <OneValueStat label="Total Reviews" value={data ?? 0} helpText="Given by you" />
+          <OneValueStat
+            label="Total Reviews"
+            value={data ?? 0}
+            helpText="Given by you"
+          />
         )}
       </CardContent>
     </Card>

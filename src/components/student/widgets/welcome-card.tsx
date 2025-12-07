@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { Card, CardContent, Box, Typography, Button } from "@mui/material";
+import { Card, CardContent, Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { trpc } from "@/lib/trpc/client";
 

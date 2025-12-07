@@ -20,7 +20,7 @@ export const AdminActionIcon = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }));
 
-export const AdminActionButton = styled(Button)(({ theme }) => ({
+export const AdminActionButton = styled(Button)(({}) => ({
   fontSize: "0.875rem",
 }));
 

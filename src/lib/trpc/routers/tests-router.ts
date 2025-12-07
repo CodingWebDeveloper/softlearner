@@ -3,14 +3,6 @@ import { ITestsService } from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
 import { router, protectedProcedure } from "../trpc";
 
-const updateTestInput = z.object({
-  id: z.string().uuid(),
-  data: z.object({
-    title: z.string().min(3).max(100),
-    description: z.string().max(500),
-  }),
-});
-
 export const testsRouter = router({
   getTests: protectedProcedure
     .input(z.string().uuid())

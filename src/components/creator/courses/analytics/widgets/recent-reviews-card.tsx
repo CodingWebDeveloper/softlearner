@@ -4,7 +4,6 @@ import React, { useMemo } from "react";
 import AnalyticsCard from "../analytics-card";
 import { trpc } from "@/lib/trpc/client";
 import {
-  Avatar,
   Box,
   Divider,
   List,
