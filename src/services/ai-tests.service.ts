@@ -22,7 +22,7 @@ export class AiTestsService implements IAiTestsService {
       "Do not include explanations or markdown. Make options concise and unambiguous.",
     ].join("\n");
     const response = await this.genAI.models.generateContent({
-      model: "gemini-2.0-flash-001",
+      model: "gemini-2.5-flash",
       contents: [
         { role: "user", parts: [{ text: prompt }] },
       ],
