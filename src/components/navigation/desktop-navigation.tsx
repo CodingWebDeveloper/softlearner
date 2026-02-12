@@ -138,30 +138,30 @@ export const DesktopNavigation = ({
       path: "/admin/creator-applications",
       description: "Review creator applications",
     },
-    {
-      label: "User Management",
-      icon: <PeopleIcon />,
-      path: "/admin/users",
-      description: "Manage platform users",
-    },
-    {
-      label: "Categories",
-      icon: <CategoryIcon />,
-      path: "/admin/categories",
-      description: "Manage course categories",
-    },
-    {
-      label: "Tags",
-      icon: <TagIcon />,
-      path: "/admin/tags",
-      description: "Manage course tags",
-    },
-    {
-      label: "Security",
-      icon: <SecurityIcon />,
-      path: "/admin/security",
-      description: "Security settings and logs",
-    },
+    // {
+    //   label: "User Management",
+    //   icon: <PeopleIcon />,
+    //   path: "/admin/users",
+    //   description: "Manage platform users",
+    // },
+    // {
+    //   label: "Categories",
+    //   icon: <CategoryIcon />,
+    //   path: "/admin/categories",
+    //   description: "Manage course categories",
+    // },
+    // {
+    //   label: "Tags",
+    //   icon: <TagIcon />,
+    //   path: "/admin/tags",
+    //   description: "Manage course tags",
+    // },
+    // {
+    //   label: "Security",
+    //   icon: <SecurityIcon />,
+    //   path: "/admin/security",
+    //   description: "Security settings and logs",
+    // },
   ];
 
   const creatorActionItems: CreatorActionItem[] = [

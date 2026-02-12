@@ -31,7 +31,7 @@ const validationSchema = Yup.object({
     .min(0, "Price must be greater than or equal to 0"),
   new_price: Yup.number().min(
     0,
-    "New Price must be greater than or equal to 0"
+    "New Price must be greater than or equal to 0",
   ),
   categoryId: Yup.string().required("Category is required"),
   videoUrl: Yup.string().required("Video URL is required"),
@@ -57,10 +57,10 @@ const UpdateGeneralForm = ({ courseId }: UpdateGeneralFormProps) => {
     error: errorCourse,
   } = trpc.courses.getCourseDataById.useQuery(courseId);
 
-  const { data: thumbData, isPending: isLoadingThumbnail } =
+  const { data: thumbData, isLoading: isLoadingThumbnail } =
     trpc.courses.getThumbnail.useQuery(
       { path: courseData?.thumbnail_image_url || "" },
-      { enabled: Boolean(courseData?.thumbnail_image_url) }
+      { enabled: Boolean(courseData?.thumbnail_image_url) },
     );
 
   const initialValues = {
@@ -99,7 +99,7 @@ const UpdateGeneralForm = ({ courseId }: UpdateGeneralFormProps) => {
         {
           variant: "error",
           anchorOrigin: { vertical: "bottom", horizontal: "center" },
-        }
+        },
       );
     }
   };

@@ -76,7 +76,7 @@ export class CoursesDAL implements ICoursesDAL {
 
   async createCourse(
     creatorId: string,
-    params: CreateCourseParams
+    params: CreateCourseParams,
   ): Promise<SimpleCourse> {
     // Create course record first
     const { data: courseData, error: courseError } = await this.supabase
@@ -98,7 +98,7 @@ export class CoursesDAL implements ICoursesDAL {
         *,
         creator:creator_id(*),
         category:category_id(*)
-      `
+      `,
       )
       .single();
 
@@ -114,7 +114,7 @@ export class CoursesDAL implements ICoursesDAL {
     await this.uploadCourseThumbnail(
       creatorId,
       course.id,
-      params.thumbnail_image as File
+      params.thumbnail_image as File,
     );
 
     const basicCourse: SimpleCourse = {
@@ -139,7 +139,7 @@ export class CoursesDAL implements ICoursesDAL {
   async uploadCourseThumbnail(
     creatorId: string,
     courseId: string,
-    file: File
+    file: File,
   ): Promise<string> {
     // Upload the thumbnail
     const { data: uploadData, error: uploadError } = await this.supabase.storage
@@ -166,7 +166,7 @@ export class CoursesDAL implements ICoursesDAL {
         .remove([uploadData.path])
         .catch(console.error);
       throw new Error(
-        `Error updating course thumbnail: ${updateError.message}`
+        `Error updating course thumbnail: ${updateError.message}`,
       );
     }
 
@@ -189,7 +189,7 @@ export class CoursesDAL implements ICoursesDAL {
         category:category_id(*), 
         reviews!course_id(rating),
         bookmarks!course_id(id)`,
-      { count: "exact" }
+      { count: "exact" },
     );
 
     // Only show published courses for public consumption
@@ -219,7 +219,7 @@ export class CoursesDAL implements ICoursesDAL {
       if (taggedCourseIds.data) {
         query = query.in(
           "id",
-          taggedCourseIds.data.map((row) => row.course_id)
+          taggedCourseIds.data.map((row) => row.course_id),
         );
       }
     }
@@ -264,7 +264,7 @@ export class CoursesDAL implements ICoursesDAL {
         };
 
         return basicCourse;
-      }
+      },
     );
 
     return {
@@ -275,7 +275,7 @@ export class CoursesDAL implements ICoursesDAL {
 
   async getCourseById(
     id: string,
-    userId?: string
+    userId?: string,
   ): Promise<BasicCourse | null> {
     const query = this.supabase
       .from("courses")
@@ -286,7 +286,7 @@ export class CoursesDAL implements ICoursesDAL {
         category:category_id(*),
         reviews!course_id(rating),
         bookmarks!course_id(id)
-      `
+      `,
       )
       .eq("id", id)
       .eq("is_published", true); // Only return published courses for public access
@@ -339,7 +339,7 @@ export class CoursesDAL implements ICoursesDAL {
       .select(
         `*,
         creator:creator_id(*),
-        category:category_id(*)`
+        category:category_id(*)`,
       )
       .eq("id", id)
       .maybeSingle();
@@ -392,7 +392,7 @@ export class CoursesDAL implements ICoursesDAL {
   async getBookmarkedCourses(
     userId: string,
     page: number = 1,
-    pageSize: number = 15
+    pageSize: number = 15,
   ): Promise<GetCoursesResult> {
     // Calculate pagination
     const from = (page - 1) * pageSize;
@@ -414,7 +414,7 @@ export class CoursesDAL implements ICoursesDAL {
           reviews!course_id(rating)
         )
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .eq("user_id", userId)
       .eq("course.is_published", true)
@@ -467,7 +467,7 @@ export class CoursesDAL implements ICoursesDAL {
     page: number = 1,
     pageSize: number = 15,
     sortBy: "name" | "orderCreatedAt" = "orderCreatedAt",
-    sortDir: "asc" | "desc" = "desc"
+    sortDir: "asc" | "desc" = "desc",
   ): Promise<PaginatedResult<PurchasedCourse>> {
     // Calculate pagination
     const from = (page - 1) * pageSize;
@@ -494,7 +494,7 @@ export class CoursesDAL implements ICoursesDAL {
           )
         )
         `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .eq("user_id", userId)
       .eq("status", ORDER_STATUS.SUCCEEDED)
@@ -525,11 +525,12 @@ export class CoursesDAL implements ICoursesDAL {
             id: resource.id,
             completed:
               resource.user_resources?.some(
-                (ur) => ur.user_id === userId && ur.completed
+                (ur) => ur.user_id === userId && ur.completed,
               ) ?? false,
           })),
           orderCreatedAt: order.created_at,
-          isReviewed: course.reviews?.some((r) => r.user_id === userId) ?? false,
+          isReviewed:
+            course.reviews?.some((r) => r.user_id === userId) ?? false,
         };
       }) || [];
 
@@ -541,7 +542,7 @@ export class CoursesDAL implements ICoursesDAL {
 
   async getCourseMaterialsById(
     id: string,
-    userId?: string
+    userId?: string,
   ): Promise<FullCourse | null> {
     let query = this.supabase
       .from("courses")
@@ -551,7 +552,7 @@ export class CoursesDAL implements ICoursesDAL {
         creator:creator_id(*),
         category:category_id(*),
         bookmarks!course_id(id)
-      `
+      `,
       )
       .eq("id", id);
 
@@ -603,7 +604,7 @@ export class CoursesDAL implements ICoursesDAL {
     page: number = 1,
     pageSize: number = 15,
     sortBy?: "name" | "category" | "price" | "created_at" | "updated_at",
-    sortDir: "asc" | "desc" = "desc"
+    sortDir: "asc" | "desc" = "desc",
   ): Promise<PaginatedResult<SimpleCourse>> {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
@@ -613,11 +614,11 @@ export class CoursesDAL implements ICoursesDAL {
       sortBy === "category"
         ? "category.name"
         : sortBy === "name" ||
-          sortBy === "price" ||
-          sortBy === "created_at" ||
-          sortBy === "updated_at"
-        ? sortBy
-        : "created_at";
+            sortBy === "price" ||
+            sortBy === "created_at" ||
+            sortBy === "updated_at"
+          ? sortBy
+          : "created_at";
 
     let query = this.supabase
       .from("courses")
@@ -625,7 +626,7 @@ export class CoursesDAL implements ICoursesDAL {
         `*,
         creator:creator_id(*),
         category:category_id(*)`,
-        { count: "exact" }
+        { count: "exact" },
       )
       .eq("creator_id", creatorId)
       .range(from, to);
@@ -670,7 +671,7 @@ export class CoursesDAL implements ICoursesDAL {
   async updateCourse(
     creatorId: string,
     courseId: string,
-    params: CreateCourseParams
+    params: CreateCourseParams,
   ): Promise<SimpleCourse> {
     // Verify ownership and fetch existing course
     const { data: existing, error: fetchError } = await this.supabase
@@ -707,7 +708,7 @@ export class CoursesDAL implements ICoursesDAL {
       const { data: uploadData, error: uploadError } =
         await this.supabase.storage
           .from("course-thumbnails")
-          .upload(courseId, params.thumbnail_image);
+          .upload(courseId, params.thumbnail_image, { upsert: true });
 
       if (uploadError) {
         throw new Error(`Error uploading thumbnail: ${uploadError.message}`);
@@ -733,7 +734,7 @@ export class CoursesDAL implements ICoursesDAL {
       .select(
         `*,
         creator:creator_id(*),
-        category:category_id(*)`
+        category:category_id(*)`,
       )
       .single();
 
@@ -779,7 +780,7 @@ export class CoursesDAL implements ICoursesDAL {
 
     if (fetchError) {
       throw new Error(
-        `Error fetching course before delete: ${fetchError.message}`
+        `Error fetching course before delete: ${fetchError.message}`,
       );
     }
 
@@ -829,7 +830,7 @@ export class CoursesDAL implements ICoursesDAL {
   async togglePublishStatus(
     creatorId: string,
     courseId: string,
-    isPublished: boolean
+    isPublished: boolean,
   ): Promise<void> {
     // Verify ownership first
     const { data: existing, error: fetchError } = await this.supabase
@@ -861,7 +862,7 @@ export class CoursesDAL implements ICoursesDAL {
 
     if (updateError) {
       throw new Error(
-        `Error updating course publish status: ${updateError.message}`
+        `Error updating course publish status: ${updateError.message}`,
       );
     }
   }
@@ -882,7 +883,7 @@ export class CoursesDAL implements ICoursesDAL {
 
     if (courseError) {
       throw new Error(
-        `Error fetching course publish status: ${courseError.message}`
+        `Error fetching course publish status: ${courseError.message}`,
       );
     }
 
@@ -899,7 +900,7 @@ export class CoursesDAL implements ICoursesDAL {
 
     if (resourceError) {
       throw new Error(
-        `Error fetching course resources count: ${resourceError.message}`
+        `Error fetching course resources count: ${resourceError.message}`,
       );
     }
 
@@ -941,7 +942,9 @@ export class CoursesDAL implements ICoursesDAL {
       .eq("course_id", courseId);
 
     if (resourcesError) {
-      throw new Error(`Error fetching course resources: ${resourcesError.message}`);
+      throw new Error(
+        `Error fetching course resources: ${resourcesError.message}`,
+      );
     }
 
     const resourceIds = (resources ?? []).map((r) => r.id);
@@ -955,7 +958,9 @@ export class CoursesDAL implements ICoursesDAL {
       .eq("status", ORDER_STATUS.SUCCEEDED);
 
     if (ordersError) {
-      throw new Error(`Error fetching course enrollments: ${ordersError.message}`);
+      throw new Error(
+        `Error fetching course enrollments: ${ordersError.message}`,
+      );
     }
 
     const userIds = Array.from(new Set((orders ?? []).map((o) => o.user_id)));
@@ -971,7 +976,7 @@ export class CoursesDAL implements ICoursesDAL {
 
     if (completedError) {
       throw new Error(
-        `Error counting completed resources: ${completedError.message}`
+        `Error counting completed resources: ${completedError.message}`,
       );
     }
 
@@ -1018,10 +1023,14 @@ export class CoursesDAL implements ICoursesDAL {
       .eq("status", ORDER_STATUS.SUCCEEDED);
 
     if (ordersError) {
-      throw new Error(`Error fetching enrolled courses: ${ordersError.message}`);
+      throw new Error(
+        `Error fetching enrolled courses: ${ordersError.message}`,
+      );
     }
 
-    const courseIds = Array.from(new Set((orders ?? []).map((o) => o.course_id)));
+    const courseIds = Array.from(
+      new Set((orders ?? []).map((o) => o.course_id)),
+    );
     if (courseIds.length === 0) return 0;
 
     // Count total resources in enrolled courses
@@ -1050,12 +1059,12 @@ export class CoursesDAL implements ICoursesDAL {
             .from("resources")
             .select("id")
             .in("course_id", courseIds)
-        ).data?.map((r) => r.id) || []
+        ).data?.map((r) => r.id) || [],
       );
 
     if (completedError) {
       throw new Error(
-        `Error counting completed user resources: ${completedError.message}`
+        `Error counting completed user resources: ${completedError.message}`,
       );
     }
 
@@ -1074,17 +1083,22 @@ export class CoursesDAL implements ICoursesDAL {
       .eq("status", ORDER_STATUS.SUCCEEDED);
 
     if (ordersError) {
-      throw new Error(`Error fetching enrolled courses: ${ordersError.message}`);
+      throw new Error(
+        `Error fetching enrolled courses: ${ordersError.message}`,
+      );
     }
 
-    const courseIds = Array.from(new Set((orders ?? []).map((o) => o.course_id)));
+    const courseIds = Array.from(
+      new Set((orders ?? []).map((o) => o.course_id)),
+    );
     if (courseIds.length === 0) {
       return { data: [], totalRecords: 0 };
     }
 
     const { data: coursesData, error: coursesError } = await this.supabase
       .from("courses")
-      .select(`
+      .select(
+        `
         id,
         name,
         resources (
@@ -1094,7 +1108,8 @@ export class CoursesDAL implements ICoursesDAL {
             user_id
           )
         )
-      `)
+      `,
+      )
       .in("id", courseIds);
 
     if (coursesError) {
@@ -1103,9 +1118,12 @@ export class CoursesDAL implements ICoursesDAL {
 
     const progressData = (coursesData || []).map((course: any) => {
       const resourceCount = course.resources?.length || 0;
-      const resourcesCompletedCount = course.resources?.filter((r: any) =>
-        r.user_resources?.some((ur: any) => ur.user_id === userId && ur.completed)
-      ).length || 0;
+      const resourcesCompletedCount =
+        course.resources?.filter((r: any) =>
+          r.user_resources?.some(
+            (ur: any) => ur.user_id === userId && ur.completed,
+          ),
+        ).length || 0;
 
       return {
         id: course.id,
