@@ -3,7 +3,7 @@
 import { useSupabase } from "@/contexts/supabase-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Container, Typography, Box } from "@mui/material";
+import { Container, Typography, Box, useTheme } from "@mui/material";
 import { PageContainer } from "@/components/styles/infrastructure/layout.styles";
 import { ROLES } from "@/utils/constants";
 import { HashLoader } from "react-spinners";

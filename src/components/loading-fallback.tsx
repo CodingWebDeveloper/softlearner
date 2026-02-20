@@ -11,6 +11,7 @@ import {
 import { School, TrendingUp, Bookmark } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { HashLoader } from "react-spinners";
+import { useTheme } from "@mui/material/styles";
 
 interface EmptyStateProps {
   title: string;
@@ -86,6 +87,8 @@ export const EmptyState = ({
 };
 
 const LoadingFallback = () => {
+  const theme = useTheme();
+
   return (
     <div
       style={{
@@ -93,10 +96,10 @@ const LoadingFallback = () => {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        backgroundColor: "#1a1b23",
+        backgroundColor: theme.palette.custom.background.dark,
       }}
     >
-      <HashLoader color="#4ecdc4" size={50} />
+      <HashLoader color={theme.palette.custom.accent.teal} size={50} />
     </div>
   );
 };
