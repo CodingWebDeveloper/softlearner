@@ -25,8 +25,8 @@ const CourseDetailsPage: FC = () => {
     typeof params?.courseId === "string"
       ? params.courseId
       : Array.isArray(params?.courseId)
-      ? params.courseId[0]
-      : "";
+        ? params.courseId[0]
+        : "";
 
   const {
     data: course,
@@ -105,7 +105,10 @@ const CourseDetailsPage: FC = () => {
           <CourseTabs course={course} />
         </Grid>
         {desktopMatches && (
-          <Grid size={{ xs: 12, md: 5, lg: 4 }}>
+          <Grid
+            sx={{ top: 0, right: 0, position: "sticky" }}
+            size={{ xs: 12, md: 5, lg: 4 }}
+          >
             <CourseSidebar course={course} />
           </Grid>
         )}

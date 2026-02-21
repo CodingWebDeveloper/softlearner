@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import UploadThumbnail from "./upload-thumbnail";
@@ -10,6 +13,7 @@ import {
   InputAdornment,
   Stack,
   CircularProgress,
+  FormHelperText,
 } from "@mui/material";
 import { trpc } from "@/lib/trpc/client";
 import { SimpleCourse } from "@/services/interfaces/service.interfaces";
@@ -22,6 +26,8 @@ import {
 } from "@/components/styles/creator/general-form.styles";
 import { WhiteText } from "@/components/styles/infrastructure/layout.styles";
 
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
+
 const validationSchema = Yup.object({
   name: Yup.string().required("Course name is required"),
   description: Yup.string().required("Description is required"),
@@ -30,7 +36,7 @@ const validationSchema = Yup.object({
     .min(0, "Price must be greater than or equal to 0"),
   new_price: Yup.number().min(
     0,
-    "New Price must be greater than or equal to 0"
+    "New Price must be greater than or equal to 0",
   ),
   categoryId: Yup.string().required("Category is required"),
   videoUrl: Yup.string().required("Video URL is required"),
@@ -121,19 +127,50 @@ const GeneralForm = ({ setCourseId }: GeneralFormProps) => {
                   helperText={touched.name && errors.name}
                 />
 
-                <TextField
-                  fullWidth
-                  id="description"
-                  name="description"
-                  label="Description"
-                  multiline
-                  rows={4}
-                  value={values.description}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={touched.description && Boolean(errors.description)}
-                  helperText={touched.description && errors.description}
-                />
+                <Box>
+                  <WhiteText variant="body1" sx={{ mb: 1 }}>
+                    Description
+                  </WhiteText>
+                  <Box
+                    sx={{
+                      border:
+                        touched.description && errors.description
+                          ? "1px solid #d32f2f"
+                          : "1px solid rgba(255, 255, 255, 0.23)",
+                      borderRadius: 1,
+                      overflow: "hidden",
+                      // "& .w-md-editor": {
+                      //   backgroundColor: "transparent",
+                      //   border: "none",
+                      //   boxShadow: "none",
+                      // },
+                      "& .w-md-editor-toolbar": {
+                        backgroundColor: "rgba(255, 255, 255, 0.05)",
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                      },
+                    }}
+                  >
+                    <MDEditor
+                      value={values.description}
+                      onChange={(val) => {
+                        handleChange({
+                          target: { name: "description", value: val || "" },
+                        });
+                      }}
+                      onBlur={handleBlur}
+                      textareaProps={{
+                        name: "description",
+                        id: "description",
+                      }}
+                      height={300}
+                    />
+                  </Box>
+                  {touched.description && errors.description && (
+                    <FormHelperText error sx={{ mt: 0.5, mx: 1.5 }}>
+                      {errors.description}
+                    </FormHelperText>
+                  )}
+                </Box>
 
                 {/* Pricing Section */}
                 <WhiteText variant="h6" gutterBottom sx={{ mt: 3 }}>

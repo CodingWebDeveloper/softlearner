@@ -11,6 +11,7 @@ import {
   Stack,
   Skeleton,
   CircularProgress,
+  FormHelperText,
 } from "@mui/material";
 import { trpc } from "@/lib/trpc/client";
 import CategoryInput from "./CategoryInput";
@@ -22,6 +23,7 @@ import {
 } from "@/components/styles/creator/general-form.styles";
 import { WhiteText } from "@/components/styles/infrastructure/layout.styles";
 import { useSnackbar } from "notistack";
+import MDEditor from "@uiw/react-md-editor";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Course name is required"),
@@ -183,19 +185,50 @@ const UpdateGeneralForm = ({ courseId }: UpdateGeneralFormProps) => {
                   helperText={touched.name && errors.name}
                 />
 
-                <TextField
-                  fullWidth
-                  id="description"
-                  name="description"
-                  label="Description"
-                  multiline
-                  rows={4}
-                  value={values.description}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={touched.description && Boolean(errors.description)}
-                  helperText={touched.description && errors.description}
-                />
+                <Box>
+                  <WhiteText variant="body1" sx={{ mb: 1 }}>
+                    Description
+                  </WhiteText>
+                  <Box
+                    sx={{
+                      border:
+                        touched.description && errors.description
+                          ? "1px solid #d32f2f"
+                          : "1px solid rgba(255, 255, 255, 0.23)",
+                      borderRadius: 1,
+                      overflow: "hidden",
+                      // "& .w-md-editor": {
+                      //   backgroundColor: "transparent",
+                      //   border: "none",
+                      //   boxShadow: "none",
+                      // },
+                      "& .w-md-editor-toolbar": {
+                        backgroundColor: "rgba(255, 255, 255, 0.05)",
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                      },
+                    }}
+                  >
+                    <MDEditor
+                      value={values.description}
+                      onChange={(val) => {
+                        handleChange({
+                          target: { name: "description", value: val || "" },
+                        });
+                      }}
+                      onBlur={handleBlur}
+                      textareaProps={{
+                        name: "description",
+                        id: "description",
+                      }}
+                      height={300}
+                    />
+                  </Box>
+                  {touched.description && errors.description && (
+                    <FormHelperText error sx={{ mt: 0.5, mx: 1.5 }}>
+                      {errors.description}
+                    </FormHelperText>
+                  )}
+                </Box>
 
                 <WhiteText variant="h6" gutterBottom sx={{ mt: 3 }}>
                   Pricing

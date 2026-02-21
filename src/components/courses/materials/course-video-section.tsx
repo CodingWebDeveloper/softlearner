@@ -10,20 +10,26 @@ import {
 } from "@/components/styles/courses/materials.styles";
 import BookmarkCard from "../courses-list/bookmark-card";
 import { FullCourse } from "@/services/interfaces/service.interfaces";
-import { useAppSelector } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { trpc } from "@/lib/trpc/client";
-import { selectResource } from "@/lib/store/features/resourceSlice";
+import {
+  clearResource,
+  selectResource,
+} from "@/lib/store/features/resourceSlice";
 import CourseTags from "../course-details/course-tags";
 import CategoryIcon from "@mui/icons-material/Category";
 import { CategoryChip } from "@/components/styles/courses/course-details.styles";
+import { CourseMarkdownContainer } from "@/components/styles/courses/course-markdown.styles";
 import CompleteCard from "./complete-card";
 import DownloadIcon from "@mui/icons-material/Download";
 import { RESOURCE_TYPES } from "@/lib/constants/database-constants";
 import { AvatarImage } from "@/components/profile/avatar-image";
 import { getInitials } from "@/utils/utils";
 import ReviewBanner from "./review-banner";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 import {
-  LightText,
   StyledButton,
   WhiteText,
 } from "@/components/styles/infrastructure/layout.styles";
@@ -35,6 +41,7 @@ interface CourseVideoSectionProps {
 const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
   // General hooks
   const theme = useTheme();
+  const dispatch = useAppDispatch();
 
   // Selectors
   const selectedResource = useAppSelector(selectResource);
@@ -72,6 +79,10 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
     } catch (error) {
       console.error("Download failed:", error);
     }
+  };
+
+  const handleBackToIntro = () => {
+    dispatch(clearResource());
   };
 
   const renderContent = () => {
@@ -150,6 +161,16 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
         </Typography>
         <Box display="flex" gap={2}>
           {selectedResource && (
+            <StyledButton
+              variant="outlined"
+              color="secondary"
+              size="small"
+              onClick={handleBackToIntro}
+            >
+              Back to course introduction
+            </StyledButton>
+          )}
+          {selectedResource && (
             <CompleteCard resourceId={selectedResource.id} />
           )}
           <BookmarkCard
@@ -162,9 +183,14 @@ const CourseVideoSection: FC<CourseVideoSectionProps> = ({ course }) => {
       <Box mt={1}>
         <CategoryChip label={course.category.name} icon={<CategoryIcon />} />
       </Box>
-      <LightText variant="body1" mt={2}>
-        {selectedResource?.short_summary || course.description}
-      </LightText>
+      <CourseMarkdownContainer>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeSanitize]}
+        >
+          {selectedResource?.short_summary || course.description || ""}
+        </ReactMarkdown>
+      </CourseMarkdownContainer>
       <CourseTags courseId={course.id} />
 
       <InstructorBox>

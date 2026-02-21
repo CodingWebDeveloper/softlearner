@@ -1,5 +1,5 @@
 import { FC, useState, KeyboardEvent } from "react";
-import { Skeleton, Stack } from "@mui/material";
+import { Skeleton, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
@@ -24,9 +24,17 @@ import {
 import Dialog from "@mui/material/Dialog";
 import CloseIcon from "@mui/icons-material/Close";
 import { BasicCourse } from "@/services/interfaces/service.interfaces";
-import { PreviewResource } from "@/lib/database/database.types";
 import { trpc } from "@/lib/trpc/client";
 import { BuyNowButton } from "./buy-now-button";
+import BookmarkCard from "@/components/courses/courses-list/bookmark-card";
+import {
+  countResourcesByType,
+  formatDurationFromMinutes,
+  getDiscountPercentage,
+  getDisplayPrice,
+  getTotalMinutesFromResources,
+  hasDiscountPrice,
+} from "@/utils/utils";
 
 interface CourseSidebarProps {
   course: BasicCourse;
@@ -41,49 +49,26 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
   const { data: resourcesData, isLoading: isResourcesLoading } =
     trpc.resources.getResourcesByCourseId.useQuery(
       { courseId: course?.id },
-      { enabled: !!course?.id }
+      { enabled: !!course?.id },
     );
 
   const { data: isEnrolled, isLoading: isEnrollmentLoading } =
     trpc.courses.isEnrolled.useQuery(course.id, { enabled: !!course?.id });
 
   // Variables/State
-  const hasDiscount =
-    course?.new_price !== null && course?.new_price !== undefined;
-  const displayPrice = hasDiscount
-    ? course?.new_price?.toFixed(2)
-    : course?.price.toFixed(2);
+  const hasDiscount = hasDiscountPrice(course.price, course?.new_price);
+  const displayPrice = getDisplayPrice(course.price, course?.new_price);
+  const discountPercentage = getDiscountPercentage(
+    course.price,
+    course?.new_price,
+  );
   const resources = resourcesData || [];
+  const durationDisplay = formatDurationFromMinutes(
+    getTotalMinutesFromResources(resourcesData),
+  );
 
-  const totalMinutes =
-    resourcesData?.reduce((total: number, resource: PreviewResource) => {
-      if (resource.duration) {
-        // Parse PostgreSQL interval format (HH:MM:SS)
-        const parts = resource.duration.split(":");
-        if (parts.length === 3) {
-          const hours = parseInt(parts[0], 10);
-          const minutes = parseInt(parts[1], 10);
-          return total + hours * 60 + minutes;
-        }
-      }
-      return total;
-    }, 0) || 0;
-
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  const durationDisplay =
-    hours > 0
-      ? `${hours} hr${hours > 1 ? "s" : ""} ${
-          minutes > 0 ? `${minutes} min` : ""
-        }`
-      : `${minutes} min`;
-
-  const totalVideos = resources.filter(
-    (r: PreviewResource) => r.type === "video"
-  ).length;
-  const totalFiles = resources.filter(
-    (r: PreviewResource) => r.type === "downloadable file"
-  ).length;
+  const totalVideos = countResourcesByType(resources, "video");
+  const totalFiles = countResourcesByType(resources, "downloadable file");
 
   // Handlers
   const handleOpenDialog = () => {
@@ -167,38 +152,72 @@ const CourseSidebar: FC<CourseSidebarProps> = ({ course }) => {
       </Dialog>
 
       <PriceContainer>
-        {hasDiscount ? (
-          <>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          width="100%"
+        >
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="baseline"
+            flexWrap="wrap"
+          >
             <DiscountedPrice
               component="span"
               tabIndex={0}
-              aria-label={`Discounted Price: $${displayPrice} USD`}
+              aria-label={`Price: $${displayPrice} USD`}
             >
-              ${displayPrice} USD
+              ${displayPrice}
             </DiscountedPrice>
-            <OldPrice
+            <Typography
               component="span"
+              variant="h6"
+              fontWeight={700}
+              sx={{ color: (theme) => theme.palette.custom.accent.teal }}
               tabIndex={0}
-              aria-label={`Original Price: $${course.price.toFixed(2)} USD`}
+              aria-label="Currency: USD"
             >
-              ${course.price.toFixed(2)} USD
-            </OldPrice>
-          </>
-        ) : (
-          <DiscountedPrice
-            component="span"
-            tabIndex={0}
-            aria-label={`Price: $${displayPrice} USD`}
-          >
-            ${displayPrice} USD
-          </DiscountedPrice>
-        )}
+              USD
+            </Typography>
+            {hasDiscount && (
+              <OldPrice
+                component="span"
+                tabIndex={0}
+                aria-label={`Original Price: $${course.price.toFixed(2)} USD`}
+              >
+                ${course.price.toFixed(2)}
+              </OldPrice>
+            )}
+          </Stack>
+          {hasDiscount && discountPercentage !== null && (
+            <Typography
+              variant="body2"
+              color="error.main"
+              tabIndex={0}
+              aria-label={`${discountPercentage}% off`}
+              sx={{ textAlign: "right", lineHeight: 1.1 }}
+            >
+              {discountPercentage}% off
+            </Typography>
+          )}
+        </Stack>
       </PriceContainer>
 
-      <BuyNowButton courseId={course.id} isEnrolled={isEnrolled} />
+      <Stack direction="row" spacing={1.5} alignItems="center">
+        <BuyNowButton courseId={course.id} isEnrolled={isEnrolled} />
+        <BookmarkCard
+          courseId={course.id}
+          initialIsBookmarked={course.isBookmarked}
+        />
+      </Stack>
 
       <DividerStyled />
       <Stack spacing={1.5}>
+        <Typography variant="subtitle2" fontWeight={600}>
+          This course includes
+        </Typography>
         <MetaItem tabIndex={0} aria-label={`Duration: ${durationDisplay}`}>
           <AccessTimeOutlinedIcon color="primary" />
           <MetaItemText>

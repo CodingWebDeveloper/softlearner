@@ -245,6 +245,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [mode]);
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-color-mode", mode);
+    }
+  }, [mode]);
+
   const toggleMode = useCallback(() => {
     setMode((prev) => (prev === "dark" ? "light" : "dark"));
   }, []);

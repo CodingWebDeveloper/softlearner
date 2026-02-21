@@ -1,5 +1,5 @@
 import { FC, ReactNode, SyntheticEvent, useState } from "react";
-import { Tabs, Typography, Box, useMediaQuery } from "@mui/material";
+import { Tabs, Box, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
   TabsContainer,
@@ -11,6 +11,10 @@ import CourseReviews from "./course-reviews";
 import PreviewQuizzesList from "./preview-quiz-list";
 import type { BasicCourse } from "@/services/interfaces/service.interfaces";
 import PreviewResourceList from "./preview-resource-list";
+import { CourseMarkdownContainer } from "@/components/styles/courses/course-markdown.styles";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -78,9 +82,14 @@ const CourseTabs: FC<{ course: BasicCourse }> = ({ course }) => {
       </Tabs>
       <TabPanel value={tab} index={0}>
         <Box component="section" aria-label="Description">
-          <Typography variant="body1" aria-label="Markdown Content">
-            {course.description}
-          </Typography>
+          <CourseMarkdownContainer aria-label="Markdown Content">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeSanitize]}
+            >
+              {course.description || ""}
+            </ReactMarkdown>
+          </CourseMarkdownContainer>
         </Box>
       </TabPanel>
       <TabPanel value={tab} index={1}>

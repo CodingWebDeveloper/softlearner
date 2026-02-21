@@ -51,10 +51,10 @@ export default function CourseChecklist({
     if (!status) return false;
     return Boolean(
       status.general &&
-        status.resources &&
-        status.tags &&
-        status.quizzes &&
-        status.publish
+      status.resources &&
+      status.tags &&
+      status.quizzes &&
+      status.publish,
     );
   }, [status]);
 
@@ -90,6 +90,8 @@ export default function CourseChecklist({
         border: `1px solid ${colors.border}`,
         borderRadius: 2,
         p: 2.5,
+        position: "sticky",
+        top: 0,
       }}
     >
       <Box

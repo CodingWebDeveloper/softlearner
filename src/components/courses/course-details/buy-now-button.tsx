@@ -1,15 +1,8 @@
 import { useState } from "react";
-import { Button, CircularProgress } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { CircularProgress } from "@mui/material";
 import { trpc } from "@/lib/trpc/client";
 import { useRouter } from "next/navigation";
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  width: "100%",
-  padding: theme.spacing(1.5),
-  fontSize: "1.1rem",
-  fontWeight: 600,
-}));
+import { StyledButton } from "@/components/styles/infrastructure/layout.styles";
 
 interface BuyNowButtonProps {
   courseId: string;
@@ -33,7 +26,7 @@ export const BuyNowButton = ({ courseId, isEnrolled }: BuyNowButtonProps) => {
 
       // Redirect to Stripe Checkout
       const stripe = await import("@stripe/stripe-js").then((mod) =>
-        mod.loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+        mod.loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!),
       );
 
       if (!stripe) {
@@ -52,8 +45,8 @@ export const BuyNowButton = ({ courseId, isEnrolled }: BuyNowButtonProps) => {
   if (isEnrolled) {
     return (
       <StyledButton
+        fullWidth
         variant="contained"
-        color="primary"
         onClick={() => router.push(`/courses/${courseId}/materials`)}
       >
         Go to Course
@@ -63,8 +56,8 @@ export const BuyNowButton = ({ courseId, isEnrolled }: BuyNowButtonProps) => {
 
   return (
     <StyledButton
+      fullWidth
       variant="contained"
-      color="primary"
       onClick={handlePurchase}
       disabled={isLoading}
     >

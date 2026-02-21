@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Box, Stack } from "@mui/material";
+import { Box } from "@mui/material";
 import {
   InstructorBox,
   HeaderContainer,
@@ -7,7 +7,6 @@ import {
   InstructorName,
   InstructorRole,
 } from "@/components/styles/courses/course-details.styles";
-import BookmarkCard from "../courses-list/bookmark-card";
 import { BasicCourse } from "@/services/interfaces/service.interfaces";
 import { AvatarImage } from "@/components/profile/avatar-image";
 import { getInitials } from "@/utils/utils";
@@ -26,27 +25,15 @@ interface CourseHeaderProps {
 const CourseHeader: FC<CourseHeaderProps> = ({ course, instructor }) => {
   return (
     <HeaderContainer>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        spacing={2}
+      <CourseTitle
+        variant="h3"
+        fontWeight={700}
+        gutterBottom
+        tabIndex={0}
+        aria-label="Course Title"
       >
-        <CourseTitle
-          variant="h3"
-          fontWeight={700}
-          gutterBottom
-          tabIndex={0}
-          aria-label="Course Title"
-        >
-          {course.name}
-        </CourseTitle>
-        <BookmarkCard
-          courseId={course.id}
-          initialIsBookmarked={course.isBookmarked}
-        />
-      </Stack>
-
+        {course.name}
+      </CourseTitle>
       <InstructorBox>
         <AvatarImage
           avatarUrl={instructor.avatar}
