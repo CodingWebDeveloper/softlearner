@@ -54,10 +54,8 @@ const QuizDialog: FC<QuizDialogProps> = ({
     selectedTest.id,
     {
       enabled: open,
-    }
+    },
   );
-
-  console.log(test);
 
   // Mutations
   const createScoreMutation = trpc.tests.createScore.useMutation();
@@ -67,7 +65,7 @@ const QuizDialog: FC<QuizDialogProps> = ({
   const [started, setStarted] = useState(false);
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<{ [questionId: string]: string[] }>(
-    {}
+    {},
   );
   const [submitted, setSubmitted] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -89,7 +87,7 @@ const QuizDialog: FC<QuizDialogProps> = ({
   const handleOptionSelect = (
     questionId: string,
     optionId: string,
-    isMultiple: boolean
+    isMultiple: boolean,
   ) => {
     const newAnswers = { ...answers };
 
@@ -177,7 +175,7 @@ const QuizDialog: FC<QuizDialogProps> = ({
   const isCurrentQuestionAnswered =
     answers[currentQuestion?.id] && answers[currentQuestion?.id].length > 0;
   const allQuestionsAnswered = test.questions.every(
-    (question) => answers[question.id] && answers[question.id].length > 0
+    (question) => answers[question.id] && answers[question.id].length > 0,
   );
 
   return (
@@ -246,7 +244,7 @@ const QuizDialog: FC<QuizDialogProps> = ({
             <>
               <Typography
                 variant="h5"
-                sx={{ color: theme.palette.custom.text.white }}
+                sx={{ color: theme.palette.custom.text.white, mb: 1 }}
               >
                 {test.title}
               </Typography>
@@ -270,7 +268,7 @@ const QuizDialog: FC<QuizDialogProps> = ({
                         handleOptionSelect(
                           currentQuestion.id,
                           opt.id,
-                          currentQuestion.type === "multiple"
+                          currentQuestion.type === "multiple",
                         )
                       }
                       fullWidth
@@ -315,7 +313,7 @@ const QuizDialog: FC<QuizDialogProps> = ({
               <QuizDialogPercent>
                 {testResult
                   ? `${Math.round(
-                      (testResult.score / testResult.maxScore) * 100
+                      (testResult.score / testResult.maxScore) * 100,
                     )}%`
                   : "0%"}
               </QuizDialogPercent>

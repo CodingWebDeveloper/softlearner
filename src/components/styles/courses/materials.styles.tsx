@@ -218,7 +218,6 @@ export const QuizTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.custom.text.white,
   fontSize: "1rem",
   fontWeight: 500,
-  marginBottom: "12px",
 }));
 
 export const QuizProgressBar = styled(LinearProgress)(({ theme }) => ({
@@ -467,5 +466,5 @@ export const BannerContainer = styled(Box)(({ theme }) => ({
 export const ResourceCompletedIcon = styled(CheckCircleOutlineIcon)(
   ({ theme }) => ({
     color: theme.palette.custom.accent.green,
-  })
+  }),
 );

@@ -2,7 +2,16 @@
 
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { DialogActions, TextField, Box } from "@mui/material";
+import {
+  DialogActions,
+  TextField,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
+} from "@mui/material";
 import {
   StyledDialog,
   StyledDialogContent,
@@ -19,6 +28,7 @@ interface QuizDialogProps {
 export interface QuizFormValues {
   title: string;
   description: string;
+  variant: "knowledge" | "skill" | "competence";
 }
 
 const validationSchema = Yup.object({
@@ -28,15 +38,18 @@ const validationSchema = Yup.object({
     .max(100, "Title must be at most 100 characters"),
   description: Yup.string().max(
     500,
-    "Description must be at most 500 characters"
+    "Description must be at most 500 characters",
   ),
+  variant: Yup.string()
+    .required("Test type is required")
+    .oneOf(["knowledge", "skill", "competence"], "Invalid test type"),
 });
 
 const QuizDialog = ({
   open,
   onClose,
   onSubmit,
-  initialValues = { title: "", description: "" },
+  initialValues = { title: "", description: "", variant: "knowledge" as const },
 }: QuizDialogProps) => {
   return (
     <StyledDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -47,6 +60,7 @@ const QuizDialog = ({
         initialValues={{
           title: initialValues.title || "",
           description: initialValues.description || "",
+          variant: initialValues.variant || "knowledge",
         }}
         validationSchema={validationSchema}
         onSubmit={onSubmit}
@@ -77,6 +91,28 @@ const QuizDialog = ({
                   error={touched.title && Boolean(errors.title)}
                   helperText={touched.title && errors.title}
                 />
+                <FormControl
+                  fullWidth
+                  error={touched.variant && Boolean(errors.variant)}
+                >
+                  <InputLabel id="variant-label">Test Type</InputLabel>
+                  <Select
+                    labelId="variant-label"
+                    id="variant"
+                    name="variant"
+                    value={values.variant}
+                    label="Test Type"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  >
+                    <MenuItem value="knowledge">Knowledge</MenuItem>
+                    <MenuItem value="skill">Skill</MenuItem>
+                    <MenuItem value="competence">Competence</MenuItem>
+                  </Select>
+                  {touched.variant && errors.variant && (
+                    <FormHelperText>{errors.variant}</FormHelperText>
+                  )}
+                </FormControl>
                 <TextField
                   fullWidth
                   id="description"

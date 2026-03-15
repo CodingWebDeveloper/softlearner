@@ -10,6 +10,7 @@ import {
   MenuItem,
   MenuProps,
   Menu,
+  Chip,
 } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import QuizIcon from "@mui/icons-material/Quiz";
@@ -35,6 +36,32 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   justifyContent: "space-between",
   marginBottom: theme.spacing(2),
 }));
+
+const getVariantColor = (variant: string) => {
+  switch (variant) {
+    case "knowledge":
+      return "info";
+    case "skill":
+      return "success";
+    case "competence":
+      return "secondary";
+    default:
+      return "default";
+  }
+};
+
+const getVariantLabel = (variant: string) => {
+  switch (variant) {
+    case "knowledge":
+      return "Knowledge";
+    case "skill":
+      return "Skill";
+    case "competence":
+      return "Competence";
+    default:
+      return variant;
+  }
+};
 
 const TitleIconWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -83,7 +110,7 @@ const StyledMenu = styled((props: MenuProps) => (
       "&:active": {
         backgroundColor: alpha(
           theme.palette.primary.main,
-          theme.palette.action.selectedOpacity
+          theme.palette.action.selectedOpacity,
         ),
       },
     },
@@ -125,7 +152,8 @@ const QuizCard = ({
     setAnchorEl(null);
   };
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setShowDeleteConfirm(true);
     handleClose();
   };
@@ -142,65 +170,74 @@ const QuizCard = ({
   const open = Boolean(anchorEl);
 
   return (
-    <StyledCard onClick={handleAddQuestions}>
-      <CardContent>
-        <IconWrapper>
-          <TitleIconWrapper>
-            <StyledQuizIcon />
-          </TitleIconWrapper>
-          <IconButton
-            aria-controls={open ? "demo-customized-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? "true" : undefined}
-            onClick={handleClick}
-            size="small"
-          >
-            <MoreIcon />
-          </IconButton>
-        </IconWrapper>
-        <Typography variant="h6" gutterBottom>
-          {quiz.title}
-        </Typography>
-        {quiz.description && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {quiz.description}
+    <>
+      <StyledCard onClick={handleAddQuestions}>
+        <CardContent>
+          <IconWrapper>
+            <TitleIconWrapper>
+              <StyledQuizIcon />
+            </TitleIconWrapper>
+            <IconButton
+              aria-controls={open ? "demo-customized-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+              onClick={handleClick}
+              size="small"
+            >
+              <MoreIcon />
+            </IconButton>
+          </IconWrapper>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              {quiz.title}
+            </Typography>
+            <Chip
+              label={getVariantLabel(quiz.variant)}
+              color={getVariantColor(quiz.variant)}
+              size="small"
+            />
+          </Box>
+          {quiz.description && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {quiz.description}
+            </Typography>
+          )}
+          <Typography variant="body2" color="text.secondary">
+            {quiz.questionsCount} Questions
           </Typography>
-        )}
-        <Typography variant="body2" color="text.secondary">
-          {quiz.questionsCount} Questions
-        </Typography>
-        <Typography variant="caption" color="text.secondary" display="block">
-          Last updated: {new Date(quiz.updated_at).toLocaleDateString()}
-        </Typography>
-      </CardContent>
+          <Typography variant="caption" color="text.secondary" display="block">
+            Last updated: {new Date(quiz.updated_at).toLocaleDateString()}
+          </Typography>
+        </CardContent>
 
-      <StyledMenu
-        id="demo-customized-menu"
-        slotProps={{
-          list: {
-            "aria-labelledby": "demo-customized-button",
-          },
-        }}
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-      >
-        <MenuItem
-          onClick={() => {
-            onClick(quiz.id);
-            handleClose();
+        <StyledMenu
+          id="demo-customized-menu"
+          slotProps={{
+            list: {
+              "aria-labelledby": "demo-customized-button",
+            },
           }}
-          disableRipple
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
         >
-          <EditIcon />
-          Edit
-        </MenuItem>
-        <MenuItem onClick={handleDeleteClick} disableRipple>
-          <DeleteIcon />
-          Delete
-        </MenuItem>
-      </StyledMenu>
-
+          <MenuItem
+            onClick={(event: React.MouseEvent<HTMLElement>) => {
+              event.stopPropagation();
+              onClick(quiz.id);
+              handleClose();
+            }}
+            disableRipple
+          >
+            <EditIcon />
+            Edit
+          </MenuItem>
+          <MenuItem onClick={handleDeleteClick} disableRipple>
+            <DeleteIcon />
+            Delete
+          </MenuItem>
+        </StyledMenu>
+      </StyledCard>
       <ConfirmAlert
         open={showDeleteConfirm}
         onClose={handleDeleteCancel}
@@ -211,7 +248,7 @@ const QuizCard = ({
         cancelText="Cancel"
         label="delete-quiz"
       />
-    </StyledCard>
+    </>
   );
 };
 

@@ -3,6 +3,7 @@ import List from "@mui/material/List";
 import QuizOutlinedIcon from "@mui/icons-material/QuizOutlined";
 import Alert from "@mui/material/Alert";
 import Skeleton from "@mui/material/Skeleton";
+import Chip from "@mui/material/Chip";
 import { trpc } from "@/lib/trpc/client";
 import {
   SectionTitle,
@@ -31,6 +32,41 @@ const LoadingSkeleton: FC = () => (
 );
 
 const PreviewQuizzesList: FC<PreviewQuizzesListProps> = ({ courseId }) => {
+  const getVariantColor = (
+    variant: string,
+  ):
+    | "default"
+    | "primary"
+    | "secondary"
+    | "error"
+    | "info"
+    | "success"
+    | "warning" => {
+    switch (variant) {
+      case "knowledge":
+        return "info";
+      case "skill":
+        return "success";
+      case "competence":
+        return "secondary";
+      default:
+        return "default";
+    }
+  };
+
+  const getVariantLabel = (variant: string) => {
+    switch (variant) {
+      case "knowledge":
+        return "Knowledge";
+      case "skill":
+        return "Skill";
+      case "competence":
+        return "Competence";
+      default:
+        return variant;
+    }
+  };
+
   const {
     data: tests,
     isLoading,
@@ -73,7 +109,18 @@ const PreviewQuizzesList: FC<PreviewQuizzesListProps> = ({ courseId }) => {
                 />
               </ListItemIconStyled>
               <ListItemTextStyled
-                primary={<LightText>{test.title}</LightText>}
+                primary={
+                  <LightText
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
+                    {test.title}
+                  </LightText>
+                }
+              />
+              <Chip
+                label={getVariantLabel(test.variant)}
+                color={getVariantColor(test.variant)}
+                size="small"
               />
             </ListItemStyled>
           ))

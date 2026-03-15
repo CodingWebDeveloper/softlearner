@@ -28,7 +28,7 @@ type QuestionWithOptions = {
 };
 
 export class TestsDAL implements ITestsDAL {
-  constructor(private supabase: SupabaseClient<Database>) { }
+  constructor(private supabase: SupabaseClient<Database>) {}
 
   async getTests(courseId: string): Promise<BasicTest[]> {
     const { data, error } = await this.supabase
@@ -37,7 +37,7 @@ export class TestsDAL implements ITestsDAL {
         `
         *,
         questions:questions(count)
-      `
+      `,
       )
       .eq("course_id", courseId)
       .order("created_at", { ascending: true });
@@ -50,6 +50,7 @@ export class TestsDAL implements ITestsDAL {
       id: test.id,
       title: test.title,
       description: test.description,
+      variant: test.variant,
       questionsCount: test.questions[0]?.count || 0,
       created_at: test.created_at,
       updated_at: test.updated_at,
@@ -74,7 +75,7 @@ export class TestsDAL implements ITestsDAL {
             text
           )
         )
-      `
+      `,
       )
       .eq("id", id)
       .single();
@@ -91,6 +92,7 @@ export class TestsDAL implements ITestsDAL {
       id: data.id,
       title: data.title,
       description: data.description,
+      variant: data.variant,
       questions: (data.questions as QuestionWithOptions[]).map((question) => ({
         ...question,
         options: question.options || [],
@@ -111,7 +113,7 @@ export class TestsDAL implements ITestsDAL {
           text,
           is_correct
         )
-      `
+      `,
       )
       .eq("test_id", testId)
       .order("created_at", { ascending: true });
@@ -134,7 +136,7 @@ export class TestsDAL implements ITestsDAL {
 
   async getTestResults(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<TestResult[]> {
     const { data, error } = await this.supabase
       .from("tests")
@@ -146,7 +148,7 @@ export class TestsDAL implements ITestsDAL {
           id,
           score
         )
-      `
+      `,
       )
       .eq("course_id", courseId)
       .eq("user_tests.user_id", userId);
@@ -173,6 +175,7 @@ export class TestsDAL implements ITestsDAL {
       .update({
         title: data.title,
         description: data.description,
+        variant: data.variant,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
@@ -180,7 +183,7 @@ export class TestsDAL implements ITestsDAL {
         `
         *,
         questions:questions(count)
-      `
+      `,
       )
       .single();
 
@@ -192,6 +195,7 @@ export class TestsDAL implements ITestsDAL {
       id: test.id,
       title: test.title,
       description: test.description,
+      variant: test.variant,
       questionsCount: test.questions[0]?.count || 0,
       created_at: test.created_at,
       updated_at: test.updated_at,
@@ -200,7 +204,7 @@ export class TestsDAL implements ITestsDAL {
 
   async createTest(
     courseId: string,
-    data: CreateTestInput
+    data: CreateTestInput,
   ): Promise<BasicTest> {
     const { data: test, error } = await this.supabase
       .from("tests")
@@ -208,12 +212,13 @@ export class TestsDAL implements ITestsDAL {
         course_id: courseId,
         title: data.title,
         description: data.description,
+        variant: data.variant,
       })
       .select(
         `
         *,
         questions:questions(count)
-      `
+      `,
       )
       .single();
 
@@ -225,6 +230,7 @@ export class TestsDAL implements ITestsDAL {
       id: test.id,
       title: test.title,
       description: test.description,
+      variant: test.variant,
       questionsCount: test.questions[0]?.count || 0,
       created_at: test.created_at,
       updated_at: test.updated_at,
@@ -236,13 +242,16 @@ export class TestsDAL implements ITestsDAL {
 
     try {
       // Determine and delete removed questions
-      const { data: existingQuestions, error: existingQError } = await this.supabase
-        .from("questions")
-        .select("id")
-        .eq("test_id", testId);
+      const { data: existingQuestions, error: existingQError } =
+        await this.supabase
+          .from("questions")
+          .select("id")
+          .eq("test_id", testId);
 
       if (existingQError) {
-        throw new Error(`Error fetching existing questions: ${existingQError.message}`);
+        throw new Error(
+          `Error fetching existing questions: ${existingQError.message}`,
+        );
       }
 
       const existingIds = (existingQuestions || []).map((q) => q.id as string);
@@ -250,7 +259,9 @@ export class TestsDAL implements ITestsDAL {
         .map((q) => q.id)
         .filter((id): id is string => Boolean(id));
 
-      const toDeleteQuestionIds = existingIds.filter((id) => !submittedIds.includes(id));
+      const toDeleteQuestionIds = existingIds.filter(
+        (id) => !submittedIds.includes(id),
+      );
       for (const qId of toDeleteQuestionIds) {
         await this.deleteQuestion(qId);
       }
@@ -279,15 +290,16 @@ export class TestsDAL implements ITestsDAL {
       return updatedTest;
     } catch (error) {
       throw new Error(
-        `Failed to save questions: ${error instanceof Error ? error.message : "Unknown error"
-        }`
+        `Failed to save questions: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
       );
     }
   }
 
   private async createQuestionWithOptions(
     testId: string,
-    question: QuestionInput
+    question: QuestionInput,
   ) {
     const { data: testData, error: testError } = await this.supabase
       .from("tests")
@@ -299,14 +311,14 @@ export class TestsDAL implements ITestsDAL {
           id,
           creator_id
         )
-      `
+      `,
       )
       .eq("id", testId)
       .single();
 
     if (testError || !testData) {
       throw new Error(
-        `Test not found: ${testError?.message || "Test not found"}`
+        `Test not found: ${testError?.message || "Test not found"}`,
       );
     }
 
@@ -326,7 +338,7 @@ export class TestsDAL implements ITestsDAL {
     }
 
     const newOptions = question.options.filter(
-      (opt: OptionInput) => opt.status === "NEW"
+      (opt: OptionInput) => opt.status === "NEW",
     );
     if (newOptions.length > 0) {
       const { error: optionsError } = await this.supabase
@@ -336,7 +348,7 @@ export class TestsDAL implements ITestsDAL {
             question_id: newQuestion.id,
             text: opt.text,
             is_correct: opt.isCorrect,
-          }))
+          })),
         );
 
       if (optionsError)
@@ -361,7 +373,7 @@ export class TestsDAL implements ITestsDAL {
 
     await this.processOptions(
       question.id as string,
-      question.options as OptionInput[]
+      question.options as OptionInput[],
     );
   }
 
@@ -414,7 +426,7 @@ export class TestsDAL implements ITestsDAL {
   async createScore(
     testId: string,
     userId: string,
-    submission: TestSubmission
+    submission: TestSubmission,
   ): Promise<TestResult> {
     // First, get the correct answers and points for each question
     const { data: questions, error: questionsError } = await this.supabase
@@ -427,7 +439,7 @@ export class TestsDAL implements ITestsDAL {
           id,
           is_correct
         )
-      `
+      `,
       )
       .eq("test_id", testId);
 
@@ -473,7 +485,7 @@ export class TestsDAL implements ITestsDAL {
         {
           onConflict: "user_id,test_id",
           ignoreDuplicates: false,
-        }
+        },
       )
       .select()
       .single();
@@ -490,7 +502,7 @@ export class TestsDAL implements ITestsDAL {
             user_test_id: userTest.id,
             question_id: questionId,
             answer_option_id: answerId,
-          }))
+          })),
       );
 
       if (userAnswers.length > 0) {
@@ -525,7 +537,7 @@ export class TestsDAL implements ITestsDAL {
           score,
           user_id
         )
-      `
+      `,
       )
       .eq("user_tests.user_id", userId);
 
@@ -540,7 +552,10 @@ export class TestsDAL implements ITestsDAL {
     let counted = 0;
 
     for (const row of rows) {
-      const max = (row.questions || []).reduce((sum: number, q: { points: number }) => sum + (q?.points || 0), 0);
+      const max = (row.questions || []).reduce(
+        (sum: number, q: { points: number }) => sum + (q?.points || 0),
+        0,
+      );
       const score = row.user_tests?.[0]?.score ?? 0;
       if (max > 0) {
         totalPercent += (score / max) * 100;
@@ -555,7 +570,7 @@ export class TestsDAL implements ITestsDAL {
   async getRecentTestResults(
     userId: string,
     page: number = 1,
-    pageSize: number = 10
+    pageSize: number = 10,
   ): Promise<PaginatedResult<RecentUserTestResult>> {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
@@ -574,7 +589,7 @@ export class TestsDAL implements ITestsDAL {
           questions(points)
         )
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .eq("user_id", userId)
       .order("updated_at", { ascending: false })
@@ -589,7 +604,7 @@ export class TestsDAL implements ITestsDAL {
       const questions = (row as any).test?.questions || [];
       const maxScore = questions.reduce(
         (sum: number, q: { points: number }) => sum + (q?.points || 0),
-        0
+        0,
       );
       return {
         id: row.id,

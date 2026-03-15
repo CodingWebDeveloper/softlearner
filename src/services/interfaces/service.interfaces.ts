@@ -52,6 +52,8 @@ export type UserRole = "student" | "creator" | "admin";
 
 export type QuestionType = "single" | "multiple";
 
+export type TestVariant = "knowledge" | "skill" | "competence";
+
 export type Status = "NEW" | "UPDATED" | "DELETED" | "INITIAL";
 
 export interface Vote {
@@ -222,7 +224,7 @@ export interface ICategoriesService {
 export interface ICoursesService {
   createCourse(
     creatorId: string,
-    params: CreateCourseParams
+    params: CreateCourseParams,
   ): Promise<SimpleCourse>;
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string): Promise<BasicCourse | null>;
@@ -230,14 +232,14 @@ export interface ICoursesService {
   getBookmarkedCourses(
     userId: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
   ): Promise<GetCoursesResult>;
   getPurchasedCourses(
     userId: string,
     page?: number,
     pageSize?: number,
     sortBy?: "name" | "orderCreatedAt",
-    sortDir?: "asc" | "desc"
+    sortDir?: "asc" | "desc",
   ): Promise<PaginatedResult<PurchasedCourse>>;
   getCourseMaterialsById(id: string, userId: string): Promise<FullCourse>;
   getCoursesByCreator(
@@ -245,12 +247,12 @@ export interface ICoursesService {
     page?: number,
     pageSize?: number,
     sortBy?: "name" | "category" | "price" | "created_at" | "updated_at",
-    sortDir?: "asc" | "desc"
+    sortDir?: "asc" | "desc",
   ): Promise<PaginatedResult<SimpleCourse>>;
   updateCourse(
     creatorId: string,
     courseId: string,
-    params: CreateCourseParams
+    params: CreateCourseParams,
   ): Promise<SimpleCourse>;
   deleteCourse(creatorId: string, courseId: string): Promise<void>;
   getCourseDataById(id: string): Promise<SimpleCourse | null>;
@@ -258,10 +260,10 @@ export interface ICoursesService {
   togglePublishStatus(
     creatorId: string,
     courseId: string,
-    isPublished: boolean
+    isPublished: boolean,
   ): Promise<void>;
   getCourseCreationProgressStatus(
-    courseId: string
+    courseId: string,
   ): Promise<CourseProgressStatus>;
   getCourseCompletionRate(courseId: string): Promise<number>;
   getTotalEnrolledCourses(userId: string): Promise<number>;
@@ -271,7 +273,7 @@ export interface ICoursesService {
   getCourseProgressData(
     userId: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
   ): Promise<PaginatedResult<CourseProgressItem>>;
 }
 
@@ -309,54 +311,54 @@ export interface IResourcesService {
   getAllResourcesByCourseId(courseId: string): Promise<SimpleResource[]>;
   getResourceMaterialsByCourseId(
     courseId: string,
-    userId?: string
+    userId?: string,
   ): Promise<BasicResource[]>;
   getNextResourceToComplete(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<string | null>;
   toggleResourceCompletion(
     userId: string,
-    resourceId: string
+    resourceId: string,
   ): Promise<boolean>;
   getResourceCompletionStatus(
     userId: string,
-    resourceId: string
+    resourceId: string,
   ): Promise<boolean>;
   createResource(params: CreateResourceParams): Promise<SimpleResource>;
   updateResource(
     resourceId: string,
-    params: UpdateResourceParams
+    params: UpdateResourceParams,
   ): Promise<SimpleResource>;
   updateResourcesOrder(
     courseId: string,
-    orderUpdates: { id: string; order_index: number }[]
+    orderUpdates: { id: string; order_index: number }[],
   ): Promise<SimpleResource[]>;
   downloadResourceFile(resourceId: string): Promise<Blob>;
   deleteResource(resourceId: string): Promise<void>;
   // User activity for a given calendar year
   getUserCompletedResourcesByYear(
     userId: string,
-    year: number
+    year: number,
   ): Promise<ActivityResource[]>;
 }
 
 export interface IReviewsService {
   getCourseRatingStats(courseId: string): Promise<RatingStats>;
   getCourseReviews(
-    params: GetReviewsParams
+    params: GetReviewsParams,
   ): Promise<Omit<GetReviewsResult, "ratingStats">>;
   getReviewById(id: string): Promise<BasicReview | null>;
   createReview(input: CreateReviewParams): Promise<BasicReview>;
   getUserReviews(
     userId: string,
     page: number,
-    pageSize: number
+    pageSize: number,
   ): Promise<PaginatedResult<BasicReview>>;
   updateReview(
     userId: string,
     reviewId: string,
-    input: UpdateReviewInput
+    input: UpdateReviewInput,
   ): Promise<BasicReview>;
   deleteReview(userId: string, reviewId: string): Promise<void>;
 }
@@ -365,14 +367,14 @@ export interface IVotesService {
   upsertVote(
     userId: string,
     reviewId: string,
-    voteType: VoteType
+    voteType: VoteType,
   ): Promise<Vote | null>;
   getReviewVotes(reviewId: string, userId?: string): Promise<ReviewWithVotes>;
 }
 
 export interface IPaymentsService {
   createCheckoutSession(
-    input: CreateCheckoutSessionInput
+    input: CreateCheckoutSessionInput,
   ): Promise<CheckoutSessionResponse>;
 }
 
@@ -405,26 +407,26 @@ export type StudentsPerCourseItem = {
 export interface IOrdersKpiService {
   getTotalRevenue(
     creatorId: string,
-    opts?: { currency?: string; from?: string; to?: string }
+    opts?: { currency?: string; from?: string; to?: string },
   ): Promise<number>;
   getCurrentMonthRevenue(
     creatorId: string,
-    opts?: { currency?: string }
+    opts?: { currency?: string },
   ): Promise<number>;
   getRevenueSeries(
     creatorId: string,
     opts?: {
       period?: "7d" | "30d" | "1y" | null;
       currency?: string;
-    }
+    },
   ): Promise<OrdersRevenueSample[]>;
   getRevenueByCourse(
     creatorId: string,
-    opts?: { currency?: string; from?: string; to?: string; limit?: number }
+    opts?: { currency?: string; from?: string; to?: string; limit?: number },
   ): Promise<TopEarningCourse[]>;
   getStudentsByCourse(
     creatorId: string,
-    opts?: { from?: string; to?: string; limit?: number }
+    opts?: { from?: string; to?: string; limit?: number },
   ): Promise<StudentsPerCourseItem[]>;
 }
 
@@ -483,7 +485,7 @@ export interface IReviewsKpiService {
   getCreatorRecentReviews(
     creatorId: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
   ): Promise<PaginatedResult<CreatorRecentReview>>;
   getCreatorAverageRating(creatorId: string): Promise<number | null>;
 }
@@ -491,12 +493,14 @@ export interface IReviewsKpiService {
 export interface CreateTestInput {
   title: string;
   description: string;
+  variant: TestVariant;
 }
 
 export interface BasicTest {
   id: string;
   title: string;
   description: string | null;
+  variant: TestVariant;
   questionsCount: number;
   created_at: string;
   updated_at: string;
@@ -594,7 +598,7 @@ export interface ITestsService {
   getRecentTestResults(
     userId: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
   ): Promise<PaginatedResult<RecentUserTestResult>>;
   createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
   updateTest(id: string, data: CreateTestInput): Promise<BasicTest>;
@@ -603,11 +607,11 @@ export interface ITestsService {
   createScore(
     testId: string,
     userId: string,
-    submission: TestSubmission
+    submission: TestSubmission,
   ): Promise<TestResult>;
   getTestMaterials(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<TestWithProgress[]>;
   getAverageTestScoreByUser(userId: string): Promise<number | null>;
 }
@@ -635,7 +639,7 @@ export interface AiGeneratedQuestionDto {
 
 export interface IAiTestsService {
   generateQuestions(
-    input: AiGenerateQuestionsInput
+    input: AiGenerateQuestionsInput,
   ): Promise<AiGeneratedQuestionDto[]>;
 }
 
@@ -645,7 +649,7 @@ export interface IUsersService {
   getUserRole(userId: string): Promise<UserRole | null>;
   updateUserDetails(
     userId: string,
-    updateData: UpdateProfile
+    updateData: UpdateProfile,
   ): Promise<UserDetails | null>;
   uploadProfileImage(userId: string, file: File): Promise<string>;
   getProfileImageBlob(avatarPath: string): Promise<Blob>;
@@ -731,23 +735,23 @@ export interface ApplicationLog {
 export interface ICreatorApplicationsService {
   createApplication(
     userId: string,
-    input: CreateCreatorApplicationInput
+    input: CreateCreatorApplicationInput,
   ): Promise<CreatorApplication>;
   getUserApplication(userId: string): Promise<CreatorApplication | null>;
   getApplications(
-    params: GetCreatorApplicationsParams
+    params: GetCreatorApplicationsParams,
   ): Promise<GetCreatorApplicationsResult>;
   getApplicationById(id: string): Promise<CreatorApplication | null>;
   updateApplicationStatus(
     id: string,
     adminId: string,
-    input: UpdateCreatorApplicationInput
+    input: UpdateCreatorApplicationInput,
   ): Promise<CreatorApplication>;
   logApplicationAction(
     applicationId: string,
     adminId: string,
     action: string,
-    notes?: string
+    notes?: string,
   ): Promise<ApplicationLog>;
   getApplicationLogs(applicationId: string): Promise<ApplicationLog[]>;
 }

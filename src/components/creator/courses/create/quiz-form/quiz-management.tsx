@@ -56,6 +56,9 @@ const QuizCardSkeleton = () => (
 const QuizManagement = ({ courseId }: QuizManagementProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<BasicTest | null>(null);
+  const [selectedQuizForQuestions, setSelectedQuizForQuestions] =
+    useState<BasicTest | null>(null);
+
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -118,7 +121,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
   const handleAddQuestions = (quizId: string) => {
     const quiz = quizzes?.find((q) => q.id === quizId);
     if (quiz) {
-      setSelectedQuiz(quiz);
+      setSelectedQuizForQuestions(quiz);
     }
   };
 
@@ -168,7 +171,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
       });
       console.error(
         selectedQuiz ? "Failed to update quiz:" : "Failed to create quiz:",
-        error
+        error,
       );
     }
   };
@@ -232,7 +235,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
 
   return (
     <Box>
-      {selectedQuiz ? (
+      {selectedQuizForQuestions ? (
         <Box mt={4}>
           <Box
             display="flex"
@@ -240,12 +243,15 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
             alignItems="center"
             mb={3}
           >
-            <LightText variant="h5">{selectedQuiz.title}</LightText>
-            <StyledButton variant="text" onClick={() => setSelectedQuiz(null)}>
+            <LightText variant="h5">{selectedQuizForQuestions.title}</LightText>
+            <StyledButton
+              variant="text"
+              onClick={() => setSelectedQuizForQuestions(null)}
+            >
               Back to Quizzes
             </StyledButton>
           </Box>
-          <QuizQuestions testId={selectedQuiz.id} />
+          <QuizQuestions testId={selectedQuizForQuestions.id} />
         </Box>
       ) : (
         <>
@@ -297,6 +303,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
             ? {
                 title: selectedQuiz.title,
                 description: selectedQuiz.description || "",
+                variant: selectedQuiz.variant,
               }
             : undefined
         }

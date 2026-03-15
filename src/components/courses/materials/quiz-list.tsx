@@ -8,7 +8,7 @@ import {
   QuizProgressContainer,
   QuizProgressText,
 } from "@/components/styles/courses/materials.styles";
-import { Box, Skeleton } from "@mui/material";
+import { Box, Skeleton, Chip } from "@mui/material";
 import { trpc } from "@/lib/trpc/client";
 import { LightText } from "@/components/styles/infrastructure/layout.styles";
 import QuizDialog from "./quiz-dialog";
@@ -45,9 +45,44 @@ const LoadingSkeleton: FC = () => (
 
 const QuizList: FC<QuizListProps> = ({ courseId }) => {
   const [selectedTest, setSelectedTest] = useState<TestWithProgress | null>(
-    null
+    null,
   );
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const getVariantColor = (
+    variant: string,
+  ):
+    | "default"
+    | "primary"
+    | "secondary"
+    | "error"
+    | "info"
+    | "success"
+    | "warning" => {
+    switch (variant) {
+      case "knowledge":
+        return "info";
+      case "skill":
+        return "success";
+      case "competence":
+        return "secondary";
+      default:
+        return "default";
+    }
+  };
+
+  const getVariantLabel = (variant: string) => {
+    switch (variant) {
+      case "knowledge":
+        return "Knowledge";
+      case "skill":
+        return "Skill";
+      case "competence":
+        return "Competence";
+      default:
+        return variant;
+    }
+  };
 
   const { data: tests, isLoading } =
     trpc.tests.getTestMaterials.useQuery(courseId);
@@ -91,7 +126,14 @@ const QuizList: FC<QuizListProps> = ({ courseId }) => {
               }
             }}
           >
-            <QuizTitle variant="h6">{test.title}</QuizTitle>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <QuizTitle variant="h6">{test.title}</QuizTitle>
+              <Chip
+                label={getVariantLabel(test.variant)}
+                color={getVariantColor(test.variant)}
+                size="small"
+              />
+            </Box>
             <QuizProgressContainer>
               <QuizProgressBar variant="determinate" value={test.progress} />
               <QuizProgressText>{test.progress}%</QuizProgressText>
