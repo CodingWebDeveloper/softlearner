@@ -569,6 +569,17 @@ export interface RecentUserTestResult {
   updated_at: string;
 }
 
+// Individual student test result for creator analytics
+export interface StudentTestResult {
+  userId: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  completedAt: string;
+}
+
 export interface QuestionsInput {
   testId: string;
   questions: QuestionInput[];
@@ -614,6 +625,7 @@ export interface ITestsService {
     userId: string,
   ): Promise<TestWithProgress[]>;
   getAverageTestScoreByUser(userId: string): Promise<number | null>;
+  getStudentTestResults(testId: string): Promise<StudentTestResult[]>;
 }
 
 // AI Tests (Gemini) interfaces

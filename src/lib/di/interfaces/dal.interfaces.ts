@@ -49,6 +49,7 @@ import {
   CreateReviewParams,
   ActivityResource,
   RecentUserTestResult,
+  StudentTestResult,
 } from "@/services/interfaces/service.interfaces";
 
 export interface PaginatedResult<T> {
@@ -262,6 +263,7 @@ export interface ITestsDAL {
   ): Promise<TestResult>;
   deleteTest(id: string): Promise<void>;
   getAverageTestScoreByUser(userId: string): Promise<number | null>;
+  getStudentTestResults(testId: string): Promise<StudentTestResult[]>;
 }
 
 export interface IUsersDAL {

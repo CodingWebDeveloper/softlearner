@@ -265,4 +265,21 @@ export const testsRouter = router({
         );
       }
     }),
+
+  getStudentTestResults: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input: testId }) => {
+      try {
+        const testsService = ctx.container.resolve<ITestsService>(
+          DI_TOKENS.TESTS_SERVICE,
+        );
+        return await testsService.getStudentTestResults(testId);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch student test results: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
+        );
+      }
+    }),
 });

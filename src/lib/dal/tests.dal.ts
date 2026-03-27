@@ -15,6 +15,7 @@ import {
   QuestionInput,
   OptionInput,
   RecentUserTestResult,
+  StudentTestResult,
 } from "@/services/interfaces/service.interfaces";
 
 type QuestionWithOptions = {
@@ -621,5 +622,54 @@ export class TestsDAL implements ITestsDAL {
       data: results,
       totalRecords: count || 0,
     };
+  }
+
+  async getStudentTestResults(testId: string): Promise<StudentTestResult[]> {
+    const { data, error } = await this.supabase
+      .from("user_tests")
+      .select(
+        `
+        user_id,
+        score,
+        updated_at,
+        user:users!user_tests_user_id_fkey (
+          id,
+          full_name,
+          avatar_url
+        ),
+        test:tests!user_tests_test_id_fkey (
+          id,
+          questions(points)
+        )
+      `,
+      )
+      .eq("test_id", testId)
+      .order("score", { ascending: false });
+
+    if (error) {
+      throw new Error(
+        `Error fetching student test results: ${error.message}`,
+      );
+    }
+
+    return (data || []).map((row) => {
+      const questions = (row as any).test?.questions || [];
+      const maxScore = questions.reduce(
+        (sum: number, q: { points: number }) => sum + (q?.points || 0),
+        0,
+      );
+      const score = row.score || 0;
+      const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+
+      return {
+        userId: row.user_id,
+        fullName: (row as any).user?.full_name || null,
+        avatarUrl: (row as any).user?.avatar_url || null,
+        score,
+        maxScore,
+        percentage,
+        completedAt: row.updated_at,
+      };
+    });
   }
 }

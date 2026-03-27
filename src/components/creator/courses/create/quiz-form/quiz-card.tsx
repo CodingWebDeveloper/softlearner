@@ -16,6 +16,7 @@ import { alpha, styled } from "@mui/material/styles";
 import QuizIcon from "@mui/icons-material/Quiz";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MoreIcon from "@mui/icons-material/More";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import ConfirmAlert from "@/components/confirm-alert";
@@ -124,6 +125,7 @@ interface QuizCardProps {
   quiz: BasicTest;
   onClick: (quizId: string) => void;
   onAddQuestions: (quizId: string) => void;
+  onViewResults: (quizId: string) => void;
   onDelete: (quizId: string) => void;
 }
 
@@ -131,6 +133,7 @@ const QuizCard = ({
   quiz,
   onClick,
   onAddQuestions,
+  onViewResults,
   onDelete,
 }: QuizCardProps) => {
   // States
@@ -140,6 +143,12 @@ const QuizCard = ({
   // Handlers
   const handleAddQuestions = () => {
     onAddQuestions(quiz.id);
+    handleClose();
+  };
+
+  const handleViewResults = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    onViewResults(quiz.id);
     handleClose();
   };
 
@@ -231,6 +240,10 @@ const QuizCard = ({
           >
             <EditIcon />
             Edit
+          </MenuItem>
+          <MenuItem onClick={handleViewResults} disableRipple>
+            <AssessmentIcon />
+            View Results
           </MenuItem>
           <MenuItem onClick={handleDeleteClick} disableRipple>
             <DeleteIcon />

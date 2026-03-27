@@ -11,6 +11,7 @@ import {
   TestSubmission,
   PaginatedResult,
   RecentUserTestResult,
+  StudentTestResult,
 } from "./interfaces/service.interfaces";
 
 export class TestsService implements ITestsService {
@@ -102,5 +103,9 @@ export class TestsService implements ITestsService {
     pageSize: number = 10
   ): Promise<PaginatedResult<RecentUserTestResult>> {
     return this.testsDAL.getRecentTestResults(userId, page, pageSize);
+  }
+
+  async getStudentTestResults(testId: string): Promise<StudentTestResult[]> {
+    return this.testsDAL.getStudentTestResults(testId);
   }
 }

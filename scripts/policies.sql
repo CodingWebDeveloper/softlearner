@@ -561,6 +561,18 @@ FOR SELECT USING (
   )
 );
 
+-- Allow course creators to view all student test results for their courses
+DROP POLICY IF EXISTS "Allow creators to view student test results" ON user_tests;
+CREATE POLICY "Allow creators to view student test results" ON user_tests
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM tests t
+    JOIN courses c ON c.id = t.course_id
+    WHERE t.id = user_tests.test_id
+    AND c.creator_id = auth.uid()
+  )
+);
+
 -- Allow users to create test results only for courses they have purchased
 DROP POLICY IF EXISTS "Allow users to create test results" ON user_tests;
 CREATE POLICY "Allow users to create test results" ON user_tests

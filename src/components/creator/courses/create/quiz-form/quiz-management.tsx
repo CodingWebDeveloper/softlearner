@@ -5,6 +5,7 @@ import { trpc } from "@/lib/trpc/client";
 import QuizCard from "./quiz-card";
 import QuizDialog, { QuizFormValues } from "./quiz-dialog";
 import QuizQuestions from "./quiz-questions";
+import TestResultsTable from "./test-results-table";
 import { BasicTest } from "@/services/interfaces/service.interfaces";
 import {
   Box,
@@ -57,6 +58,8 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<BasicTest | null>(null);
   const [selectedQuizForQuestions, setSelectedQuizForQuestions] =
+    useState<BasicTest | null>(null);
+  const [selectedQuizForResults, setSelectedQuizForResults] =
     useState<BasicTest | null>(null);
 
   const [snackbar, setSnackbar] = useState<{
@@ -122,6 +125,13 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
     const quiz = quizzes?.find((q) => q.id === quizId);
     if (quiz) {
       setSelectedQuizForQuestions(quiz);
+    }
+  };
+
+  const handleViewResults = (quizId: string) => {
+    const quiz = quizzes?.find((q) => q.id === quizId);
+    if (quiz) {
+      setSelectedQuizForResults(quiz);
     }
   };
 
@@ -235,7 +245,27 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
 
   return (
     <Box>
-      {selectedQuizForQuestions ? (
+      {selectedQuizForResults ? (
+        <Box mt={4}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={3}
+          >
+            <LightText variant="h5">
+              Test Results: {selectedQuizForResults.title}
+            </LightText>
+            <StyledButton
+              variant="text"
+              onClick={() => setSelectedQuizForResults(null)}
+            >
+              Back to Quizzes
+            </StyledButton>
+          </Box>
+          <TestResultsTable testId={selectedQuizForResults.id} />
+        </Box>
+      ) : selectedQuizForQuestions ? (
         <Box mt={4}>
           <Box
             display="flex"
@@ -281,6 +311,7 @@ const QuizManagement = ({ courseId }: QuizManagementProps) => {
                   quiz={quiz}
                   onClick={handleQuizClick}
                   onAddQuestions={handleAddQuestions}
+                  onViewResults={handleViewResults}
                   onDelete={handleDeleteQuiz}
                 />
               ))}
