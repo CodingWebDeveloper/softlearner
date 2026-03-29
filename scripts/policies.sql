@@ -259,6 +259,21 @@ DROP POLICY IF EXISTS "Allow users to view their own orders" ON orders;
 CREATE POLICY "Allow users to view their own orders" ON orders
 FOR SELECT USING (auth.uid() = user_id);
 
+-- Allow course creators (or admins) to view orders for their courses
+DROP POLICY IF EXISTS "Allow creators to view course orders" ON orders;
+CREATE POLICY "Allow creators to view course orders" ON orders
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM courses c
+    WHERE c.id = orders.course_id
+      AND c.creator_id = auth.uid()
+  ) OR EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.id = auth.uid()
+      AND u.role = 'admin'
+  )
+);
+
 -- Allow authenticated users to create orders for themselves only
 DROP POLICY IF EXISTS "Allow authenticated users to create orders" ON orders;
 CREATE POLICY "Allow authenticated users to create orders" ON orders

@@ -35,6 +35,7 @@ import { trpc } from "@/lib/trpc/client";
 import { useSnackbar } from "notistack";
 import ConfirmAlert from "@/components/confirm-alert";
 import CourseAnalyticsTab from "@/components/creator/courses/analytics/course-analytics-tab";
+import CourseStudentsTable from "@/components/creator/courses/create/course-students-table";
 
 function a11yProps(index: number) {
   return {
@@ -86,7 +87,9 @@ const EditCoursePage = () => {
       onSuccess: async (data) => {
         await utils.courses.getCourseDataById.invalidate(courseId!);
         await utils.courses.getCreatorCourses.invalidate();
-        await utils.courses.getCourseCreationProgressStatus.invalidate(courseId!);
+        await utils.courses.getCourseCreationProgressStatus.invalidate(
+          courseId!,
+        );
         enqueueSnackbar(data.message, { variant: "success" });
       },
       onError: (error) => {
@@ -191,6 +194,7 @@ const EditCoursePage = () => {
                 <Tab label="Tags" {...a11yProps(2)} />
                 <Tab label="Quizzes" {...a11yProps(3)} />
                 <Tab label="Analytics" {...a11yProps(4)} />
+                <Tab label="Students" {...a11yProps(5)} />
               </StyledTabs>
 
               <TabPanel value={currentTab} index={0}>
@@ -210,7 +214,11 @@ const EditCoursePage = () => {
               </TabPanel>
 
               <TabPanel value={currentTab} index={4}>
-                {courseId && <CourseAnalyticsTab courseId={courseId} />}
+                <CourseAnalyticsTab courseId={courseId} />
+              </TabPanel>
+
+              <TabPanel value={currentTab} index={5}>
+                <CourseStudentsTable courseId={courseId} />
               </TabPanel>
             </Box>
           </Grid>

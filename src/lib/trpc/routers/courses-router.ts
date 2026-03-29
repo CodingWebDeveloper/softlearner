@@ -19,7 +19,10 @@ const getBookmarkedCoursesInput = z.object({
 const getPurchasedCoursesInput = z.object({
   page: z.number().min(1).default(1),
   pageSize: z.number().min(1).max(100).default(15),
-  sortBy: z.enum(["name", "orderCreatedAt"]).default("orderCreatedAt").optional(),
+  sortBy: z
+    .enum(["name", "orderCreatedAt"])
+    .default("orderCreatedAt")
+    .optional(),
   sortDir: z.enum(["asc", "desc"]).default("desc").optional(),
 });
 
@@ -83,7 +86,7 @@ export const coursesRouter = router({
     .mutation(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         const courseData = extractAndValidateCourseData(input);
@@ -92,7 +95,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to create course: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -100,14 +103,14 @@ export const coursesRouter = router({
   getReviewsCount: protectedProcedure.query(async ({ ctx }) => {
     try {
       const coursesService = ctx.container.resolve<ICoursesService>(
-        DI_TOKENS.COURSES_SERVICE
+        DI_TOKENS.COURSES_SERVICE,
       );
       return await coursesService.getReviewsCount(ctx.user.id);
     } catch (error) {
       throw new Error(
         `Failed to fetch reviews count: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     }
   }),
@@ -117,7 +120,7 @@ export const coursesRouter = router({
     .mutation(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         const courseId = input.get("id") as string;
@@ -129,13 +132,13 @@ export const coursesRouter = router({
         return await coursesService.updateCourse(
           ctx.user.id,
           courseId,
-          courseData
+          courseData,
         );
       } catch (error) {
         throw new Error(
           `Failed to update course: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -145,7 +148,7 @@ export const coursesRouter = router({
     .query(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         return await coursesService.getCourses({
@@ -156,7 +159,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to fetch courses: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -166,7 +169,7 @@ export const coursesRouter = router({
     .query(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         return await coursesService.getCourseById(input);
@@ -174,7 +177,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to fetch course: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -184,7 +187,7 @@ export const coursesRouter = router({
     .query(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         return await coursesService.getCourseDataById(input);
@@ -192,7 +195,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to fetch course data: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -202,12 +205,12 @@ export const coursesRouter = router({
     .query(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         const course = await coursesService.getCourseMaterialsById(
           input,
-          ctx.user.id
+          ctx.user.id,
         );
 
         if (!course) {
@@ -219,7 +222,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to fetch course materials: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -229,7 +232,7 @@ export const coursesRouter = router({
     .query(async ({ ctx, input: courseId }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         return await coursesService.isEnrolled(ctx.user.id, courseId);
@@ -237,7 +240,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to check enrollment: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -247,19 +250,19 @@ export const coursesRouter = router({
     .query(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         return await coursesService.getBookmarkedCourses(
           ctx.user.id,
           input.page,
-          input.pageSize
+          input.pageSize,
         );
       } catch (error) {
         throw new Error(
           `Failed to fetch bookmarked courses: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -269,7 +272,7 @@ export const coursesRouter = router({
     .query(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         return await coursesService.getPurchasedCourses(
@@ -277,13 +280,13 @@ export const coursesRouter = router({
           input.page,
           input.pageSize,
           input.sortBy,
-          input.sortDir
+          input.sortDir,
         );
       } catch (error) {
         throw new Error(
           `Failed to fetch purchased courses: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -293,7 +296,7 @@ export const coursesRouter = router({
     .query(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         return await coursesService.getCoursesByCreator(
@@ -301,13 +304,13 @@ export const coursesRouter = router({
           input.page,
           input.pageSize,
           input.sortBy,
-          input.sortDir
+          input.sortDir,
         );
       } catch (error) {
         throw new Error(
           `Failed to fetch creator courses: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -317,7 +320,7 @@ export const coursesRouter = router({
     .mutation(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         await coursesService.deleteCourse(ctx.user.id, input.id);
@@ -326,7 +329,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to delete course: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -336,7 +339,7 @@ export const coursesRouter = router({
     .query(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         const blob = await coursesService.getThumbnail(input.path);
@@ -347,7 +350,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to download thumbnail: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -357,18 +360,18 @@ export const coursesRouter = router({
       z.object({
         courseId: z.string().uuid(),
         isPublished: z.boolean(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         await coursesService.togglePublishStatus(
           ctx.user.id,
           input.courseId,
-          input.isPublished
+          input.isPublished,
         );
 
         return {
@@ -382,7 +385,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to update course publish status: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -392,7 +395,7 @@ export const coursesRouter = router({
     .query(async ({ ctx, input: courseId }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         return await coursesService.getCourseCreationProgressStatus(courseId);
@@ -400,7 +403,7 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to fetch course progress status: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
@@ -410,7 +413,7 @@ export const coursesRouter = router({
     .query(async ({ ctx, input: courseId }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
 
         return await coursesService.getCourseCompletionRate(courseId);
@@ -418,74 +421,87 @@ export const coursesRouter = router({
         throw new Error(
           `Failed to fetch course completion rate: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
         );
       }
     }),
-  getTotalEnrolledCourses: protectedProcedure
-    .query(async ({ ctx }) => {
-      try {
-        const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
-        );
-        return await coursesService.getTotalEnrolledCourses(ctx.user.id);
-      } catch (error) {
-        throw new Error(
-          `Failed to fetch total enrolled courses: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`
-        );
-      }
-    }),
-  getCompletedResourcesCount: protectedProcedure
-    .query(async ({ ctx }) => {
-      try {
-        const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
-        );
-        return await coursesService.getCompletedResourcesCount(ctx.user.id);
-      } catch (error) {
-        throw new Error(
-          `Failed to fetch completed resources: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`
-        );
-      }
-    }),
+  getTotalEnrolledCourses: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const coursesService = ctx.container.resolve<ICoursesService>(
+        DI_TOKENS.COURSES_SERVICE,
+      );
+      return await coursesService.getTotalEnrolledCourses(ctx.user.id);
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch total enrolled courses: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
+    }
+  }),
+  getCompletedResourcesCount: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const coursesService = ctx.container.resolve<ICoursesService>(
+        DI_TOKENS.COURSES_SERVICE,
+      );
+      return await coursesService.getCompletedResourcesCount(ctx.user.id);
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch completed resources: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
+    }
+  }),
 
   // Student: overall completion percentage across enrolled courses
-  getOverallCompletionRate: protectedProcedure
-    .query(async ({ ctx }) => {
-      try {
-        const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
-        );
-        return await coursesService.getOverallCompletionRate(ctx.user.id);
-      } catch (error) {
-        throw new Error(
-          `Failed to fetch overall completion rate: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`
-        );
-      }
-    }),
+  getOverallCompletionRate: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const coursesService = ctx.container.resolve<ICoursesService>(
+        DI_TOKENS.COURSES_SERVICE,
+      );
+      return await coursesService.getOverallCompletionRate(ctx.user.id);
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch overall completion rate: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
+    }
+  }),
   getCourseProgressData: protectedProcedure
     .input(getCourseProgressInput)
     .query(async ({ ctx, input }) => {
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
-          DI_TOKENS.COURSES_SERVICE
+          DI_TOKENS.COURSES_SERVICE,
         );
         return await coursesService.getCourseProgressData(
           ctx.user.id,
           input.page,
-          input.pageSize
+          input.pageSize,
         );
       } catch (error) {
         throw new Error(
           `Failed to fetch course progress data: ${
             error instanceof Error ? error.message : "Unknown error"
-          }`
+          }`,
+        );
+      }
+    }),
+  getCourseStudentsProgress: protectedProcedure
+    .input(z.string().uuid())
+    .query(async ({ ctx, input: courseId }) => {
+      try {
+        const coursesService = ctx.container.resolve<ICoursesService>(
+          DI_TOKENS.COURSES_SERVICE,
+        );
+        return await coursesService.getCourseStudentsProgress(courseId);
+      } catch (error) {
+        throw new Error(
+          `Failed to fetch course students progress: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
         );
       }
     }),

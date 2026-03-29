@@ -10,6 +10,7 @@ import {
   SimpleCourse,
   User,
   CourseProgressItem,
+  CourseStudentProgress,
 } from "@/services/interfaces/service.interfaces";
 import { ORDER_STATUS } from "@/lib/constants/stripe-constants";
 import { FullCourse } from "@/services/interfaces/service.interfaces";
@@ -37,6 +38,13 @@ type SimpleCourseWithRelations =
 
 type BookmarkWithCourse = Database["public"]["Tables"]["bookmarks"]["Row"] & {
   course: CourseWithRelations;
+};
+
+type OrderWithUser = Database["public"]["Tables"]["orders"]["Row"] & {
+  user: {
+    id: string;
+    full_name: string | null;
+  };
 };
 
 type PurchasedCourseResource = {
@@ -1145,5 +1153,89 @@ export class CoursesDAL implements ICoursesDAL {
       data: progressData as CourseProgressItem[],
       totalRecords: progressData.length,
     };
+  }
+
+  async getCourseStudentsProgress(
+    courseId: string,
+  ): Promise<CourseStudentProgress[]> {
+    // Get total resources count for the course
+    const { data: resources, error: resourcesError } = await this.supabase
+      .from("resources")
+      .select("id")
+      .eq("course_id", courseId);
+
+    if (resourcesError) {
+      throw new Error(
+        `Error fetching course resources: ${resourcesError.message}`,
+      );
+    }
+
+    const resourceIds = (resources ?? []).map((r) => r.id);
+    const totalResources = resourceIds.length;
+
+    // Get enrolled students with their user details
+    const { data: ordersData, error: ordersError } = await this.supabase
+      .from("orders")
+      .select(
+        `
+        user_id,
+        created_at,
+        user:user_id (
+          id,
+          full_name
+        )
+      `,
+      )
+      .eq("course_id", courseId)
+      .eq("status", ORDER_STATUS.SUCCEEDED)
+      .order("created_at", { ascending: false });
+
+    if (ordersError) {
+      throw new Error(
+        `Error fetching enrolled students: ${ordersError.message}`,
+      );
+    }
+
+    const orders = (ordersData ?? []) as OrderWithUser[];
+
+    if (orders.length === 0) {
+      return [];
+    }
+
+    // Get completed resources for all enrolled students
+    const userIds = orders.map((o) => o.user_id);
+    const { data: completedResources, error: completedError } =
+      await this.supabase
+        .from("user_resources")
+        .select("user_id, resource_id")
+        .in("user_id", userIds)
+        .in("resource_id", resourceIds)
+        .eq("completed", true);
+
+    if (completedError) {
+      throw new Error(
+        `Error fetching completed resources: ${completedError.message}`,
+      );
+    }
+
+    // Count completed resources per user
+    const completedCountMap = new Map<string, number>();
+    (completedResources ?? []).forEach((cr) => {
+      const count = completedCountMap.get(cr.user_id) || 0;
+      completedCountMap.set(cr.user_id, count + 1);
+    });
+
+    // Map to CourseStudentProgress
+    return orders.map((order) => {
+      const completedCount = completedCountMap.get(order.user_id) || 0;
+
+      return {
+        userId: order.user_id,
+        fullName: order.user?.full_name || null,
+        completedResources: completedCount,
+        totalResources,
+        enrolledAt: order.created_at,
+      };
+    });
   }
 }

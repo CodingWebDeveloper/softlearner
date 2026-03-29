@@ -35,6 +35,7 @@ import CourseChecklist from "@/components/creator/courses/course-checklist";
 import { VIEWPORT_MEDIA_QUERIES } from "@/utils/constants";
 import { trpc } from "@/lib/trpc/client";
 import ConfirmAlert from "@/components/confirm-alert";
+import CourseStudentsTable from "@/components/creator/courses/create/course-students-table";
 
 function a11yProps(index: number) {
   return {
@@ -83,7 +84,9 @@ const CreateCoursePage = () => {
       onSuccess: async (data) => {
         await utils.courses.getCourseDataById.invalidate(courseId!);
         await utils.courses.getCreatorCourses.invalidate();
-        await utils.courses.getCourseCreationProgressStatus.invalidate(courseId!);
+        await utils.courses.getCourseCreationProgressStatus.invalidate(
+          courseId!,
+        );
         enqueueSnackbar(data.message, { variant: "success" });
       },
       onError: (error) => {
@@ -185,6 +188,7 @@ const CreateCoursePage = () => {
                 <Tab label="Resources" disabled={!courseId} {...a11yProps(1)} />
                 <Tab label="Tags" disabled={!courseId} {...a11yProps(2)} />
                 <Tab label="Quizzes" disabled={!courseId} {...a11yProps(3)} />
+                <Tab label="Students" disabled={!courseId} {...a11yProps(4)} />
               </StyledTabs>
 
               <TabPanel value={currentTab} index={0}>
@@ -205,6 +209,10 @@ const CreateCoursePage = () => {
 
               <TabPanel value={currentTab} index={3}>
                 <QuizManagement courseId={courseId} />
+              </TabPanel>
+
+              <TabPanel value={currentTab} index={4}>
+                <CourseStudentsTable courseId={courseId!} />
               </TabPanel>
             </Box>
           </Grid>

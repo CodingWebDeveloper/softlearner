@@ -174,6 +174,15 @@ export interface CourseProgressItem {
   resourceCount: number;
 }
 
+// Individual student progress for a specific course (creator view)
+export interface CourseStudentProgress {
+  userId: string;
+  fullName: string | null;
+  completedResources: number;
+  totalResources: number;
+  enrolledAt: string;
+}
+
 export interface BasicReview {
   id: string;
   content: string;
@@ -275,6 +284,7 @@ export interface ICoursesService {
     page?: number,
     pageSize?: number,
   ): Promise<PaginatedResult<CourseProgressItem>>;
+  getCourseStudentsProgress(courseId: string): Promise<CourseStudentProgress[]>;
 }
 
 export interface ITagsService {

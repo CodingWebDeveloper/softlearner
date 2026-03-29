@@ -11,17 +11,18 @@ import {
   CourseProgressStatus,
   FullCourse,
   CourseProgressItem,
+  CourseStudentProgress,
 } from "./interfaces/service.interfaces";
 
 export class CoursesService implements ICoursesService {
   constructor(
     private coursesDAL: ICoursesDAL,
-    private reviewsDAL: IReviewsDAL
+    private reviewsDAL: IReviewsDAL,
   ) {}
 
   async createCourse(
     creatorId: string,
-    params: CreateCourseParams
+    params: CreateCourseParams,
   ): Promise<SimpleCourse> {
     return this.coursesDAL.createCourse(creatorId, params);
   }
@@ -41,7 +42,7 @@ export class CoursesService implements ICoursesService {
   async getBookmarkedCourses(
     userId: string,
     page: number = 1,
-    pageSize: number = 15
+    pageSize: number = 15,
   ): Promise<GetCoursesResult> {
     return this.coursesDAL.getBookmarkedCourses(userId, page, pageSize);
   }
@@ -51,20 +52,20 @@ export class CoursesService implements ICoursesService {
     page: number = 1,
     pageSize: number = 15,
     sortBy?: "name" | "orderCreatedAt",
-    sortDir?: "asc" | "desc"
+    sortDir?: "asc" | "desc",
   ): Promise<PaginatedResult<PurchasedCourse>> {
     return this.coursesDAL.getPurchasedCourses(
       userId,
       page,
       pageSize,
       sortBy,
-      sortDir
+      sortDir,
     );
   }
 
   async getCourseMaterialsById(
     id: string,
-    userId: string
+    userId: string,
   ): Promise<FullCourse> {
     const courseData = await this.coursesDAL.getCourseMaterialsById(id, userId);
     const isReviewed = await this.reviewsDAL.hasUserReviewedCourse(userId, id);
@@ -81,21 +82,21 @@ export class CoursesService implements ICoursesService {
     page: number = 1,
     pageSize: number = 15,
     sortBy?: "name" | "category" | "price" | "created_at" | "updated_at",
-    sortDir?: "asc" | "desc"
+    sortDir?: "asc" | "desc",
   ): Promise<PaginatedResult<SimpleCourse>> {
     return this.coursesDAL.getCoursesByCreator(
       creatorId,
       page,
       pageSize,
       sortBy,
-      sortDir
+      sortDir,
     );
   }
 
   async updateCourse(
     creatorId: string,
     courseId: string,
-    params: CreateCourseParams
+    params: CreateCourseParams,
   ): Promise<SimpleCourse> {
     return this.coursesDAL.updateCourse(creatorId, courseId, params);
   }
@@ -115,17 +116,17 @@ export class CoursesService implements ICoursesService {
   async togglePublishStatus(
     creatorId: string,
     courseId: string,
-    isPublished: boolean
+    isPublished: boolean,
   ): Promise<void> {
     return this.coursesDAL.togglePublishStatus(
       creatorId,
       courseId,
-      isPublished
+      isPublished,
     );
   }
 
   async getCourseCreationProgressStatus(
-    courseId: string
+    courseId: string,
   ): Promise<CourseProgressStatus> {
     return this.coursesDAL.getCourseCreationProgressStatus(courseId);
   }
@@ -153,8 +154,14 @@ export class CoursesService implements ICoursesService {
   async getCourseProgressData(
     userId: string,
     page: number = 1,
-    pageSize: number = 15
+    pageSize: number = 15,
   ): Promise<PaginatedResult<CourseProgressItem>> {
     return this.coursesDAL.getCourseProgressData(userId, page, pageSize);
+  }
+
+  async getCourseStudentsProgress(
+    courseId: string,
+  ): Promise<CourseStudentProgress[]> {
+    return this.coursesDAL.getCourseStudentsProgress(courseId);
   }
 }

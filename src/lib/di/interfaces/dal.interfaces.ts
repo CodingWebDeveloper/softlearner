@@ -72,12 +72,12 @@ export interface IOrdersDAL {
 export interface ICoursesDAL {
   createCourse(
     creatorId: string,
-    params: CreateCourseParams
+    params: CreateCourseParams,
   ): Promise<SimpleCourse>;
   uploadCourseThumbnail(
     creatorId: string,
     courseId: string,
-    file: File
+    file: File,
   ): Promise<string>;
   getCourses(params: GetCoursesParams): Promise<GetCoursesResult>;
   getCourseById(id: string, userId?: string): Promise<BasicCourse | null>;
@@ -86,50 +86,51 @@ export interface ICoursesDAL {
   getBookmarkedCourses(
     userId: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
   ): Promise<GetCoursesResult>;
   getPurchasedCourses(
     userId: string,
     page?: number,
     pageSize?: number,
     sortBy?: "name" | "orderCreatedAt",
-    sortDir?: "asc" | "desc"
+    sortDir?: "asc" | "desc",
   ): Promise<PaginatedResult<PurchasedCourse>>;
   getCourseProgressData(
     userId: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
   ): Promise<PaginatedResult<CourseProgressItem>>;
   getCourseMaterialsById(
     id: string,
-    userId?: string
+    userId?: string,
   ): Promise<FullCourse | null>;
   getCoursesByCreator(
     creatorId: string,
     page?: number,
     pageSize?: number,
     sortBy?: "name" | "category" | "price" | "created_at" | "updated_at",
-    sortDir?: "asc" | "desc"
+    sortDir?: "asc" | "desc",
   ): Promise<PaginatedResult<SimpleCourse>>;
   updateCourse(
     creatorId: string,
     courseId: string,
-    params: CreateCourseParams
+    params: CreateCourseParams,
   ): Promise<SimpleCourse>;
   deleteCourse(creatorId: string, courseId: string): Promise<void>;
   getThumbnail(thumbnailPath: string): Promise<Blob>;
   togglePublishStatus(
     creatorId: string,
     courseId: string,
-    isPublished: boolean
+    isPublished: boolean,
   ): Promise<void>;
   getCourseCreationProgressStatus(
-    courseId: string
+    courseId: string,
   ): Promise<CourseProgressStatus>;
   getCourseCompletionRate(courseId: string): Promise<number>;
   getTotalEnrolledCourses(userId: string): Promise<number>;
   getCompletedResourcesCount(userId: string): Promise<number>;
   getOverallCompletionRate(userId: string): Promise<number>;
+  getCourseStudentsProgress(courseId: string): Promise<CourseStudentProgress[]>;
 }
 
 export interface ICategoriesDAL {
@@ -150,41 +151,41 @@ export interface IResourcesDAL {
   getAllResourcesByCourseId(courseId: string): Promise<SimpleResource[]>;
   getResourceMaterialsByCourseId(
     courseId: string,
-    userId?: string
+    userId?: string,
   ): Promise<BasicResource[]>;
   getNextResourceToComplete(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<string | null>;
   toggleResourceCompletion(
     userId: string,
-    resourceId: string
+    resourceId: string,
   ): Promise<boolean>;
   getResourceCompletionStatus(
     userId: string,
-    resourceId: string
+    resourceId: string,
   ): Promise<boolean>;
   createResource(params: CreateResourceParams): Promise<SimpleResource>;
   updateResource(
     resourceId: string,
-    params: UpdateResourceParams
+    params: UpdateResourceParams,
   ): Promise<SimpleResource>;
   updateResourcesOrder(
     courseId: string,
-    orderUpdates: { id: string; order_index: number }[]
+    orderUpdates: { id: string; order_index: number }[],
   ): Promise<SimpleResource[]>;
   downloadResourceFile(resourceId: string): Promise<Blob>;
   deleteResource(resourceId: string): Promise<void>;
   getUserCompletedResourcesByYear(
     userId: string,
-    year: number
+    year: number,
   ): Promise<ActivityResource[]>;
 }
 
 export interface IReviewsDAL {
   getCourseRatingStats(courseId: string): Promise<RatingStats>;
   getCourseReviews(
-    params: GetReviewsParams
+    params: GetReviewsParams,
   ): Promise<Omit<GetReviewsResult, "ratingStats">>;
   getReviewById(id: string): Promise<BasicReview | null>;
   createReview(params: CreateReviewParams): Promise<BasicReview>;
@@ -192,13 +193,13 @@ export interface IReviewsDAL {
   getUserReviews(
     userId: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
   ): Promise<PaginatedResult<BasicReview>>;
   getReviewsCount(userId: string): Promise<number>;
   updateReview(
     userId: string,
     reviewId: string,
-    input: UpdateReviewInput
+    input: UpdateReviewInput,
   ): Promise<BasicReview>;
   deleteReview(userId: string, reviewId: string): Promise<void>;
 }
@@ -207,19 +208,19 @@ export interface IVotesDAL {
   upsertVote(
     userId: string,
     reviewId: string,
-    voteType: VoteType
+    voteType: VoteType,
   ): Promise<Vote | null>;
   getReviewVotes(reviewId: string, userId?: string): Promise<ReviewWithVotes>;
 }
 
 export interface IPaymentsDAL {
   createCheckoutSession(
-    input: CreateCheckoutSessionInput
+    input: CreateCheckoutSessionInput,
   ): Promise<CheckoutSessionResponse>;
   getCourseById(courseId: string): Promise<Course | null>;
   checkExistingOrder(
     userId: string,
-    courseId: string
+    courseId: string,
   ): Promise<{ id: string } | null>;
   createOrder(order: {
     user_id: string;
@@ -230,11 +231,11 @@ export interface IPaymentsDAL {
   }): Promise<{ id: string }>;
   updateOrderPaymentIntent(
     orderId: string,
-    paymentIntentId: string
+    paymentIntentId: string,
   ): Promise<void>;
   checkExistingSuccessfulOrder(
     userId: string,
-    courseId: string
+    courseId: string,
   ): Promise<boolean>;
 }
 
@@ -251,7 +252,7 @@ export interface ITestsDAL {
   getRecentTestResults(
     userId: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
   ): Promise<PaginatedResult<RecentUserTestResult>>;
   createTest(courseId: string, data: CreateTestInput): Promise<BasicTest>;
   saveQuestions(data: QuestionsInput): Promise<FullTest>;
@@ -259,7 +260,7 @@ export interface ITestsDAL {
   createScore(
     testId: string,
     userId: string,
-    submission: TestSubmission
+    submission: TestSubmission,
   ): Promise<TestResult>;
   deleteTest(id: string): Promise<void>;
   getAverageTestScoreByUser(userId: string): Promise<number | null>;
@@ -272,7 +273,7 @@ export interface IUsersDAL {
   getUserRole(userId: string): Promise<UserRole | null>;
   updateUserDetails(
     userId: string,
-    updateData: UpdateProfile
+    updateData: UpdateProfile,
   ): Promise<UserDetails | null>;
   uploadProfileImage(userId: string, file: File): Promise<string>;
   getProfileImageBlob(avatarPath: string): Promise<Blob>;
@@ -282,23 +283,23 @@ export interface IUsersDAL {
 export interface ICreatorApplicationsDAL {
   createApplication(
     userId: string,
-    input: CreateCreatorApplicationInput
+    input: CreateCreatorApplicationInput,
   ): Promise<CreatorApplication>;
   getUserApplication(userId: string): Promise<CreatorApplication | null>;
   getApplications(
-    params: GetCreatorApplicationsParams
+    params: GetCreatorApplicationsParams,
   ): Promise<GetCreatorApplicationsResult>;
   getApplicationById(id: string): Promise<CreatorApplication | null>;
   updateApplicationStatus(
     id: string,
     adminId: string,
-    input: UpdateCreatorApplicationInput
+    input: UpdateCreatorApplicationInput,
   ): Promise<CreatorApplication>;
   logApplicationAction(
     applicationId: string,
     adminId: string,
     action: string,
-    notes?: string
+    notes?: string,
   ): Promise<ApplicationLog>;
   getApplicationLogs(applicationId: string): Promise<ApplicationLog[]>;
 }
