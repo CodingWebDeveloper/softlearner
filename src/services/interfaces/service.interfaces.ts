@@ -629,7 +629,7 @@ export interface ITestsService {
 }
 
 // AI Tests (Gemini) interfaces
-export type AiDifficulty = "easy" | "medium" | "hard";
+export type AiDifficulty = "knowledge" | "skill" | "competence";
 
 export interface AiGenerateQuestionsInput {
   topic: string;

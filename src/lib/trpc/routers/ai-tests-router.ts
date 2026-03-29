@@ -6,7 +6,7 @@ import { IAiTestsService } from "@/services/interfaces/service.interfaces";
 const generateInput = z.object({
   topic: z.string().min(1, "Topic is required"),
   numQuestions: z.number().int().min(1).max(20).optional(),
-  difficulty: z.enum(["easy", "medium", "hard"]).optional(),
+  difficulty: z.enum(["knowledge", "skill", "competence"]).optional(),
 });
 
 export const aiTestsRouter = router({

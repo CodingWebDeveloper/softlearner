@@ -63,6 +63,7 @@ const ResourceCard: FC<ResourceCardProps> = ({ resource }) => {
           secondary={resource.duration}
           selected={isSelected}
         />
+        {resource.completed && <ResourceCompletedIcon />}
       </ResourceMaterialItem>
     );
   }

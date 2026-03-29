@@ -13,7 +13,7 @@ export class AiTestsService implements IAiTestsService {
   }
 
   async generateQuestions(input: AiGenerateQuestionsInput): Promise<AiGeneratedQuestionDto[]> {
-    const { topic, numQuestions = 5, difficulty = "medium" } = input;
+    const { topic, numQuestions = 5, difficulty = "knowledge" } = input;
 
     const prompt = [
       `Generate ${numQuestions} multiple-choice questions about the topic: "${topic}".`,

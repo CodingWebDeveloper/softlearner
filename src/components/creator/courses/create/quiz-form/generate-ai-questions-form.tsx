@@ -42,7 +42,7 @@ const GenerateAIQuestionsForm = ({
 }: GenerateAIQuestionsFormProps) => {
   const [topic, setTopic] = useState("");
   const [numQuestions, setNumQuestions] = useState(5);
-  const [difficulty, setDifficulty] = useState<AiDifficulty>("medium");
+  const [difficulty, setDifficulty] = useState<AiDifficulty>("knowledge");
   const [error, setError] = useState<string | null>(null);
 
   const generateQuestionsMutation = trpc.aiTests.generateQuestions.useMutation({
@@ -58,7 +58,7 @@ const GenerateAIQuestionsForm = ({
   const handleClose = () => {
     setTopic("");
     setNumQuestions(5);
-    setDifficulty("medium");
+    setDifficulty("knowledge");
     setError(null);
     onClose();
   };
@@ -114,9 +114,9 @@ const GenerateAIQuestionsForm = ({
                 onChange={(e) => setDifficulty(e.target.value as AiDifficulty)}
                 label="Difficulty"
               >
-                <MenuItem value="easy">Easy</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="hard">Hard</MenuItem>
+                <MenuItem value="knowledge">Knowledge</MenuItem>
+                <MenuItem value="skill">Skill</MenuItem>
+                <MenuItem value="competence">Competence</MenuItem>
               </Select>
             </FormControl>
           </Box>
