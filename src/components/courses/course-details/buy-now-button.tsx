@@ -3,6 +3,7 @@ import { CircularProgress } from "@mui/material";
 import { trpc } from "@/lib/trpc/client";
 import { useRouter } from "next/navigation";
 import { StyledButton } from "@/components/styles/infrastructure/layout.styles";
+import { getStripe } from "@/lib/stripe/stripe-client";
 
 interface BuyNowButtonProps {
   courseId: string;
@@ -24,10 +25,7 @@ export const BuyNowButton = ({ courseId, isEnrolled }: BuyNowButtonProps) => {
         cancelUrl: `${window.location.origin}/courses/${courseId}`,
       });
 
-      // Redirect to Stripe Checkout
-      const stripe = await import("@stripe/stripe-js").then((mod) =>
-        mod.loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!),
-      );
+      const stripe = await getStripe();
 
       if (!stripe) {
         throw new Error("Failed to load Stripe");
