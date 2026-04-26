@@ -37,7 +37,7 @@ export class PaymentsDAL implements IPaymentsDAL {
 
   async checkExistingSuccessfulOrder(
     userId: string,
-    courseId: string
+    courseId: string,
   ): Promise<boolean> {
     const { data: existingOrder } = await this.supabase
       .from("orders")
@@ -52,7 +52,7 @@ export class PaymentsDAL implements IPaymentsDAL {
 
   async checkExistingOrder(
     userId: string,
-    courseId: string
+    courseId: string,
   ): Promise<{ id: string } | null> {
     const { data: existingOrder } = await this.supabase
       .from("orders")
@@ -89,7 +89,7 @@ export class PaymentsDAL implements IPaymentsDAL {
 
   async updateOrderPaymentIntent(
     orderId: string,
-    paymentIntentId: string
+    paymentIntentId: string,
   ): Promise<void> {
     const { error } = await this.supabase
       .from("orders")
@@ -107,8 +107,35 @@ export class PaymentsDAL implements IPaymentsDAL {
     }
   }
 
+  private async getCreatorStripeAccountId(
+    courseId: string,
+  ): Promise<string | null> {
+    const { data } = await this.supabase
+      .from("courses")
+      .select("creator_id")
+      .eq("id", courseId)
+      .single();
+
+    if (!data?.creator_id) return null;
+
+    const { data: creator } = await this.supabase
+      .from("users")
+      .select("stripe_account_id, stripe_onboarding_complete")
+      .eq("id", data.creator_id)
+      .single();
+
+    if (!creator?.stripe_onboarding_complete || !creator.stripe_account_id) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: PAYMENT_ERRORS.CREATOR_NOT_ONBOARDED,
+      });
+    }
+
+    return creator.stripe_account_id;
+  }
+
   async createCheckoutSession(
-    input: CreateCheckoutSessionInput
+    input: CreateCheckoutSessionInput,
   ): Promise<CheckoutSessionResponse> {
     const { courseId, successUrl, cancelUrl, userId } = input;
 
@@ -124,7 +151,7 @@ export class PaymentsDAL implements IPaymentsDAL {
     // Check if already purchased
     const hasSuccessfulOrder = await this.checkExistingSuccessfulOrder(
       userId,
-      courseId
+      courseId,
     );
     if (hasSuccessfulOrder) {
       throw new TRPCError({
@@ -133,18 +160,22 @@ export class PaymentsDAL implements IPaymentsDAL {
       });
     }
 
+    // Get creator's connected Stripe account
+    const creatorStripeAccountId =
+      await this.getCreatorStripeAccountId(courseId);
+
     try {
       // Get or create order
       let orderId: string;
       const existingOrder = await this.checkExistingOrder(userId, courseId);
+      const actualPrice = getActualCoursePrice(
+        course.price,
+        course.new_price || null,
+      );
 
       if (existingOrder) {
         orderId = existingOrder.id;
       } else {
-        const actualPrice = getActualCoursePrice(
-          course.price,
-          course.new_price || null
-        );
         const newOrder = await this.createOrder({
           user_id: userId,
           course_id: courseId,
@@ -155,7 +186,10 @@ export class PaymentsDAL implements IPaymentsDAL {
         orderId = newOrder.id;
       }
 
-      // Create Stripe checkout session
+      const unitAmountInCents = formatAmountForStripe(actualPrice);
+      const platformFeeInCents = Math.round(unitAmountInCents * 0.1);
+
+      // Create Stripe checkout session with destination charge
       const session = await stripe.checkout.sessions.create({
         payment_method_types: [
           "card" as Stripe.Checkout.SessionCreateParams.PaymentMethodType,
@@ -171,9 +205,7 @@ export class PaymentsDAL implements IPaymentsDAL {
                   ? [course.thumbnail_image_url]
                   : undefined,
               },
-              unit_amount: formatAmountForStripe(
-                getActualCoursePrice(course.price, course.new_price || null)
-              ),
+              unit_amount: unitAmountInCents,
             },
             quantity: 1,
           },
@@ -186,18 +218,27 @@ export class PaymentsDAL implements IPaymentsDAL {
           courseId,
           userId,
         },
+        ...(creatorStripeAccountId && {
+          payment_intent_data: {
+            application_fee_amount: platformFeeInCents,
+            transfer_data: {
+              destination: creatorStripeAccountId,
+            },
+          },
+        }),
       });
 
       // Update order with payment intent
       if (session.payment_intent) {
         await this.updateOrderPaymentIntent(
           orderId,
-          session.payment_intent as string
+          session.payment_intent as string,
         );
       }
 
       return { sessionId: session.id };
     } catch (error) {
+      if (error instanceof TRPCError) throw error;
       console.error("Checkout session error:", error);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

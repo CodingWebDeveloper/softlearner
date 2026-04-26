@@ -50,6 +50,9 @@ import {
   ActivityResource,
   RecentUserTestResult,
   StudentTestResult,
+  CourseStudentProgress,
+  StripeConnectStatus,
+  CreateAccountLinkInput,
 } from "@/services/interfaces/service.interfaces";
 
 export interface PaginatedResult<T> {
@@ -302,4 +305,18 @@ export interface ICreatorApplicationsDAL {
     notes?: string,
   ): Promise<ApplicationLog>;
   getApplicationLogs(applicationId: string): Promise<ApplicationLog[]>;
+}
+
+export interface IStripeConnectDAL {
+  getStripeAccountId(userId: string): Promise<string | null>;
+  createConnectAccount(userId: string): Promise<string>;
+  createAccountLink(input: CreateAccountLinkInput): Promise<string>;
+  getConnectStatus(userId: string): Promise<StripeConnectStatus>;
+  getDashboardLink(userId: string): Promise<string>;
+  updateOnboardingStatusFromWebhook(
+    stripeAccountId: string,
+    chargesEnabled: boolean,
+    detailsSubmitted: boolean,
+  ): Promise<void>;
+  getPlatformFeeAmount(totalAmountInCents: number): number;
 }

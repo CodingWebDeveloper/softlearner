@@ -1,6 +1,7 @@
 export const STRIPE_WEBHOOK_EVENTS = {
   CHECKOUT_SESSION_COMPLETED: "checkout.session.completed",
   CHECKOUT_SESSION_EXPIRED: "checkout.session.expired",
+  ACCOUNT_UPDATED: "account.updated",
 };
 
 export const STRIPE_PAYMENT_METHODS = {

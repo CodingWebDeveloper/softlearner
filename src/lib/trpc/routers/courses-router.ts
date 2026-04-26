@@ -1,7 +1,12 @@
 import { z } from "zod";
-import { ICoursesService } from "@/services/interfaces/service.interfaces";
+import { TRPCError } from "@trpc/server";
+import {
+  ICoursesService,
+  IStripeConnectService,
+} from "@/services/interfaces/service.interfaces";
 import { DI_TOKENS } from "@/lib/di/registry";
 import { router, protectedProcedure } from "../trpc";
+import { STRIPE_CONNECT_ERRORS } from "@/lib/constants/error-messages";
 
 const getCoursesInput = z.object({
   page: z.number().min(1).default(1),
@@ -84,6 +89,20 @@ export const coursesRouter = router({
   createCourse: protectedProcedure
     .input(z.instanceof(FormData))
     .mutation(async ({ ctx, input }) => {
+      const stripeConnectService = ctx.container.resolve<IStripeConnectService>(
+        DI_TOKENS.STRIPE_CONNECT_SERVICE,
+      );
+      const connectStatus = await stripeConnectService.getConnectStatus(
+        ctx.user.id,
+      );
+
+      if (!connectStatus.onboardingComplete) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: STRIPE_CONNECT_ERRORS.NOT_ONBOARDED,
+        });
+      }
+
       try {
         const coursesService = ctx.container.resolve<ICoursesService>(
           DI_TOKENS.COURSES_SERVICE,
@@ -92,6 +111,7 @@ export const coursesRouter = router({
         const courseData = extractAndValidateCourseData(input);
         return await coursesService.createCourse(ctx.user.id, courseData);
       } catch (error) {
+        if (error instanceof TRPCError) throw error;
         throw new Error(
           `Failed to create course: ${
             error instanceof Error ? error.message : "Unknown error"

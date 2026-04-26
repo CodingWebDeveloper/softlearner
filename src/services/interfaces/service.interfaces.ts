@@ -388,6 +388,27 @@ export interface IPaymentsService {
   ): Promise<CheckoutSessionResponse>;
 }
 
+export interface StripeConnectStatus {
+  hasAccount: boolean;
+  onboardingComplete: boolean;
+  accountId?: string;
+  chargesEnabled?: boolean;
+  detailsSubmitted?: boolean;
+}
+
+export interface CreateAccountLinkInput {
+  userId: string;
+  refreshUrl: string;
+  returnUrl: string;
+}
+
+export interface IStripeConnectService {
+  createConnectAccount(userId: string): Promise<string>;
+  createAccountLink(input: CreateAccountLinkInput): Promise<string>;
+  getConnectStatus(userId: string): Promise<StripeConnectStatus>;
+  getDashboardLink(userId: string): Promise<string>;
+}
+
 export interface IBookmarksService {
   createBookmark(userId: string, courseId: string): Promise<Bookmark>;
   deleteBookmark(userId: string, courseId: string): Promise<void>;

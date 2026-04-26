@@ -21,14 +21,14 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
     console.error("❌ Webhook signature verification failed:", errorMessage);
     return NextResponse.json(
       { message: `Webhook Error: ${errorMessage}` },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json(
           { message: PAYMENT_ERRORS.WEBHOOK_MISSING_METADATA },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json(
           { message: PAYMENT_ERRORS.UPDATE_ORDER_STATUS_FAILED },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
         console.error("Missing orderId in session metadata");
         return NextResponse.json(
           { message: PAYMENT_ERRORS.WEBHOOK_MISSING_ORDER_ID },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -89,7 +89,34 @@ export async function POST(req: Request) {
         console.error("Failed to update order status:", updateError);
         return NextResponse.json(
           { message: PAYMENT_ERRORS.UPDATE_ORDER_STATUS_FAILED },
-          { status: 500 }
+          { status: 500 },
+        );
+      }
+
+      break;
+    }
+
+    case STRIPE_WEBHOOK_EVENTS.ACCOUNT_UPDATED: {
+      const account = event.data.object as Stripe.Account;
+      const onboardingComplete =
+        !!account.charges_enabled && !!account.details_submitted;
+
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({
+          stripe_onboarding_complete: onboardingComplete,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("stripe_account_id", account.id);
+
+      if (updateError) {
+        console.error(
+          "Failed to update Stripe onboarding status:",
+          updateError,
+        );
+        return NextResponse.json(
+          { message: "Failed to update onboarding status" },
+          { status: 500 },
         );
       }
 

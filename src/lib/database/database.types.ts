@@ -146,6 +146,8 @@ export interface User {
   created_at: string;
   updated_at: string;
   role: "admin" | "creator" | "student";
+  stripe_account_id?: string | null;
+  stripe_onboarding_complete?: boolean;
 }
 
 // Update Course interface

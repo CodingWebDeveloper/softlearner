@@ -14,6 +14,7 @@ import { ordersKpiRouter } from "./orders-kpi-router";
 import { reviewsKpiRouter } from "./reviews-kpi-router";
 import { router } from "../trpc";
 import { aiTestsRouter } from "./ai-tests-router";
+import { stripeConnectRouter } from "./stripe-connect-router";
 
 export const appRouter = router({
   courses: coursesRouter,
@@ -31,6 +32,7 @@ export const appRouter = router({
   ordersKpi: ordersKpiRouter,
   reviewsKpi: reviewsKpiRouter,
   aiTests: aiTestsRouter,
+  stripeConnect: stripeConnectRouter,
 });
 
 export type AppRouter = typeof appRouter;
