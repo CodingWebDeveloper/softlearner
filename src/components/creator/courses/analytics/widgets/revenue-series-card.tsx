@@ -44,8 +44,11 @@ const RevenueSeriesCard: React.FC = () => {
         Number(amount || 0),
         (currency || "USD").toUpperCase(),
         userCurrency,
-        rates
+        rates,
       );
+
+    const sampleAmount = (s: (typeof samples)[number]) =>
+      Number(s.net_amount ?? s.total_amount ?? 0);
 
     if (period === "7d" || period === "30d") {
       const days = period === "7d" ? 6 : 29;
@@ -61,7 +64,7 @@ const RevenueSeriesCard: React.FC = () => {
           const key = created.format("YYYY-MM-DD");
           map.set(
             key,
-            (map.get(key) || 0) + sumConv(s.total_amount, s.currency)
+            (map.get(key) || 0) + sumConv(sampleAmount(s), s.currency),
           );
         }
       }
@@ -94,7 +97,10 @@ const RevenueSeriesCard: React.FC = () => {
       const created = moment(s.created_at);
       if (created.isBetween(startMonth, endMonth, "month", "[]")) {
         const key = monthKey(created);
-        map.set(key, (map.get(key) || 0) + sumConv(s.total_amount, s.currency));
+        map.set(
+          key,
+          (map.get(key) || 0) + sumConv(sampleAmount(s), s.currency),
+        );
       }
     }
     return Array.from(map.entries()).map(([ym, amount]) => ({
@@ -110,10 +116,10 @@ const RevenueSeriesCard: React.FC = () => {
         period === "7d"
           ? `Last 7 days · ${userCurrency}`
           : period === "30d"
-          ? `Last 30 days · ${userCurrency}`
-          : period === "1y"
-          ? `Last 12 months · ${userCurrency}`
-          : `All time · ${userCurrency}`
+            ? `Last 30 days · ${userCurrency}`
+            : period === "1y"
+              ? `Last 12 months · ${userCurrency}`
+              : `All time · ${userCurrency}`
       }
       disablePadding
       loading={isLoading}

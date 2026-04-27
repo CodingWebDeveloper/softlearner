@@ -8,6 +8,7 @@ export type Granularity = "month" | "week" | "day";
 export type RevenueSample = {
   created_at: string; // ISO timestamp of order creation (UTC)
   total_amount: number;
+  net_amount?: number;
   currency: string;
 };
 
@@ -17,15 +18,15 @@ export class OrdersKpiDAL {
   // Sum of revenue for a creator, optional currency and date range filters
   async getTotalRevenue(
     creatorId: string,
-    opts?: { currency?: string; from?: string; to?: string }
+    opts?: { currency?: string; from?: string; to?: string },
   ): Promise<number> {
     const { currency, from, to } = opts || {};
 
     let query = this.supabase
       .from("orders")
       .select(
-        `total_amount, currency, created_at, course:course_id(creator_id)`,
-        { count: "exact" }
+        `total_amount, net_amount, platform_fee_amount, currency, created_at, course:course_id(creator_id)`,
+        { count: "exact" },
       )
       .eq("status", ORDER_STATUS.SUCCEEDED)
       .eq("course.creator_id", creatorId);
@@ -38,22 +39,35 @@ export class OrdersKpiDAL {
     if (error) {
       throw new Error(`Error fetching total revenue: ${error.message}`);
     }
-    const total = (data ?? []).reduce((sum, o: any) => sum + Number(o.total_amount || 0), 0);
+    const total = (data ?? []).reduce((sum, o: any) => {
+      const net =
+        o.net_amount ??
+        Number(o.total_amount || 0) - Number(o.platform_fee_amount || 0);
+      return sum + Number(net || 0);
+    }, 0);
     return Number(total.toFixed(2));
   }
 
   // Revenue grouped by course for a creator
   async getRevenueByCourse(
     creatorId: string,
-    opts?: { currency?: string; from?: string; to?: string; limit?: number }
-  ): Promise<{ courseId: string; name: string; total: number; currency?: string }[]> {
+    opts?: { currency?: string; from?: string; to?: string; limit?: number },
+  ): Promise<
+    {
+      courseId: string;
+      name: string;
+      total: number;
+      currency?: string;
+      totalsByCurrency?: Record<string, number>;
+    }[]
+  > {
     const { currency, from, to, limit = 10 } = opts || {};
 
     let query = this.supabase
       .from("orders")
       .select(
-        `total_amount, currency, created_at, course:course_id(id, name, creator_id)`,
-        { count: "exact" }
+        `total_amount, net_amount, platform_fee_amount, currency, created_at, course:course_id(id, name, creator_id)`,
+        { count: "exact" },
       )
       .eq("status", ORDER_STATUS.SUCCEEDED)
       .eq("course.creator_id", creatorId);
@@ -68,13 +82,37 @@ export class OrdersKpiDAL {
     }
 
     // Aggregate in-memory
-    const map = new Map<string, { courseId: string; name: string; total: number; currency?: string }>();
+    const map = new Map<
+      string,
+      {
+        courseId: string;
+        name: string;
+        total: number;
+        currency?: string;
+        totalsByCurrency?: Record<string, number>;
+      }
+    >();
     for (const row of data ?? []) {
       const course = (row as any).course as { id: string; name: string } | null;
       if (!course?.id) continue;
       const key = course.id;
-      const prev = map.get(key) || { courseId: course.id, name: course.name, total: 0, currency: currency || (row as any).currency };
-      prev.total += Number((row as any).total_amount || 0);
+      const rowCurrency = ((row as any).currency || "USD") as string;
+      const rowNet = Number(
+        (row as any).net_amount ??
+          Number((row as any).total_amount || 0) -
+            Number((row as any).platform_fee_amount || 0),
+      );
+      const prev = map.get(key) || {
+        courseId: course.id,
+        name: course.name,
+        total: 0,
+        currency: currency || rowCurrency,
+        totalsByCurrency: {},
+      };
+      prev.total += rowNet;
+      prev.totalsByCurrency = prev.totalsByCurrency || {};
+      prev.totalsByCurrency[rowCurrency] =
+        (prev.totalsByCurrency[rowCurrency] || 0) + rowNet;
       // If mixed currencies and no filter, omit currency for safety (keep undefined)
       if (!currency) {
         prev.currency = undefined;
@@ -93,16 +131,15 @@ export class OrdersKpiDAL {
   // Students per course (count of successful orders) for a creator
   async getStudentsByCourse(
     creatorId: string,
-    opts?: { from?: string; to?: string; limit?: number }
+    opts?: { from?: string; to?: string; limit?: number },
   ): Promise<{ courseId: string; name: string; count: number }[]> {
     const { from, to, limit = 10 } = opts || {};
 
     let query = this.supabase
       .from("orders")
-      .select(
-        `id, created_at, course:course_id(id, name, creator_id)`,
-        { count: "exact" }
-      )
+      .select(`id, created_at, course:course_id(id, name, creator_id)`, {
+        count: "exact",
+      })
       .eq("status", ORDER_STATUS.SUCCEEDED)
       .eq("course.creator_id", creatorId);
 
@@ -114,12 +151,19 @@ export class OrdersKpiDAL {
       throw new Error(`Error fetching students by course: ${error.message}`);
     }
 
-    const map = new Map<string, { courseId: string; name: string; count: number }>();
+    const map = new Map<
+      string,
+      { courseId: string; name: string; count: number }
+    >();
     for (const row of data ?? []) {
       const course = (row as any).course as { id: string; name: string } | null;
       if (!course?.id) continue;
       const key = course.id;
-      const prev = map.get(key) || { courseId: course.id, name: course.name, count: 0 };
+      const prev = map.get(key) || {
+        courseId: course.id,
+        name: course.name,
+        count: 0,
+      };
       prev.count += 1; // each successful order counts as one enrollment
       map.set(key, prev);
     }
@@ -134,7 +178,7 @@ export class OrdersKpiDAL {
   // Current month revenue (MRR-like), filtered to the month of now()
   async getCurrentMonthRevenue(
     creatorId: string,
-    opts?: { currency?: string }
+    opts?: { currency?: string },
   ): Promise<number> {
     const monthStart = this.startOfMonthISO(new Date());
     const monthEnd = this.endOfMonthISO(new Date());
@@ -152,7 +196,7 @@ export class OrdersKpiDAL {
       // period filter: 7 days, 30 days, 1 year, or all-time when null/undefined
       period?: "7d" | "30d" | "1y" | null;
       currency?: string;
-    }
+    },
   ): Promise<RevenueSample[]> {
     // Compute optional time range based on period
     const now = new Date();
@@ -162,15 +206,47 @@ export class OrdersKpiDAL {
     const period = opts?.period ?? null;
     if (period === "7d" || period === "30d") {
       const days = period === "7d" ? 6 : 29;
-      const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
-      const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+      const end = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate(),
+          23,
+          59,
+          59,
+          999,
+        ),
+      );
+      const start = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate(),
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
       start.setUTCDate(start.getUTCDate() - days);
       fromISO = start.toISOString();
       toISO = end.toISOString();
     } else if (period === "1y") {
-      const startMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
+      const startMonth = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0),
+      );
       startMonth.setUTCMonth(startMonth.getUTCMonth() - 11);
-      const endMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+      const endMonth = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth() + 1,
+          0,
+          23,
+          59,
+          59,
+          999,
+        ),
+      );
       fromISO = startMonth.toISOString();
       toISO = endMonth.toISOString();
     } else {
@@ -183,8 +259,8 @@ export class OrdersKpiDAL {
     let query = this.supabase
       .from("orders")
       .select(
-        `total_amount, currency, created_at, course:course_id(creator_id)`,
-        { count: "exact" }
+        `total_amount, net_amount, platform_fee_amount, currency, created_at, course:course_id(creator_id)`,
+        { count: "exact" },
       )
       .eq("status", ORDER_STATUS.SUCCEEDED)
       .eq("course.creator_id", creatorId);
@@ -201,6 +277,10 @@ export class OrdersKpiDAL {
     const series: RevenueSample[] = (data ?? []).map((row: any) => ({
       created_at: row.created_at as string,
       total_amount: Number(row.total_amount || 0),
+      net_amount: Number(
+        row.net_amount ??
+          Number(row.total_amount || 0) - Number(row.platform_fee_amount || 0),
+      ),
       currency: (row.currency || "USD") as string,
     }));
 
@@ -209,73 +289,15 @@ export class OrdersKpiDAL {
 
   // Helpers
   private startOfMonthISO(d: Date): string {
-    const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
+    const x = new Date(
+      Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0),
+    );
     return x.toISOString();
   }
   private endOfMonthISO(d: Date): string {
-    const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+    const x = new Date(
+      Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0, 23, 59, 59, 999),
+    );
     return x.toISOString();
-  }
-
-  private startOfWeekISO(d: Date): string {
-    // ISO week starts Monday; normalize to UTC
-    const day = (d.getUTCDay() + 6) % 7; // 0=Mon..6=Sun
-    const start = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
-    start.setUTCDate(start.getUTCDate() - day);
-    return start.toISOString();
-  }
-
-  private endOfWeekISO(d: Date): string {
-    const day = (d.getUTCDay() + 6) % 7;
-    const end = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 23, 59, 59, 999));
-    end.setUTCDate(end.getUTCDate() + (6 - day));
-    return end.toISOString();
-  }
-
-  private startOfDayISO(d: Date): string {
-    const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
-    return x.toISOString();
-  }
-  private endOfDayISO(d: Date): string {
-    const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 23, 59, 59, 999));
-    return x.toISOString();
-  }
-
-  private startOfBucketISO(d: Date, g: Granularity): string {
-    if (g === "month") return this.startOfMonthISO(d);
-    if (g === "week") return this.startOfWeekISO(d);
-    return this.startOfDayISO(d);
-  }
-  private endOfBucketISO(d: Date, g: Granularity): string {
-    if (g === "month") return this.endOfMonthISO(d);
-    if (g === "week") return this.endOfWeekISO(d);
-    return this.endOfDayISO(d);
-  }
-
-  private bucketKey(d: Date, g: Granularity): string {
-    if (g === "month") return this.startOfMonthISO(d);
-    if (g === "week") return this.startOfWeekISO(d);
-    return this.startOfDayISO(d);
-  }
-
-  private buildEmptyBuckets(fromISO: string, toISO: string, g: Granularity): Record<string, number> {
-    const buckets: Record<string, number> = {};
-    const start = new Date(fromISO);
-    const end = new Date(toISO);
-
-    const cursor = new Date(start);
-    while (cursor <= end) {
-      const key = this.bucketKey(cursor, g);
-      buckets[key] = 0;
-      // advance cursor
-      if (g === "month") {
-        cursor.setUTCMonth(cursor.getUTCMonth() + 1);
-      } else if (g === "week") {
-        cursor.setUTCDate(cursor.getUTCDate() + 7);
-      } else {
-        cursor.setUTCDate(cursor.getUTCDate() + 1);
-      }
-    }
-    return buckets;
   }
 }

@@ -63,6 +63,8 @@ export interface PaginatedResult<T> {
 // Orders
 export interface SimpleOrder {
   total_amount: number;
+  net_amount?: number;
+  platform_fee_amount?: number;
   currency: string;
   created_at: string;
   updated_at: string;
@@ -229,6 +231,9 @@ export interface IPaymentsDAL {
     user_id: string;
     course_id: string;
     total_amount: number;
+    platform_fee_amount?: number;
+    stripe_fee_amount?: number;
+    net_amount?: number;
     currency: string;
     status: string;
   }): Promise<{ id: string }>;

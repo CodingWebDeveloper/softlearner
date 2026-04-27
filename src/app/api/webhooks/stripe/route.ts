@@ -50,10 +50,67 @@ export async function POST(req: Request) {
         );
       }
 
-      // Update order status to SUCCEEDED
+      const paymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id;
+
+      const grossAmount = Number(
+        ((session.amount_total ?? 0) / 100).toFixed(2),
+      );
+      let platformFeeAmount = 0;
+      let stripeFeeAmount = 0;
+
+      if (paymentIntentId) {
+        try {
+          const paymentIntent = await stripe.paymentIntents.retrieve(
+            paymentIntentId,
+            {
+              expand: ["latest_charge.balance_transaction"],
+            },
+          );
+
+          platformFeeAmount = Number(
+            (
+              ((paymentIntent.application_fee_amount ?? 0) as number) / 100
+            ).toFixed(2),
+          );
+
+          const latestCharge =
+            paymentIntent.latest_charge &&
+            typeof paymentIntent.latest_charge !== "string"
+              ? paymentIntent.latest_charge
+              : null;
+
+          const balanceTransaction = latestCharge?.balance_transaction;
+          if (balanceTransaction && typeof balanceTransaction !== "string") {
+            stripeFeeAmount = Number((balanceTransaction.fee / 100).toFixed(2));
+          }
+        } catch (paymentIntentError) {
+          console.error(
+            "Failed to resolve payment intent financials:",
+            paymentIntentError,
+          );
+        }
+      }
+
+      const netAmount = Number(
+        (grossAmount - platformFeeAmount - stripeFeeAmount).toFixed(2),
+      );
+
+      // Update order status and financial breakdown
       const { error: updateError } = await supabase
         .from("orders")
-        .update({ status: ORDER_STATUS.SUCCEEDED })
+        .update({
+          status: ORDER_STATUS.SUCCEEDED,
+          total_amount: grossAmount,
+          platform_fee_amount: platformFeeAmount,
+          stripe_fee_amount: stripeFeeAmount,
+          net_amount: netAmount,
+          ...(paymentIntentId
+            ? { stripe_payment_intent_id: paymentIntentId }
+            : {}),
+        })
         .eq("id", session.metadata.orderId);
 
       if (updateError) {

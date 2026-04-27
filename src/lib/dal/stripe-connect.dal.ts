@@ -9,8 +9,7 @@ import {
   StripeConnectStatus,
   CreateAccountLinkInput,
 } from "@/services/interfaces/service.interfaces";
-
-const PLATFORM_FEE_PERCENT = 0.10;
+import { PLATFORM_FEE_PERCENT } from "@/lib/constants/stripe-constants";
 
 export class StripeConnectDAL implements IStripeConnectDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -146,7 +145,7 @@ export class StripeConnectDAL implements IStripeConnectDAL {
   async updateOnboardingStatusFromWebhook(
     stripeAccountId: string,
     chargesEnabled: boolean,
-    detailsSubmitted: boolean
+    detailsSubmitted: boolean,
   ): Promise<void> {
     const onboardingComplete = chargesEnabled && detailsSubmitted;
     const { error } = await this.supabase

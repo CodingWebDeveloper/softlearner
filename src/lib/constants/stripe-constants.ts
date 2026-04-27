@@ -8,6 +8,8 @@ export const STRIPE_PAYMENT_METHODS = {
   CARD: "card",
 };
 
+export const PLATFORM_FEE_PERCENT = 0.1;
+
 export const ORDER_STATUS = {
   PENDING: "PENDING",
   SUCCEEDED: "SUCCEEDED",

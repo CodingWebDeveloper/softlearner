@@ -14,6 +14,7 @@ import {
   getActualCoursePrice,
 } from "../stripe/stripe";
 import type { Stripe } from "stripe";
+import { PLATFORM_FEE_PERCENT } from "@/lib/constants/stripe-constants";
 
 export class PaymentsDAL implements IPaymentsDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -68,6 +69,9 @@ export class PaymentsDAL implements IPaymentsDAL {
     user_id: string;
     course_id: string;
     total_amount: number;
+    platform_fee_amount?: number;
+    stripe_fee_amount?: number;
+    net_amount?: number;
     currency: string;
     status: string;
   }): Promise<{ id: string }> {
@@ -172,6 +176,12 @@ export class PaymentsDAL implements IPaymentsDAL {
         course.price,
         course.new_price || null,
       );
+      const unitAmountInCents = formatAmountForStripe(actualPrice);
+      const platformFeeInCents = Math.round(
+        unitAmountInCents * PLATFORM_FEE_PERCENT,
+      );
+      const platformFeeAmount = platformFeeInCents / 100;
+      const netAmount = Number((actualPrice - platformFeeAmount).toFixed(2));
 
       if (existingOrder) {
         orderId = existingOrder.id;
@@ -180,14 +190,13 @@ export class PaymentsDAL implements IPaymentsDAL {
           user_id: userId,
           course_id: courseId,
           total_amount: actualPrice,
+          platform_fee_amount: platformFeeAmount,
+          net_amount: netAmount,
           currency: course.currency,
           status: ORDER_STATUS.PENDING,
         });
         orderId = newOrder.id;
       }
-
-      const unitAmountInCents = formatAmountForStripe(actualPrice);
-      const platformFeeInCents = Math.round(unitAmountInCents * 0.1);
 
       // Create Stripe checkout session with destination charge
       const session = await stripe.checkout.sessions.create({

@@ -419,6 +419,7 @@ export type OrdersKpiGranularity = "month" | "week" | "day";
 export type OrdersRevenueSample = {
   created_at: string;
   total_amount: number;
+  net_amount?: number;
   currency: string;
 };
 
@@ -427,6 +428,7 @@ export type TopEarningCourse = {
   name: string;
   total: number;
   currency?: string;
+  totalsByCurrency?: Record<string, number>;
 };
 
 export type StudentsPerCourseItem = {

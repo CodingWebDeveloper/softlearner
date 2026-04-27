@@ -30,7 +30,24 @@ const TopEarningCoursesCard: React.FC = () => {
     const items = data || [];
     return items.map((c) => ({
       label: c.name,
-      amount: convertAmount(Number(c.total || 0), "USD", userCurrency, rates),
+      amount: c.totalsByCurrency
+        ? Object.entries(c.totalsByCurrency).reduce(
+            (sum, [currency, amount]) =>
+              sum +
+              convertAmount(
+                Number(amount || 0),
+                currency.toUpperCase(),
+                userCurrency,
+                rates,
+              ),
+            0,
+          )
+        : convertAmount(
+            Number(c.total || 0),
+            (c.currency || "USD").toUpperCase(),
+            userCurrency,
+            rates,
+          ),
     }));
   }, [data, userCurrency, rates]);
 
