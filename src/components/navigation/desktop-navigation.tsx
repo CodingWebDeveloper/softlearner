@@ -14,10 +14,8 @@ import {
   ExpandLess,
   ExpandMore,
   People as PeopleIcon,
-  Category as CategoryIcon,
-  LocalOffer as TagIcon,
-  Security as SecurityIcon,
   OndemandVideo as VideoIcon,
+  MonetizationOn as EarningsIcon,
 } from "@mui/icons-material";
 import {
   SidebarContainer,
@@ -170,6 +168,12 @@ export const DesktopNavigation = ({
       icon: <VideoIcon />,
       path: "/creator/courses",
       description: "Manage your created courses",
+    },
+    {
+      label: "Earnings",
+      icon: <EarningsIcon />,
+      path: "/creator/earnings",
+      description: "Manage payouts and Stripe Connect",
     },
   ];
 

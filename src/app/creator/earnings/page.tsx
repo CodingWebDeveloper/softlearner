@@ -16,7 +16,10 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import { PageContainer } from "@/components/styles/infrastructure/layout.styles";
+import {
+  PageContainer,
+  StyledButton,
+} from "@/components/styles/infrastructure/layout.styles";
 import { ROLES } from "@/utils/constants";
 import { HashLoader } from "react-spinners";
 import { trpc } from "@/lib/trpc/client";
@@ -112,7 +115,7 @@ const CreatorEarningsPage = () => {
               account. Stripe will handle your payouts securely. The platform
               takes a 10% fee on each sale.
             </Typography>
-            <Button
+            <StyledButton
               variant="contained"
               onClick={handleStartOnboarding}
               disabled={createAccountLink.isPending}
@@ -123,7 +126,7 @@ const CreatorEarningsPage = () => {
               }
             >
               Start Stripe Onboarding
-            </Button>
+            </StyledButton>
           </CardContent>
         </Card>
       );
@@ -148,7 +151,7 @@ const CreatorEarningsPage = () => {
               payments. This usually takes just a few minutes.
             </Typography>
             <Box display="flex" gap={2}>
-              <Button
+              <StyledButton
                 variant="contained"
                 onClick={handleStartOnboarding}
                 disabled={createAccountLink.isPending}
@@ -159,7 +162,7 @@ const CreatorEarningsPage = () => {
                 }
               >
                 Continue Onboarding
-              </Button>
+              </StyledButton>
               <Button variant="outlined" onClick={() => refetchStatus()}>
                 Refresh Status
               </Button>
@@ -189,7 +192,7 @@ const CreatorEarningsPage = () => {
           <Typography variant="body2" color="text.secondary" mb={3}>
             Platform fee: <strong>10%</strong> per sale
           </Typography>
-          <Button
+          <StyledButton
             variant="contained"
             onClick={handleOpenDashboard}
             disabled={getDashboardLink.isPending}
@@ -200,7 +203,7 @@ const CreatorEarningsPage = () => {
             }
           >
             Open Stripe Dashboard
-          </Button>
+          </StyledButton>
         </CardContent>
       </Card>
     );
