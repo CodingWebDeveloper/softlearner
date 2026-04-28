@@ -47,7 +47,7 @@ const PublishedDraftDonutCard: React.FC = () => {
               stroke="none"
               isAnimationActive={false}
             >
-              {chartData.map((entry, index) => (
+              {chartData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
@@ -55,7 +55,10 @@ const PublishedDraftDonutCard: React.FC = () => {
               ))}
             </Pie>
             <Tooltip
-              formatter={(v: any, n: any) => [v as number, n as string]}
+              formatter={(value: number | string, name: number | string) => [
+                value,
+                String(name),
+              ]}
             />
           </PieChart>
         </ResponsiveContainer>

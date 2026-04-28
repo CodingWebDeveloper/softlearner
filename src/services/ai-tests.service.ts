@@ -1,5 +1,25 @@
-import { IAiTestsService, AiGenerateQuestionsInput, AiGeneratedQuestionDto } from "@/services/interfaces/service.interfaces";
+import {
+  IAiTestsService,
+  AiGenerateQuestionsInput,
+  AiGeneratedQuestionDto,
+} from "@/services/interfaces/service.interfaces";
 import { GoogleGenAI } from "@google/genai";
+
+type RawGeneratedOption = {
+  text?: unknown;
+  isCorrect?: unknown;
+};
+
+type RawGeneratedQuestion = {
+  text?: unknown;
+  type?: unknown;
+  points?: unknown;
+  options?: unknown;
+};
+
+type RawGeneratedResponse = {
+  questions?: unknown;
+};
 
 export class AiTestsService implements IAiTestsService {
   private genAI: GoogleGenAI;
@@ -9,23 +29,23 @@ export class AiTestsService implements IAiTestsService {
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not set in environment variables");
     }
-    this.genAI = new GoogleGenAI({apiKey,});
+    this.genAI = new GoogleGenAI({ apiKey });
   }
 
-  async generateQuestions(input: AiGenerateQuestionsInput): Promise<AiGeneratedQuestionDto[]> {
+  async generateQuestions(
+    input: AiGenerateQuestionsInput,
+  ): Promise<AiGeneratedQuestionDto[]> {
     const { topic, numQuestions = 5, difficulty = "knowledge" } = input;
 
     const prompt = [
       `Generate ${numQuestions} multiple-choice questions about the topic: "${topic}".`,
       `Difficulty: ${difficulty}.`,
-      "Return ONLY valid JSON with the shape: { \"questions\": [ { \"text\": string, \"options\": [ { \"text\": string, \"isCorrect\": boolean } ... exactly 4 options ], \"type\": \"single\", \"points\": 1 } ] }.",
+      'Return ONLY valid JSON with the shape: { "questions": [ { "text": string, "options": [ { "text": string, "isCorrect": boolean } ... exactly 4 options ], "type": "single", "points": 1 } ] }.',
       "Do not include explanations or markdown. Make options concise and unambiguous.",
     ].join("\n");
     const response = await this.genAI.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: [
-        { role: "user", parts: [{ text: prompt }] },
-      ],
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
     const text = response.text ?? "";
@@ -43,7 +63,7 @@ export class AiTestsService implements IAiTestsService {
       return cleaned;
     };
 
-    let data: any;
+    let data: unknown;
     try {
       data = JSON.parse(extractJsonString(text));
     } catch {
@@ -51,29 +71,47 @@ export class AiTestsService implements IAiTestsService {
         model: "gemini-2.0-flash-001",
         contents: [
           { role: "user", parts: [{ text: prompt }] },
-          { role: "user", parts: [{ text: "Remember: Output MUST be pure JSON with no comments or backticks." }] },
+          {
+            role: "user",
+            parts: [
+              {
+                text: "Remember: Output MUST be pure JSON with no comments or backticks.",
+              },
+            ],
+          },
         ],
       });
       const retryText = retry.text ?? "";
       data = JSON.parse(extractJsonString(retryText));
     }
 
-    const questions = Array.isArray(data?.questions) ? data.questions : [];
+    const parsed =
+      typeof data === "object" && data !== null
+        ? (data as RawGeneratedResponse)
+        : {};
+    const questions = Array.isArray(parsed.questions)
+      ? (parsed.questions as RawGeneratedQuestion[])
+      : [];
 
     const normalized: AiGeneratedQuestionDto[] = questions
       .slice(0, numQuestions)
-      .map((q: any) => ({
+      .map((q) => ({
         text: String(q.text ?? "").trim(),
-        type: (q.type === "multiple" ? "multiple" : "single") as "single" | "multiple",
+        type: (q.type === "multiple" ? "multiple" : "single") as
+          | "single"
+          | "multiple",
         points: typeof q.points === "number" ? q.points : 1,
         options: Array.isArray(q.options)
-          ? q.options.slice(0, 6).map((o: any) => ({
+          ? (q.options as RawGeneratedOption[]).slice(0, 6).map((o) => ({
               text: String(o.text ?? "").trim(),
               isCorrect: Boolean(o.isCorrect),
             }))
           : [],
       }))
-      .filter((q: AiGeneratedQuestionDto) => q.text && q.options.length >= 2 && q.options.some((o) => o.isCorrect));
+      .filter(
+        (q: AiGeneratedQuestionDto) =>
+          q.text && q.options.length >= 2 && q.options.some((o) => o.isCorrect),
+      );
 
     const finalized = normalized.map((q) => {
       if (q.type === "single") {

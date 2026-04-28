@@ -58,7 +58,12 @@ const QuestionInputCard: React.FC<QuestionInputCardProps> = ({
       handleChange(e);
       const currentStatus = statusPath
         .split(".")
-        .reduce((acc: any, key: string) => acc?.[key], values);
+        .reduce<unknown>((acc, key) => {
+          if (typeof acc === "object" && acc !== null) {
+            return (acc as Record<string, unknown>)[key];
+          }
+          return undefined;
+        }, values as unknown);
 
       if (currentStatus === "NEW") {
         return;
@@ -115,7 +120,7 @@ const QuestionInputCard: React.FC<QuestionInputCardProps> = ({
               helperText="Be clear and specific in your question"
               onChange={withStatus(
                 `questions.${index}.text`,
-                `questions.${index}.status`
+                `questions.${index}.status`,
               )}
             />
           </Grid>
@@ -131,7 +136,7 @@ const QuestionInputCard: React.FC<QuestionInputCardProps> = ({
                 label="Question Type"
                 onChange={withStatus(
                   `questions.${index}.type`,
-                  `questions.${index}.status`
+                  `questions.${index}.status`,
                 )}
               >
                 <MenuItem value="single">Single Choice</MenuItem>
@@ -151,7 +156,7 @@ const QuestionInputCard: React.FC<QuestionInputCardProps> = ({
               helperText="Max 100 points"
               onChange={withStatus(
                 `questions.${index}.points`,
-                `questions.${index}.status`
+                `questions.${index}.status`,
               )}
             />
           </Grid>
@@ -197,14 +202,14 @@ const QuestionInputCard: React.FC<QuestionInputCardProps> = ({
                           name={`questions.${index}.options.${optionIndex}.text`}
                           as={StyledTextField}
                           label={`Option ${String.fromCharCode(
-                            65 + optionIndex
+                            65 + optionIndex,
                           )}`}
                           placeholder="Enter answer option..."
                           fullWidth
                           size="small"
                           onChange={withStatus(
                             `questions.${index}.options.${optionIndex}.text`,
-                            `questions.${index}.options.${optionIndex}.status`
+                            `questions.${index}.options.${optionIndex}.status`,
                           )}
                         />
                       </Grid>
@@ -222,7 +227,7 @@ const QuestionInputCard: React.FC<QuestionInputCardProps> = ({
                             label="Correctness"
                             onChange={withStatus(
                               `questions.${index}.options.${optionIndex}.isCorrect`,
-                              `questions.${index}.options.${optionIndex}.status`
+                              `questions.${index}.options.${optionIndex}.status`,
                             )}
                           >
                             <MenuItem value={false}>Incorrect</MenuItem>

@@ -19,6 +19,19 @@ export type RevenueByCourseEntry = {
   totalsByCurrency?: Record<string, number>;
 };
 
+type CourseSummary = {
+  id: string;
+  name: string;
+};
+
+export type RevenueByCourseRow = OrderRow & {
+  course?: CourseSummary | null;
+};
+
+export type StudentsByCourseRow = {
+  course?: CourseSummary | null;
+};
+
 export function resolveNetAmount(row: OrderRow): number {
   return Number(
     row.net_amount ??
@@ -46,10 +59,26 @@ export function getPeriodDateRange(
   if (period === "7d" || period === "30d") {
     const days = period === "7d" ? 6 : 29;
     const end = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999),
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        23,
+        59,
+        59,
+        999,
+      ),
     );
     const start = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0),
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        0,
+        0,
+        0,
+        0,
+      ),
     );
     start.setUTCDate(start.getUTCDate() - days);
     return { from: start.toISOString(), to: end.toISOString() };
@@ -70,7 +99,7 @@ export function getPeriodDateRange(
 }
 
 export function aggregateRevenueByCourse(
-  rows: any[],
+  rows: RevenueByCourseRow[],
   currencyFilter?: string,
   limit = 10,
 ): RevenueByCourseEntry[] {
@@ -92,7 +121,8 @@ export function aggregateRevenueByCourse(
 
     prev.total += rowNet;
     prev.totalsByCurrency = prev.totalsByCurrency ?? {};
-    prev.totalsByCurrency[rowCurrency] = (prev.totalsByCurrency[rowCurrency] || 0) + rowNet;
+    prev.totalsByCurrency[rowCurrency] =
+      (prev.totalsByCurrency[rowCurrency] || 0) + rowNet;
 
     if (!currencyFilter) prev.currency = undefined;
 
@@ -106,16 +136,23 @@ export function aggregateRevenueByCourse(
 }
 
 export function aggregateStudentsByCourse(
-  rows: any[],
+  rows: StudentsByCourseRow[],
   limit = 10,
 ): { courseId: string; name: string; count: number }[] {
-  const map = new Map<string, { courseId: string; name: string; count: number }>();
+  const map = new Map<
+    string,
+    { courseId: string; name: string; count: number }
+  >();
 
   for (const row of rows) {
     const course = row.course as { id: string; name: string } | null;
     if (!course?.id) continue;
 
-    const prev = map.get(course.id) ?? { courseId: course.id, name: course.name, count: 0 };
+    const prev = map.get(course.id) ?? {
+      courseId: course.id,
+      name: course.name,
+      count: 0,
+    };
     prev.count += 1;
     map.set(course.id, prev);
   }

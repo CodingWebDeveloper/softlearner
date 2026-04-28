@@ -7,13 +7,7 @@ import {
   AdminActionIcon,
   AdminActionButton,
 } from "@/components/styles/admin/admin-dashboard.styles";
-import {
-  People as PeopleIcon,
-  Category as CategoryIcon,
-  LocalOffer as TagIcon,
-  Assessment as AssessmentIcon,
-  Security as SecurityIcon,
-} from "@mui/icons-material";
+import { People as PeopleIcon } from "@mui/icons-material";
 import { useRouter as useNextRouter } from "next/navigation";
 
 const AdminDashboard = () => {

@@ -40,11 +40,14 @@ type BookmarkWithCourse = Database["public"]["Tables"]["bookmarks"]["Row"] & {
   course: CourseWithRelations;
 };
 
-type OrderWithUser = Database["public"]["Tables"]["orders"]["Row"] & {
+type OrderStudentRow = Pick<
+  Database["public"]["Tables"]["orders"]["Row"],
+  "user_id" | "created_at"
+> & {
   user: {
     id: string;
     full_name: string | null;
-  };
+  } | null;
 };
 
 type PurchasedCourseResource = {
@@ -434,35 +437,38 @@ export class CoursesDAL implements ICoursesDAL {
     }
 
     // Transform the data to match the BasicCourse structure
+    // Filter out bookmarks where course is null (course was deleted)
     const transformedData =
-      (data as unknown as BookmarkWithCourse[] | null)?.map((bookmark) => {
-        const course = bookmark.course;
-        const ratings = course.reviews || [];
-        const ratingsCount = ratings.length;
-        const averageRating =
-          ratingsCount > 0
-            ? ratings.reduce((sum, review) => sum + (review.rating || 0), 0) /
-              ratingsCount
-            : 0;
+      (data as unknown as BookmarkWithCourse[] | null)
+        ?.filter((bookmark) => bookmark.course !== null)
+        ?.map((bookmark) => {
+          const course = bookmark.course;
+          const ratings = course.reviews || [];
+          const ratingsCount = ratings.length;
+          const averageRating =
+            ratingsCount > 0
+              ? ratings.reduce((sum, review) => sum + (review.rating || 0), 0) /
+                ratingsCount
+              : 0;
 
-        const basicCourse: BasicCourse = {
-          id: course.id,
-          name: course.name,
-          description: course.description || "",
-          video_url: course.video_url || "",
-          price: course.price,
-          new_price: course.new_price || null,
-          thumbnail_image_url: course.thumbnail_image_url || "",
-          creator: course.creator,
-          category: course.category,
-          rating: Number(averageRating.toFixed(1)),
-          created_at: course.created_at,
-          updated_at: course.updated_at,
-          isBookmarked: true,
-        };
+          const basicCourse: BasicCourse = {
+            id: course.id,
+            name: course.name,
+            description: course.description || "",
+            video_url: course.video_url || "",
+            price: course.price,
+            new_price: course.new_price || null,
+            thumbnail_image_url: course.thumbnail_image_url || "",
+            creator: course.creator,
+            category: course.category,
+            rating: Number(averageRating.toFixed(1)),
+            created_at: course.created_at,
+            updated_at: course.updated_at,
+            isBookmarked: true,
+          };
 
-        return basicCourse;
-      }) || [];
+          return basicCourse;
+        }) || [];
 
     return {
       data: transformedData,
@@ -1124,22 +1130,37 @@ export class CoursesDAL implements ICoursesDAL {
       throw new Error(`Error fetching course data: ${coursesError.message}`);
     }
 
-    const progressData = (coursesData || []).map((course: any) => {
-      const resourceCount = course.resources?.length || 0;
-      const resourcesCompletedCount =
-        course.resources?.filter((r: any) =>
-          r.user_resources?.some(
-            (ur: any) => ur.user_id === userId && ur.completed,
-          ),
-        ).length || 0;
+    type UserResourceProgress = {
+      completed?: boolean | null;
+      user_id?: string | null;
+    };
+    type ResourceProgress = {
+      user_resources?: UserResourceProgress[] | null;
+    };
+    type CourseProgressRow = {
+      id: string;
+      name: string;
+      resources?: ResourceProgress[] | null;
+    };
 
-      return {
-        id: course.id,
-        name: course.name,
-        resourcesCompletedCount,
-        resourceCount,
-      };
-    });
+    const progressData = ((coursesData || []) as CourseProgressRow[]).map(
+      (course) => {
+        const resourceCount = course.resources?.length || 0;
+        const resourcesCompletedCount =
+          course.resources?.filter((r) =>
+            r.user_resources?.some(
+              (ur) => ur.user_id === userId && ur.completed,
+            ),
+          ).length || 0;
+
+        return {
+          id: course.id,
+          name: course.name,
+          resourcesCompletedCount,
+          resourceCount,
+        };
+      },
+    );
 
     progressData.sort((a, b) => {
       const byCompleted = b.resourcesCompletedCount - a.resourcesCompletedCount;
@@ -1188,7 +1209,8 @@ export class CoursesDAL implements ICoursesDAL {
       )
       .eq("course_id", courseId)
       .eq("status", ORDER_STATUS.SUCCEEDED)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .overrideTypes<OrderStudentRow[], { merge: false }>();
 
     if (ordersError) {
       throw new Error(
@@ -1196,7 +1218,7 @@ export class CoursesDAL implements ICoursesDAL {
       );
     }
 
-    const orders = (ordersData ?? []) as OrderWithUser[];
+    const orders = ordersData ?? [];
 
     if (orders.length === 0) {
       return [];
@@ -1231,7 +1253,7 @@ export class CoursesDAL implements ICoursesDAL {
 
       return {
         userId: order.user_id,
-        fullName: order.user?.full_name || null,
+        fullName: order.user?.full_name ?? null,
         completedResources: completedCount,
         totalResources,
         enrolledAt: order.created_at,

@@ -28,6 +28,31 @@ type QuestionWithOptions = {
   options: Array<BasicAnswerOption>;
 };
 
+type TestQuestionPoints = { points: number };
+type RelatedTestSummary = {
+  id?: string;
+  title?: string;
+  questions?: TestQuestionPoints[];
+};
+type RelatedUserSummary = {
+  full_name?: string | null;
+  avatar_url?: string | null;
+};
+type RecentResultRow = {
+  id: string;
+  score: number | null;
+  created_at: string;
+  updated_at: string;
+  test?: RelatedTestSummary | null;
+};
+type StudentResultRow = {
+  user_id: string;
+  score: number | null;
+  updated_at: string;
+  user?: RelatedUserSummary | null;
+  test?: { questions?: TestQuestionPoints[] } | null;
+};
+
 export class TestsDAL implements ITestsDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
 
@@ -601,16 +626,18 @@ export class TestsDAL implements ITestsDAL {
       throw new Error(`Error fetching recent test results: ${error.message}`);
     }
 
-    const results: RecentUserTestResult[] = (data || []).map((row) => {
-      const questions = (row as any).test?.questions || [];
+    const results: RecentUserTestResult[] = (
+      (data || []) as RecentResultRow[]
+    ).map((row) => {
+      const questions = row.test?.questions || [];
       const maxScore = questions.reduce(
         (sum: number, q: { points: number }) => sum + (q?.points || 0),
         0,
       );
       return {
         id: row.id,
-        testId: (row as any).test?.id || "",
-        title: (row as any).test?.title || "",
+        testId: row.test?.id || "",
+        title: row.test?.title || "",
         score: row.score || 0,
         maxScore,
         created_at: row.created_at,
@@ -647,24 +674,23 @@ export class TestsDAL implements ITestsDAL {
       .order("score", { ascending: false });
 
     if (error) {
-      throw new Error(
-        `Error fetching student test results: ${error.message}`,
-      );
+      throw new Error(`Error fetching student test results: ${error.message}`);
     }
 
-    return (data || []).map((row) => {
-      const questions = (row as any).test?.questions || [];
+    return ((data || []) as StudentResultRow[]).map((row) => {
+      const questions = row.test?.questions || [];
       const maxScore = questions.reduce(
         (sum: number, q: { points: number }) => sum + (q?.points || 0),
         0,
       );
       const score = row.score || 0;
-      const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+      const percentage =
+        maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
 
       return {
         userId: row.user_id,
-        fullName: (row as any).user?.full_name || null,
-        avatarUrl: (row as any).user?.avatar_url || null,
+        fullName: row.user?.full_name || null,
+        avatarUrl: row.user?.avatar_url || null,
         score,
         maxScore,
         percentage,

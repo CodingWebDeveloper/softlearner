@@ -16,10 +16,12 @@ import {
   Box,
   Skeleton,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Link from "next/link";
 import { SimpleCourse } from "@/services/interfaces/service.interfaces";
 import { StyledButton } from "@/components/styles/infrastructure/layout.styles";
 import { trpc } from "@/lib/trpc/client";
@@ -62,6 +64,7 @@ interface CreatorCoursesTableProps {
   courses: SimpleCourse[];
   total: number;
   isLoading: boolean;
+  canCreateCourse: boolean;
   page: number;
   pageSize: number;
   setPage: (page: number) => void;
@@ -75,6 +78,7 @@ const CreatorCoursesTable = ({
   courses,
   total,
   isLoading,
+  canCreateCourse,
   page,
   pageSize,
   setPage,
@@ -136,7 +140,7 @@ const CreatorCoursesTable = ({
         {
           variant: "error",
           anchorOrigin: { vertical: "bottom", horizontal: "center" },
-        }
+        },
       );
     } finally {
       handleConfirmClose();
@@ -148,7 +152,7 @@ const CreatorCoursesTable = ({
   };
 
   const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setPageSize(parseInt(event.target.value, 10));
     setPage(1);
@@ -202,11 +206,25 @@ const CreatorCoursesTable = ({
 
   return (
     <Paper elevation={0} sx={{ backgroundColor: "transparent" }}>
+      {!canCreateCourse && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          You must finish Stripe onboarding before creating courses. Complete it
+          from{" "}
+          <strong>
+            <Link color="" href="/creator/earnings">
+              Earnings &amp; Payouts
+            </Link>
+          </strong>{" "}
+          .
+        </Alert>
+      )}
+
       <Box sx={{ mb: 3, display: "flex", justifyContent: "flex-end" }}>
         <StyledButton
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleCreateCourse}
+          disabled={!canCreateCourse}
         >
           Create Course
         </StyledButton>
@@ -247,7 +265,7 @@ const CreatorCoursesTable = ({
                     <TableCell>
                       {formatPrice(
                         course.new_price || course.price,
-                        course.currency
+                        course.currency,
                       )}
                     </TableCell>
                     <TableCell>

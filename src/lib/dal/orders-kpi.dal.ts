@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../database/database.types";
 import { ORDER_STATUS } from "@/lib/constants/stripe-constants";
 import {
+  OrderRow,
   resolveNetAmount,
   getPeriodDateRange,
   startOfMonthISO,
@@ -9,6 +10,8 @@ import {
   aggregateRevenueByCourse,
   aggregateStudentsByCourse,
   RevenueByCourseEntry,
+  RevenueByCourseRow,
+  StudentsByCourseRow,
 } from "@/lib/utils/kpi.utils";
 
 export type Granularity = "month" | "week" | "day";
@@ -18,6 +21,10 @@ export type RevenueSample = {
   total_amount: number;
   net_amount?: number;
   currency: string;
+};
+
+type RevenueSeriesRow = OrderRow & {
+  created_at?: string | null;
 };
 
 export class OrdersKpiDAL {
@@ -46,10 +53,8 @@ export class OrdersKpiDAL {
     if (error)
       throw new Error(`Error fetching total revenue: ${error.message}`);
 
-    const total = (data ?? []).reduce(
-      (sum, o: any) => sum + resolveNetAmount(o),
-      0,
-    );
+    const rows = (data ?? []) as OrderRow[];
+    const total = rows.reduce((sum, row) => sum + resolveNetAmount(row), 0);
     return Number(total.toFixed(2));
   }
 
@@ -76,7 +81,11 @@ export class OrdersKpiDAL {
     if (error)
       throw new Error(`Error fetching revenue by course: ${error.message}`);
 
-    return aggregateRevenueByCourse(data ?? [], currency, limit);
+    return aggregateRevenueByCourse(
+      (data ?? []) as RevenueByCourseRow[],
+      currency,
+      limit,
+    );
   }
 
   async getStudentsByCourse(
@@ -100,7 +109,10 @@ export class OrdersKpiDAL {
     if (error)
       throw new Error(`Error fetching students by course: ${error.message}`);
 
-    return aggregateStudentsByCourse(data ?? [], limit);
+    return aggregateStudentsByCourse(
+      (data ?? []) as StudentsByCourseRow[],
+      limit,
+    );
   }
 
   async getCurrentMonthRevenue(
@@ -138,7 +150,7 @@ export class OrdersKpiDAL {
     if (error)
       throw new Error(`Error fetching revenue series: ${error.message}`);
 
-    return (data ?? []).map((row: any) => ({
+    return ((data ?? []) as RevenueSeriesRow[]).map((row) => ({
       created_at: row.created_at as string,
       total_amount: Number(row.total_amount || 0),
       net_amount: resolveNetAmount(row),
