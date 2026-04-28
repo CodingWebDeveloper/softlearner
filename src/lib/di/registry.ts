@@ -15,6 +15,7 @@ import { BookmarksDAL } from "../dal/bookmarks.dal";
 import { TestsDAL } from "../dal/tests.dal";
 import { UsersDAL } from "../dal/users.dal";
 import { CreatorApplicationsDAL } from "../dal/creator-applications.dal";
+import { StripeConnectDAL } from "../dal/stripe-connect.dal";
 
 // Service imports
 import { CategoriesService } from "@/services/categories.service";
@@ -30,6 +31,7 @@ import { AiTestsService } from "@/services/ai-tests.service";
 import { UsersService } from "@/services/users.service";
 import { OrdersService } from "@/services/orders.service";
 import { CreatorApplicationsService } from "@/services/creator-applications.service";
+import { StripeConnectService } from "@/services/stripe-connect.service";
 import { OrdersKpiService } from "@/services/orders-kpi.service";
 import { ReviewsKpiService } from "@/services/reviews-kpi.service";
 
@@ -46,6 +48,7 @@ import {
   ITestsDAL,
   IUsersDAL,
   ICreatorApplicationsDAL,
+  IStripeConnectDAL,
 } from "./interfaces/dal.interfaces";
 
 import {
@@ -62,6 +65,7 @@ import {
   ICreatorApplicationsService,
   IOrdersKpiService,
   IReviewsKpiService,
+  IStripeConnectService,
 } from "@/services/interfaces/service.interfaces";
 
 // Token constants for dependency injection
@@ -79,7 +83,7 @@ export const DI_TOKENS = {
   TESTS_DAL: "TESTS_DAL",
   USERS_DAL: "USERS_DAL",
   CREATOR_APPLICATIONS_DAL: "CREATOR_APPLICATIONS_DAL",
-  
+  STRIPE_CONNECT_DAL: "STRIPE_CONNECT_DAL",
 
   // Service tokens
   CATEGORIES_SERVICE: "CATEGORIES_SERVICE",
@@ -97,6 +101,7 @@ export const DI_TOKENS = {
   ORDERS_KPI_SERVICE: "ORDERS_KPI_SERVICE",
   REVIEWS_KPI_SERVICE: "REVIEWS_KPI_SERVICE",
   AI_TESTS_SERVICE: "AI_TESTS_SERVICE",
+  STRIPE_CONNECT_SERVICE: "STRIPE_CONNECT_SERVICE",
 
   // Core dependencies
   SUPABASE: "SUPABASE",
@@ -107,7 +112,7 @@ export const DI_TOKENS = {
  */
 export function registerDALs(
   container: DIContainer,
-  supabase: SupabaseClient<Database>
+  supabase: SupabaseClient<Database>,
 ): void {
   // Register Supabase client
   container.register(DI_TOKENS.SUPABASE, () => supabase);
@@ -115,64 +120,68 @@ export function registerDALs(
   // Register DALs
   container.register<ICoursesDAL>(
     DI_TOKENS.COURSES_DAL,
-    (c) => new CoursesDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new CoursesDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   container.register<ICategoriesDAL>(
     DI_TOKENS.CATEGORIES_DAL,
-    (c) => new CategoriesDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new CategoriesDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   container.register<ITagsDAL>(
     DI_TOKENS.TAGS_DAL,
-    (c) => new TagsDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new TagsDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   container.register<IReviewsDAL>(
     DI_TOKENS.REVIEWS_DAL,
-    (c) => new ReviewsDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new ReviewsDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   container.register<IVotesDAL>(
     DI_TOKENS.VOTES_DAL,
-    (c) => new VotesDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new VotesDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   container.register<IResourcesDAL>(
     DI_TOKENS.RESOURCES_DAL,
-    (c) => new ResourcesDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new ResourcesDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
-  container.register( // Orders DAL
+  container.register(
+    // Orders DAL
     DI_TOKENS.ORDERS_DAL,
-    (c) => new OrdersDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new OrdersDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   container.register<IPaymentsDAL>(
     DI_TOKENS.PAYMENTS_DAL,
-    (c) => new PaymentsDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new PaymentsDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   container.register<IBookmarksDAL>(
     DI_TOKENS.BOOKMARKS_DAL,
-    (c) => new BookmarksDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new BookmarksDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   container.register<ITestsDAL>(
     DI_TOKENS.TESTS_DAL,
-    (c) => new TestsDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new TestsDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
-
-  
 
   container.register<IUsersDAL>(
     DI_TOKENS.USERS_DAL,
-    (c) => new UsersDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new UsersDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   container.register<ICreatorApplicationsDAL>(
     DI_TOKENS.CREATOR_APPLICATIONS_DAL,
-    (c) => new CreatorApplicationsDAL(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new CreatorApplicationsDAL(c.resolve(DI_TOKENS.SUPABASE)),
+  );
+
+  container.register<IStripeConnectDAL>(
+    DI_TOKENS.STRIPE_CONNECT_DAL,
+    (c) => new StripeConnectDAL(c.resolve(DI_TOKENS.SUPABASE)),
   );
 }
 
@@ -181,7 +190,7 @@ export function registerDALs(
  */
 export function registerServices(
   container: DIContainer,
-  supabase: SupabaseClient<Database>
+  supabase: SupabaseClient<Database>,
 ): void {
   // First register DALs since services depend on them
   registerDALs(container, supabase);
@@ -189,7 +198,7 @@ export function registerServices(
   // Register services
   container.register<ICategoriesService>(
     DI_TOKENS.CATEGORIES_SERVICE,
-    (c) => new CategoriesService(c.resolve(DI_TOKENS.CATEGORIES_DAL))
+    (c) => new CategoriesService(c.resolve(DI_TOKENS.CATEGORIES_DAL)),
   );
 
   container.register<ICoursesService>(
@@ -197,79 +206,82 @@ export function registerServices(
     (c) =>
       new CoursesService(
         c.resolve(DI_TOKENS.COURSES_DAL),
-        c.resolve(DI_TOKENS.REVIEWS_DAL)
-      )
+        c.resolve(DI_TOKENS.REVIEWS_DAL),
+      ),
   );
 
   container.register<ITagsService>(
     DI_TOKENS.TAGS_SERVICE,
-    (c) => new TagsService(c.resolve(DI_TOKENS.TAGS_DAL))
+    (c) => new TagsService(c.resolve(DI_TOKENS.TAGS_DAL)),
   );
 
   container.register<IResourcesService>(
     DI_TOKENS.RESOURCES_SERVICE,
-    (c) => new ResourcesService(c.resolve(DI_TOKENS.RESOURCES_DAL))
+    (c) => new ResourcesService(c.resolve(DI_TOKENS.RESOURCES_DAL)),
   );
 
   container.register<IReviewsService>(
     DI_TOKENS.REVIEWS_SERVICE,
-    (c) => new ReviewsService(c.resolve(DI_TOKENS.REVIEWS_DAL))
+    (c) => new ReviewsService(c.resolve(DI_TOKENS.REVIEWS_DAL)),
   );
 
   container.register<IVotesService>(
     DI_TOKENS.VOTES_SERVICE,
-    (c) => new VotesService(c.resolve(DI_TOKENS.VOTES_DAL))
+    (c) => new VotesService(c.resolve(DI_TOKENS.VOTES_DAL)),
   );
 
   container.register<IPaymentsService>(
     DI_TOKENS.PAYMENTS_SERVICE,
-    (c) => new PaymentsService(c.resolve(DI_TOKENS.PAYMENTS_DAL))
+    (c) => new PaymentsService(c.resolve(DI_TOKENS.PAYMENTS_DAL)),
   );
 
   container.register<IBookmarksService>(
     DI_TOKENS.BOOKMARKS_SERVICE,
-    (c) => new BookmarksService(c.resolve(DI_TOKENS.BOOKMARKS_DAL))
+    (c) => new BookmarksService(c.resolve(DI_TOKENS.BOOKMARKS_DAL)),
   );
 
   container.register<ITestsService>(
     DI_TOKENS.TESTS_SERVICE,
-    (c) => new TestsService(c.resolve(DI_TOKENS.TESTS_DAL))
+    (c) => new TestsService(c.resolve(DI_TOKENS.TESTS_DAL)),
   );
 
   // AI Tests Service (Gemini)
-  container.register(
-    DI_TOKENS.AI_TESTS_SERVICE,
-    () => new AiTestsService()
-  );
+  container.register(DI_TOKENS.AI_TESTS_SERVICE, () => new AiTestsService());
 
   container.register<IUsersService>(
     DI_TOKENS.USERS_SERVICE,
-    (c) => new UsersService(c.resolve(DI_TOKENS.USERS_DAL))
+    (c) => new UsersService(c.resolve(DI_TOKENS.USERS_DAL)),
   );
 
   container.register<ICreatorApplicationsService>(
     DI_TOKENS.CREATOR_APPLICATIONS_SERVICE,
     (c) =>
       new CreatorApplicationsService(
-        c.resolve(DI_TOKENS.CREATOR_APPLICATIONS_DAL)
-      )
+        c.resolve(DI_TOKENS.CREATOR_APPLICATIONS_DAL),
+      ),
   );
 
   // Orders Service
   container.register(
     DI_TOKENS.ORDERS_SERVICE,
-    (c) => new OrdersService(c.resolve(DI_TOKENS.ORDERS_DAL))
+    (c) => new OrdersService(c.resolve(DI_TOKENS.ORDERS_DAL)),
   );
 
   // Orders KPI Service
   container.register<IOrdersKpiService>(
     DI_TOKENS.ORDERS_KPI_SERVICE,
-    (c) => new OrdersKpiService(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new OrdersKpiService(c.resolve(DI_TOKENS.SUPABASE)),
   );
 
   // Reviews KPI Service
   container.register<IReviewsKpiService>(
     DI_TOKENS.REVIEWS_KPI_SERVICE,
-    (c) => new ReviewsKpiService(c.resolve(DI_TOKENS.SUPABASE))
+    (c) => new ReviewsKpiService(c.resolve(DI_TOKENS.SUPABASE)),
+  );
+
+  // Stripe Connect Service
+  container.register<IStripeConnectService>(
+    DI_TOKENS.STRIPE_CONNECT_SERVICE,
+    (c) => new StripeConnectService(c.resolve(DI_TOKENS.STRIPE_CONNECT_DAL)),
   );
 }

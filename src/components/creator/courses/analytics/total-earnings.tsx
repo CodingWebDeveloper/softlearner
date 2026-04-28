@@ -29,11 +29,14 @@ const TotalEarnigns: React.FC<TotalEarningsProps> = ({
     let prev30 = 0;
 
     for (const o of orders) {
+      const netAmount =
+        o.net_amount ??
+        Number(o.total_amount || 0) - Number(o.platform_fee_amount || 0);
       const amt = convertAmount(
-        Number(o.total_amount || 0),
+        Number(netAmount || 0),
         (o.currency || "USD").toUpperCase(),
         userCurrency,
-        rates
+        rates,
       );
       const createdAt = moment(o.created_at);
 

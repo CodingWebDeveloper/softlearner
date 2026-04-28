@@ -13,17 +13,19 @@ import {
   CartesianGrid,
 } from "recharts";
 
-export interface HorizontalBarChartProps<T extends Record<string, any>> {
+type ChartValue = string | number | boolean | null | undefined;
+
+export interface HorizontalBarChartProps<T extends Record<string, unknown>> {
   data: T[];
   xKey: keyof T; // numeric value
   yKey: keyof T; // label
   color?: string;
   height?: number;
-  formatX?: (value: any, index: number) => string;
-  formatY?: (value: any, index: number) => string;
+  formatX?: (value: ChartValue, index: number) => string;
+  formatY?: (value: ChartValue, index: number) => string;
 }
 
-const HorizontalBarChart = <T extends Record<string, any>>({
+const HorizontalBarChart = <T extends Record<string, unknown>>({
   data,
   xKey,
   yKey,
@@ -35,12 +37,14 @@ const HorizontalBarChart = <T extends Record<string, any>>({
   const theme = useTheme();
   const fillColor = color || theme.palette.primary.main;
   const xTickFormatter = React.useCallback(
-    (v: any, i: number) => (formatX ? formatX(v, i) : String(v)),
-    [formatX]
+    (value: ChartValue, index: number) =>
+      formatX ? formatX(value, index) : String(value ?? ""),
+    [formatX],
   );
   const yTickFormatter = React.useCallback(
-    (v: any, i: number) => (formatY ? formatY(v, i) : String(v)),
-    [formatY]
+    (value: ChartValue, index: number) =>
+      formatY ? formatY(value, index) : String(value ?? ""),
+    [formatY],
   );
 
   return (

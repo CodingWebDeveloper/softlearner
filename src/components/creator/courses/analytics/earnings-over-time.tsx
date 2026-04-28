@@ -25,13 +25,17 @@ const EarningsOverTime: React.FC<EarningsOverTimeProps> = ({
   const [period, setPeriod] = useState<PeriodKey>("30d");
 
   const data = useMemo<SeriesPoint[]>(() => {
-    const conv = (o: SimpleOrder) =>
-      convertAmount(
-        Number(o.total_amount || 0),
+    const conv = (o: SimpleOrder) => {
+      const netAmount =
+        o.net_amount ??
+        Number(o.total_amount || 0) - Number(o.platform_fee_amount || 0);
+      return convertAmount(
+        Number(netAmount || 0),
         (o.currency || "USD").toUpperCase(),
         userCurrency,
-        rates
+        rates,
       );
+    };
 
     const now = moment();
 
@@ -61,9 +65,10 @@ const EarningsOverTime: React.FC<EarningsOverTimeProps> = ({
     const firstOrderDate = orders.length
       ? moment.min(orders.map((o) => moment(o.created_at))).startOf("month")
       : now.clone().startOf("month");
-    const startMonth = period === "1y"
-      ? now.clone().startOf("month").subtract(11, "months")
-      : firstOrderDate;
+    const startMonth =
+      period === "1y"
+        ? now.clone().startOf("month").subtract(11, "months")
+        : firstOrderDate;
     const endMonth = now.clone().startOf("month");
 
     const map = new Map<string, number>();
@@ -94,21 +99,23 @@ const EarningsOverTime: React.FC<EarningsOverTimeProps> = ({
         period === "7d"
           ? `Last 7 days · ${userCurrency}`
           : period === "30d"
-          ? `Last 30 days · ${userCurrency}`
-          : period === "1y"
-          ? `Last 12 months · ${userCurrency}`
-          : `All time · ${userCurrency}`
+            ? `Last 30 days · ${userCurrency}`
+            : period === "1y"
+              ? `Last 12 months · ${userCurrency}`
+              : `All time · ${userCurrency}`
       }
       disablePadding
       loading={isLoading}
       action={
         <Stack direction="row" spacing={1}>
-          {([
-            { key: "7d", label: "7d" },
-            { key: "30d", label: "30d" },
-            { key: "1y", label: "1y" },
-            { key: "all", label: "All" },
-          ] as { key: PeriodKey; label: string }[]).map((p) => (
+          {(
+            [
+              { key: "7d", label: "7d" },
+              { key: "30d", label: "30d" },
+              { key: "1y", label: "1y" },
+              { key: "all", label: "All" },
+            ] as { key: PeriodKey; label: string }[]
+          ).map((p) => (
             <Chip
               key={p.key}
               label={p.label}

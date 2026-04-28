@@ -146,6 +146,8 @@ export interface User {
   created_at: string;
   updated_at: string;
   role: "admin" | "creator" | "student";
+  stripe_account_id?: string | null;
+  stripe_onboarding_complete?: boolean;
 }
 
 // Update Course interface
@@ -172,6 +174,9 @@ export interface Order {
   user_id: string;
   course_id: string;
   total_amount: number;
+  platform_fee_amount?: number | null;
+  stripe_fee_amount?: number | null;
+  net_amount?: number | null;
   currency: string;
   status: "PENDING" | "SUCCEEDED" | "FAILED";
   stripe_payment_intent_id?: string;

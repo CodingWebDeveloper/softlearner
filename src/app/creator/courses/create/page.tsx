@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GeneralForm from "@/components/creator/courses/create/general-form";
 import ResourcesForm from "@/components/creator/courses/create/resources-form/resources-form";
 import {
@@ -36,6 +36,9 @@ import { VIEWPORT_MEDIA_QUERIES } from "@/utils/constants";
 import { trpc } from "@/lib/trpc/client";
 import ConfirmAlert from "@/components/confirm-alert";
 import CourseStudentsTable from "@/components/creator/courses/create/course-students-table";
+import { useSupabase } from "@/contexts/supabase-context";
+import { useRouter } from "next/navigation";
+import { ROLES } from "@/utils/constants";
 
 function a11yProps(index: number) {
   return {
@@ -71,6 +74,20 @@ const CreateCoursePage = () => {
   const desktopMatches = useMediaQuery(VIEWPORT_MEDIA_QUERIES.DESKTOP);
   const { enqueueSnackbar } = useSnackbar();
   const utils = trpc.useUtils();
+  const { user, userProfile, loading } = useSupabase();
+  const router = useRouter();
+
+  const isCreator = userProfile?.role === ROLES.CREATOR;
+  const { data: connectStatus, isLoading: isStatusLoading } =
+    trpc.stripeConnect.getStatus.useQuery(undefined, {
+      enabled: !!user && isCreator,
+    });
+
+  const isOnboardingIncomplete = connectStatus?.onboardingComplete === false;
+  const shouldRedirectToEarnings =
+    !loading && !isStatusLoading && isOnboardingIncomplete;
+  const shouldShowGuardLoader =
+    loading || isStatusLoading || shouldRedirectToEarnings;
 
   // States
   const [currentTab, setCurrentTab] = useState(0);
@@ -110,6 +127,24 @@ const CreateCoursePage = () => {
       isPublished: true,
     });
   };
+
+  useEffect(() => {
+    if (shouldRedirectToEarnings) {
+      router.push("/creator/earnings");
+    }
+  }, [shouldRedirectToEarnings, router]);
+
+  if (shouldShowGuardLoader) {
+    return (
+      <PageContainer>
+        <Container maxWidth="lg">
+          <Box display="flex" justifyContent="center" py={8}>
+            <CircularProgress />
+          </Box>
+        </Container>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer>

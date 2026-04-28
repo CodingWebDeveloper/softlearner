@@ -27,6 +27,14 @@ const CreatorCoursesPage = () => {
   >("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
+  const isCreator = userProfile?.role === ROLES.CREATOR;
+  const { data: connectStatus } = trpc.stripeConnect.getStatus.useQuery(
+    undefined,
+    {
+      enabled: !!user && isCreator,
+    },
+  );
+
   // Queries
   const { data: coursesData, isPending: isLoadingCourses } =
     trpc.courses.getCreatorCourses.useQuery({
@@ -79,6 +87,7 @@ const CreatorCoursesPage = () => {
           courses={coursesData?.data || []}
           total={coursesData?.totalRecords || 0}
           isLoading={isLoadingCourses}
+          canCreateCourse={!!connectStatus?.onboardingComplete}
           page={page}
           pageSize={pageSize}
           setPage={setPage}

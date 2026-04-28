@@ -50,6 +50,9 @@ import {
   ActivityResource,
   RecentUserTestResult,
   StudentTestResult,
+  CourseStudentProgress,
+  StripeConnectStatus,
+  CreateAccountLinkInput,
 } from "@/services/interfaces/service.interfaces";
 
 export interface PaginatedResult<T> {
@@ -60,6 +63,8 @@ export interface PaginatedResult<T> {
 // Orders
 export interface SimpleOrder {
   total_amount: number;
+  net_amount?: number;
+  platform_fee_amount?: number;
   currency: string;
   created_at: string;
   updated_at: string;
@@ -226,6 +231,9 @@ export interface IPaymentsDAL {
     user_id: string;
     course_id: string;
     total_amount: number;
+    platform_fee_amount?: number;
+    stripe_fee_amount?: number;
+    net_amount?: number;
     currency: string;
     status: string;
   }): Promise<{ id: string }>;
@@ -302,4 +310,18 @@ export interface ICreatorApplicationsDAL {
     notes?: string,
   ): Promise<ApplicationLog>;
   getApplicationLogs(applicationId: string): Promise<ApplicationLog[]>;
+}
+
+export interface IStripeConnectDAL {
+  getStripeAccountId(userId: string): Promise<string | null>;
+  createConnectAccount(userId: string): Promise<string>;
+  createAccountLink(input: CreateAccountLinkInput): Promise<string>;
+  getConnectStatus(userId: string): Promise<StripeConnectStatus>;
+  getDashboardLink(userId: string): Promise<string>;
+  updateOnboardingStatusFromWebhook(
+    stripeAccountId: string,
+    chargesEnabled: boolean,
+    detailsSubmitted: boolean,
+  ): Promise<void>;
+  getPlatformFeeAmount(totalAmountInCents: number): number;
 }

@@ -13,17 +13,19 @@ import {
   CartesianGrid,
 } from "recharts";
 
-export interface BarChartWidgetProps<T extends Record<string, any>> {
+type ChartValue = string | number | boolean | null | undefined;
+
+export interface BarChartWidgetProps<T extends Record<string, unknown>> {
   data: T[];
   xKey: keyof T;
   yKey: keyof T;
   color?: string;
   height?: number;
   formatY?: (value: number) => string | number;
-  formatX?: (value: any) => string | number;
+  formatX?: (value: ChartValue) => string | number;
 }
 
-const BarChartWidget = <T extends Record<string, any>>({
+const BarChartWidget = <T extends Record<string, unknown>>({
   data,
   xKey,
   yKey,
@@ -37,12 +39,23 @@ const BarChartWidget = <T extends Record<string, any>>({
   return (
     <Box sx={{ width: "100%", height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <BarChart
+          data={data}
+          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+        >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey={xKey as string} tickFormatter={formatX} />
           <YAxis tickFormatter={formatY} />
-          <Tooltip formatter={(v: any) => (formatY ? formatY(Number(v)) : v)} />
-          <Bar dataKey={yKey as string} fill={fillColor} radius={[4, 4, 0, 0]} />
+          <Tooltip
+            formatter={(value: ChartValue) =>
+              formatY ? formatY(Number(value)) : String(value ?? "")
+            }
+          />
+          <Bar
+            dataKey={yKey as string}
+            fill={fillColor}
+            radius={[4, 4, 0, 0]}
+          />
         </BarChart>
       </ResponsiveContainer>
     </Box>
