@@ -1,12 +1,20 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../database/database.types";
 import { ORDER_STATUS } from "@/lib/constants/stripe-constants";
+import {
+  resolveNetAmount,
+  getPeriodDateRange,
+  startOfMonthISO,
+  endOfMonthISO,
+  aggregateRevenueByCourse,
+  aggregateStudentsByCourse,
+  RevenueByCourseEntry,
+} from "@/lib/utils/kpi.utils";
 
 export type Granularity = "month" | "week" | "day";
 
-// Raw revenue sample for charting on client
 export type RevenueSample = {
-  created_at: string; // ISO timestamp of order creation (UTC)
+  created_at: string;
   total_amount: number;
   net_amount?: number;
   currency: string;
@@ -15,7 +23,6 @@ export type RevenueSample = {
 export class OrdersKpiDAL {
   constructor(private supabase: SupabaseClient<Database>) {}
 
-  // Sum of revenue for a creator, optional currency and date range filters
   async getTotalRevenue(
     creatorId: string,
     opts?: { currency?: string; from?: string; to?: string },
@@ -36,31 +43,20 @@ export class OrdersKpiDAL {
     if (to) query = query.lte("created_at", to);
 
     const { data, error } = await query;
-    if (error) {
+    if (error)
       throw new Error(`Error fetching total revenue: ${error.message}`);
-    }
-    const total = (data ?? []).reduce((sum, o: any) => {
-      const net =
-        o.net_amount ??
-        Number(o.total_amount || 0) - Number(o.platform_fee_amount || 0);
-      return sum + Number(net || 0);
-    }, 0);
+
+    const total = (data ?? []).reduce(
+      (sum, o: any) => sum + resolveNetAmount(o),
+      0,
+    );
     return Number(total.toFixed(2));
   }
 
-  // Revenue grouped by course for a creator
   async getRevenueByCourse(
     creatorId: string,
     opts?: { currency?: string; from?: string; to?: string; limit?: number },
-  ): Promise<
-    {
-      courseId: string;
-      name: string;
-      total: number;
-      currency?: string;
-      totalsByCurrency?: Record<string, number>;
-    }[]
-  > {
+  ): Promise<RevenueByCourseEntry[]> {
     const { currency, from, to, limit = 10 } = opts || {};
 
     let query = this.supabase
@@ -77,58 +73,12 @@ export class OrdersKpiDAL {
     if (to) query = query.lte("created_at", to);
 
     const { data, error } = await query;
-    if (error) {
+    if (error)
       throw new Error(`Error fetching revenue by course: ${error.message}`);
-    }
 
-    // Aggregate in-memory
-    const map = new Map<
-      string,
-      {
-        courseId: string;
-        name: string;
-        total: number;
-        currency?: string;
-        totalsByCurrency?: Record<string, number>;
-      }
-    >();
-    for (const row of data ?? []) {
-      const course = (row as any).course as { id: string; name: string } | null;
-      if (!course?.id) continue;
-      const key = course.id;
-      const rowCurrency = ((row as any).currency || "USD") as string;
-      const rowNet = Number(
-        (row as any).net_amount ??
-          Number((row as any).total_amount || 0) -
-            Number((row as any).platform_fee_amount || 0),
-      );
-      const prev = map.get(key) || {
-        courseId: course.id,
-        name: course.name,
-        total: 0,
-        currency: currency || rowCurrency,
-        totalsByCurrency: {},
-      };
-      prev.total += rowNet;
-      prev.totalsByCurrency = prev.totalsByCurrency || {};
-      prev.totalsByCurrency[rowCurrency] =
-        (prev.totalsByCurrency[rowCurrency] || 0) + rowNet;
-      // If mixed currencies and no filter, omit currency for safety (keep undefined)
-      if (!currency) {
-        prev.currency = undefined;
-      }
-      map.set(key, prev);
-    }
-
-    const result = Array.from(map.values())
-      .map((r) => ({ ...r, total: Number(r.total.toFixed(2)) }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, Math.max(1, limit));
-
-    return result;
+    return aggregateRevenueByCourse(data ?? [], currency, limit);
   }
 
-  // Students per course (count of successful orders) for a creator
   async getStudentsByCourse(
     creatorId: string,
     opts?: { from?: string; to?: string; limit?: number },
@@ -147,115 +97,30 @@ export class OrdersKpiDAL {
     if (to) query = query.lte("created_at", to);
 
     const { data, error } = await query;
-    if (error) {
+    if (error)
       throw new Error(`Error fetching students by course: ${error.message}`);
-    }
 
-    const map = new Map<
-      string,
-      { courseId: string; name: string; count: number }
-    >();
-    for (const row of data ?? []) {
-      const course = (row as any).course as { id: string; name: string } | null;
-      if (!course?.id) continue;
-      const key = course.id;
-      const prev = map.get(key) || {
-        courseId: course.id,
-        name: course.name,
-        count: 0,
-      };
-      prev.count += 1; // each successful order counts as one enrollment
-      map.set(key, prev);
-    }
-
-    const result = Array.from(map.values())
-      .sort((a, b) => b.count - a.count)
-      .slice(0, Math.max(1, limit));
-
-    return result;
+    return aggregateStudentsByCourse(data ?? [], limit);
   }
 
-  // Current month revenue (MRR-like), filtered to the month of now()
   async getCurrentMonthRevenue(
     creatorId: string,
     opts?: { currency?: string },
   ): Promise<number> {
-    const monthStart = this.startOfMonthISO(new Date());
-    const monthEnd = this.endOfMonthISO(new Date());
+    const now = new Date();
     return this.getTotalRevenue(creatorId, {
       currency: opts?.currency,
-      from: monthStart,
-      to: monthEnd,
+      from: startOfMonthISO(now),
+      to: endOfMonthISO(now),
     });
   }
 
-  // Revenue series over time aggregated on the client.
   async getRevenueSeries(
     creatorId: string,
-    opts?: {
-      // period filter: 7 days, 30 days, 1 year, or all-time when null/undefined
-      period?: "7d" | "30d" | "1y" | null;
-      currency?: string;
-    },
+    opts?: { period?: "7d" | "30d" | "1y" | null; currency?: string },
   ): Promise<RevenueSample[]> {
-    // Compute optional time range based on period
-    const now = new Date();
-    let fromISO: string | undefined;
-    let toISO: string | undefined;
+    const { from: fromISO, to: toISO } = getPeriodDateRange(opts?.period);
 
-    const period = opts?.period ?? null;
-    if (period === "7d" || period === "30d") {
-      const days = period === "7d" ? 6 : 29;
-      const end = new Date(
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate(),
-          23,
-          59,
-          59,
-          999,
-        ),
-      );
-      const start = new Date(
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate(),
-          0,
-          0,
-          0,
-          0,
-        ),
-      );
-      start.setUTCDate(start.getUTCDate() - days);
-      fromISO = start.toISOString();
-      toISO = end.toISOString();
-    } else if (period === "1y") {
-      const startMonth = new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0),
-      );
-      startMonth.setUTCMonth(startMonth.getUTCMonth() - 11);
-      const endMonth = new Date(
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth() + 1,
-          0,
-          23,
-          59,
-          59,
-          999,
-        ),
-      );
-      fromISO = startMonth.toISOString();
-      toISO = endMonth.toISOString();
-    } else {
-      // all-time: no date filter
-      fromISO = undefined;
-      toISO = undefined;
-    }
-
-    // Fetch raw orders within computed range
     let query = this.supabase
       .from("orders")
       .select(
@@ -270,34 +135,14 @@ export class OrdersKpiDAL {
     if (toISO) query = query.lte("created_at", toISO);
 
     const { data, error } = await query;
-    if (error) {
+    if (error)
       throw new Error(`Error fetching revenue series: ${error.message}`);
-    }
 
-    const series: RevenueSample[] = (data ?? []).map((row: any) => ({
+    return (data ?? []).map((row: any) => ({
       created_at: row.created_at as string,
       total_amount: Number(row.total_amount || 0),
-      net_amount: Number(
-        row.net_amount ??
-          Number(row.total_amount || 0) - Number(row.platform_fee_amount || 0),
-      ),
+      net_amount: resolveNetAmount(row),
       currency: (row.currency || "USD") as string,
     }));
-
-    return series;
-  }
-
-  // Helpers
-  private startOfMonthISO(d: Date): string {
-    const x = new Date(
-      Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0),
-    );
-    return x.toISOString();
-  }
-  private endOfMonthISO(d: Date): string {
-    const x = new Date(
-      Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0, 23, 59, 59, 999),
-    );
-    return x.toISOString();
   }
 }
